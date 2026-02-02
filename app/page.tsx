@@ -1,20 +1,32 @@
 "use client";
 
 import { api } from "@/convex/_generated/api";
+import { authClient } from "@/lib/auth-client";
 import { useMutation, useQuery } from "convex/react";
+import Link from "next/link";
 
 export default function Home() {
-  const result = useQuery(api.myFunctions.getNumbers);
-  const add = useMutation(api.myFunctions.addNumber);
+  const { data, isPending } = authClient.useSession();
 
   return (
     <main>
-      <button className="bg-white text-black" onClick={() => {
-        add({ number: 64 });
-      }}>Add</button>
+      {isPending ? "Loading" : data == null ? <>
+        You are not signed in
 
-      Result: {JSON.stringify(result?.numbers.map(n => n.number).join(", "))}
+        <div className="flex flex-col">
+          <Link href="/signup">Sign Up</Link>
+          <Link href="/signin">Sign In</Link>
+        </div>
 
+      </> : <>
+        You are signed in as {data.user.name} ({data.user.email})
+
+        <div>
+          <button onClick={() => {
+            authClient.signOut();
+          }}>Sign Out</button>
+        </div>
+      </>}
     </main>
   );
 }
