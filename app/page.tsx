@@ -21,6 +21,10 @@ export default function Home() {
       </> : <>
         You are signed in as {data.user.name} ({data.user.email})
 
+        <div className="flex flex-col"> 
+          <Link href="/editprofile">Edit Profile</Link>
+        </div>
+
         <div>
           <button onClick={() => {
             authClient.signOut();

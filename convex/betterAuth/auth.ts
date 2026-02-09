@@ -24,6 +24,12 @@ export const createAuthOptions = (ctx: GenericCtx<DataModel>) => {
     emailAndPassword: {
       enabled: true,
     },
+    user: {
+      changeEmail: {
+        enabled: true,
+        updateEmailWithoutVerification: true
+      }
+    },
     plugins: [convex({ authConfig })]
   } satisfies BetterAuthOptions;
 }

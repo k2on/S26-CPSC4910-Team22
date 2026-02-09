@@ -18,8 +18,7 @@ export const addNumber = mutation({
     number: v.number()
   },
   handler: async (ctx, args) => {
-    await ctx.db.insert("numbers", { number: args.number });
-    return "ok";
+    
   }
 })
 
