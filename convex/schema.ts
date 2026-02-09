@@ -3,7 +3,6 @@ import { v } from "convex/values";
 
 export default defineSchema({
   numbers: defineTable({
-    number: v.number(),
-    createdBy: v.string(),
+    number: v.number()
   }),
 });

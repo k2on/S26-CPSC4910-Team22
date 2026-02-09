@@ -18,12 +18,7 @@ export const addNumber = mutation({
     number: v.number()
   },
   handler: async (ctx, args) => {
-    const user = await ctx.auth.getUserIdentity()
-    if(!user){
-      throw Error()
-    }
-    await ctx.db.insert("numbers", { number: args.number, createdBy: user.name || "joebiden123orsomethingidk"});
-    return "ok";
+    
   }
 })
 

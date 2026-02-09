@@ -8,13 +8,6 @@ import Link from "next/link";
 export default function Home() {
   const { data, isPending } = authClient.useSession();
 
-  const numbers = useQuery(api.myFunctions.getNumbers)
-  const addNumber = useMutation(api.myFunctions.addNumber)
-
-  function onClickMe(){
-    addNumber({number:46})
-  }
-
   return (
     <main>
       {isPending ? "Loading" : data == null ? <>

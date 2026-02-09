@@ -28,7 +28,7 @@ export default function Page() {
       <div>Account Email:</div>
       <div className="flex flex-col">
         <input placeholder={data?.user.email} type="email" onChange={(e) => setEmail(e.target.value)} />
-        <button style={{textAlign:"left"}} onClick={changeEmail}>Update</button>
+        <button style={{textAlign:"left"}} onClick={changeEmail}>Update Email</button>
         </div>
     </main>
   );
