@@ -8,6 +8,13 @@ import Link from "next/link";
 export default function Home() {
   const { data, isPending } = authClient.useSession();
 
+  const numbers = useQuery(api.myFunctions.getNumbers)
+  const addNumber = useMutation(api.myFunctions.addNumber)
+
+  function onClickMe(){
+    addNumber({number:46})
+  }
+
   return (
     <main>
       {isPending ? "Loading" : data == null ? <>
@@ -20,6 +27,10 @@ export default function Home() {
 
       </> : <>
         You are signed in as {data.user.name} ({data.user.email})
+
+        <div className="flex flex-col"> 
+          <Link href="/editprofile">Edit Profile</Link>
+        </div>
 
         <div>
           <button onClick={() => {
