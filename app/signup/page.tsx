@@ -1,8 +1,11 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { Input } from "@/components/ui/input";
+import Link from "next/link";
 
 export default function Page() {
   const router = useRouter();
@@ -21,13 +24,16 @@ export default function Page() {
   }
 
   return (
-    <main>
+    <main className="max-w-lg mx-auto">
       <div className="flex flex-col">
-        <input placeholder="Name" onChange={(e) => setName(e.target.value)} />
-        <input placeholder="Email" type="email" onChange={(e) => setEmail(e.target.value)} />
-        <input placeholder="Password" type="password" onChange={(e) => setPassword(e.target.value)} />
+        <Input placeholder="Name" onChange={(e) => setName(e.target.value)} />
+        <Input placeholder="Email" type="email" onChange={(e) => setEmail(e.target.value)} />
+        <Input placeholder="Password" type="password" onChange={(e) => setPassword(e.target.value)} />
 
-        <button onClick={onSubmit}>Sign Up</button>
+        <Button onClick={onSubmit}>Sign Up</Button>
+        <Button asChild variant="outline">
+          <Link href="/signin">Already Have an Account? Sign In</Link>
+        </Button>
       </div>
     </main>
   );
