@@ -31,14 +31,14 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
           input:
             | {
                 data: {
-                  address?: string;
+                  address?: null | string;
                   createdAt: number;
                   email: string;
                   emailVerified: boolean;
                   image?: null | string;
-                  imageBorderColor?: string;
+                  imageBorderColor?: null | string;
                   name: string;
-                  role: "driver" | "sponsor" | "admin";
+                  role?: null | string;
                   updatedAt: number;
                   userId?: null | string;
                 };
@@ -112,12 +112,12 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
                     | "email"
                     | "emailVerified"
                     | "image"
-                    | "imageBorderColor"
                     | "createdAt"
                     | "updatedAt"
                     | "userId"
                     | "role"
                     | "address"
+                    | "imageBorderColor"
                     | "_id";
                   operator?:
                     | "lt"
@@ -303,12 +303,12 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
                     | "email"
                     | "emailVerified"
                     | "image"
-                    | "imageBorderColor"
                     | "createdAt"
                     | "updatedAt"
                     | "userId"
                     | "role"
                     | "address"
+                    | "imageBorderColor"
                     | "_id";
                   operator?:
                     | "lt"
@@ -558,14 +558,14 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
             | {
                 model: "user";
                 update: {
-                  address?: string;
+                  address?: null | string;
                   createdAt?: number;
                   email?: string;
                   emailVerified?: boolean;
                   image?: null | string;
-                  imageBorderColor?: string;
+                  imageBorderColor?: null | string;
                   name?: string;
-                  role?: "driver" | "sponsor" | "admin";
+                  role?: null | string;
                   updatedAt?: number;
                   userId?: null | string;
                 };
@@ -576,12 +576,12 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
                     | "email"
                     | "emailVerified"
                     | "image"
-                    | "imageBorderColor"
                     | "createdAt"
                     | "updatedAt"
                     | "userId"
                     | "role"
                     | "address"
+                    | "imageBorderColor"
                     | "_id";
                   operator?:
                     | "lt"
@@ -797,14 +797,14 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
             | {
                 model: "user";
                 update: {
-                  address?: string;
+                  address?: null | string;
                   createdAt?: number;
                   email?: string;
                   emailVerified?: boolean;
                   image?: null | string;
-                  imageBorderColor?: string;
+                  imageBorderColor?: null | string;
                   name?: string;
-                  role?: "driver" | "sponsor" | "admin";
+                  role?: null | string;
                   updatedAt?: number;
                   userId?: null | string;
                 };
@@ -815,12 +815,12 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
                     | "email"
                     | "emailVerified"
                     | "image"
-                    | "imageBorderColor"
                     | "createdAt"
                     | "updatedAt"
                     | "userId"
                     | "role"
                     | "address"
+                    | "imageBorderColor"
                     | "_id";
                   operator?:
                     | "lt"

@@ -6,6 +6,7 @@
     "dev": "npm-run-all --parallel dev:frontend dev:backend",
     "dev:frontend": "next dev",
     "dev:backend": "convex dev",
+    "gen": "npx @better-auth/cli generate --output ./convex/betterAuth/schema.ts -y --config ./convex/betterAuth/auth.ts",
     "build": "next build",
     "start": "next start",
     "lint": "eslint"

@@ -17,18 +17,14 @@ export const tables = {
     email: v.string(),
     emailVerified: v.boolean(),
     image: v.optional(v.union(v.null(), v.string())),
-    imageBorderColor: v.optional(v.string()),
     createdAt: v.number(),
     updatedAt: v.number(),
     userId: v.optional(v.union(v.null(), v.string())),
-    role: v.union(
-      v.literal('driver'),
-      v.literal('sponsor'),
-      v.literal('admin')
-    ),
-    address: v.optional(v.string()),
+    role: v.optional(v.union(v.null(), v.string())),
+    address: v.optional(v.union(v.null(), v.string())),
+    imageBorderColor: v.optional(v.union(v.null(), v.string())),
   })
-    .index("email_name", ["email", "name"])
+    .index("email_name", ["email","name"])
     .index("name", ["name"])
     .index("userId", ["userId"]),
   session: defineTable({
@@ -41,7 +37,7 @@ export const tables = {
     userId: v.string(),
   })
     .index("expiresAt", ["expiresAt"])
-    .index("expiresAt_userId", ["expiresAt", "userId"])
+    .index("expiresAt_userId", ["expiresAt","userId"])
     .index("token", ["token"])
     .index("userId", ["userId"]),
   account: defineTable({
@@ -59,8 +55,8 @@ export const tables = {
     updatedAt: v.number(),
   })
     .index("accountId", ["accountId"])
-    .index("accountId_providerId", ["accountId", "providerId"])
-    .index("providerId_userId", ["providerId", "userId"])
+    .index("accountId_providerId", ["accountId","providerId"])
+    .index("providerId_userId", ["providerId","userId"])
     .index("userId", ["userId"]),
   verification: defineTable({
     identifier: v.string(),
