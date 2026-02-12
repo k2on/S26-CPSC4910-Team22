@@ -18,7 +18,14 @@ export const addNumber = mutation({
     number: v.number()
   },
   handler: async (ctx, args) => {
-    
+
   }
 })
 
+export const getAbout = query({
+  handler: async (ctx) => {
+    return {
+      about: await ctx.db.query("aboutPageInfo").first()
+    }
+  }
+})
