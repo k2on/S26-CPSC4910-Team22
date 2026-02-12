@@ -20,6 +20,7 @@ export const createAuthOptions = (ctx: GenericCtx<DataModel>) => {
     appName: "My App",
     baseURL: process.env.SITE_URL,
     secret: process.env.BETTER_AUTH_SECRETE,
+    trustedOrigins: ['http://localhost:3000'],
     database: authComponent.adapter(ctx),
     emailAndPassword: {
       enabled: true,
@@ -28,6 +29,20 @@ export const createAuthOptions = (ctx: GenericCtx<DataModel>) => {
       changeEmail: {
         enabled: true,
         updateEmailWithoutVerification: true
+      },
+      additionalFields: {
+        role: {
+          type: "string",
+          defaultValue: "driver",
+        },
+        address: {
+          type: "string",
+          required: false,
+        },
+        imageBorderColor: {
+          type: "string",
+          defaultValue: "black"
+        }
       }
     },
     plugins: [convex({ authConfig })]
