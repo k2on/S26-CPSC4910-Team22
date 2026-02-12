@@ -29,3 +29,18 @@ export const getAbout = query({
     }
   }
 })
+
+export const generateUploadUrl = mutation({
+  handler: async (ctx) => {
+    return await ctx.storage.generateUploadUrl();
+  },
+});
+
+export const getImageUrl = mutation({
+  args: {
+    id: v.id("_storage")
+  },
+  handler: async (ctx, args) => {
+    return await ctx.storage.getUrl(args.id)
+  },
+});
