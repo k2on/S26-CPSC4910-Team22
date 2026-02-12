@@ -6,6 +6,6 @@ import { type options } from "@/convex/betterAuth/auth";
 export const authClient = createAuthClient({
   plugins: [
     convexClient(),
-    // inferAdditionalFields<typeof options>()
+    inferAdditionalFields<typeof options>()
   ],
 })
