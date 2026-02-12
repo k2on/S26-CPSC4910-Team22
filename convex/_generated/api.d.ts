@@ -58,11 +58,14 @@ export declare const components: {
           input:
             | {
                 data: {
+                  address?: string;
                   createdAt: number;
                   email: string;
                   emailVerified: boolean;
                   image?: null | string;
+                  imageBorderColor?: string;
                   name: string;
+                  role: "driver" | "sponsor" | "admin";
                   updatedAt: number;
                   userId?: null | string;
                 };
@@ -135,9 +138,12 @@ export declare const components: {
                     | "email"
                     | "emailVerified"
                     | "image"
+                    | "imageBorderColor"
                     | "createdAt"
                     | "updatedAt"
                     | "userId"
+                    | "role"
+                    | "address"
                     | "_id";
                   operator?:
                     | "lt"
@@ -322,9 +328,12 @@ export declare const components: {
                     | "email"
                     | "emailVerified"
                     | "image"
+                    | "imageBorderColor"
                     | "createdAt"
                     | "updatedAt"
                     | "userId"
+                    | "role"
+                    | "address"
                     | "_id";
                   operator?:
                     | "lt"
@@ -571,11 +580,14 @@ export declare const components: {
             | {
                 model: "user";
                 update: {
+                  address?: string;
                   createdAt?: number;
                   email?: string;
                   emailVerified?: boolean;
                   image?: null | string;
+                  imageBorderColor?: string;
                   name?: string;
+                  role?: "driver" | "sponsor" | "admin";
                   updatedAt?: number;
                   userId?: null | string;
                 };
@@ -586,9 +598,12 @@ export declare const components: {
                     | "email"
                     | "emailVerified"
                     | "image"
+                    | "imageBorderColor"
                     | "createdAt"
                     | "updatedAt"
                     | "userId"
+                    | "role"
+                    | "address"
                     | "_id";
                   operator?:
                     | "lt"
@@ -803,11 +818,14 @@ export declare const components: {
             | {
                 model: "user";
                 update: {
+                  address?: string;
                   createdAt?: number;
                   email?: string;
                   emailVerified?: boolean;
                   image?: null | string;
+                  imageBorderColor?: string;
                   name?: string;
+                  role?: "driver" | "sponsor" | "admin";
                   updatedAt?: number;
                   userId?: null | string;
                 };
@@ -818,9 +836,12 @@ export declare const components: {
                     | "email"
                     | "emailVerified"
                     | "image"
+                    | "imageBorderColor"
                     | "createdAt"
                     | "updatedAt"
                     | "userId"
+                    | "role"
+                    | "address"
                     | "_id";
                   operator?:
                     | "lt"

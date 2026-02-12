@@ -18,8 +18,9 @@ export default function Page() {
       name,
       email,
       password,
-    }).then(() => {
-      router.push("/")
+    }).then((r) => {
+      if (r.error == null)
+        router.push("/")
     })
   }
 
