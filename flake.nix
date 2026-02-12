@@ -14,6 +14,7 @@
           nodejs
           bun
           biome
+          openssl
         ];
       };
     });
