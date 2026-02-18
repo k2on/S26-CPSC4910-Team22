@@ -3,40 +3,240 @@
 import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
+import Image from "next/image";
+import { useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import { validateSignUp } from "@/app/utils/inputValidation";
+import { toast } from "sonner";
+import { waitForAuth } from "@/app/utils/authValidation";
+import { createUserProfileServer } from "./serverActions";
 
 export default function Page() {
-  const router = useRouter();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [name, setName] = useState("");
+    const router = useRouter();
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [name, setName] = useState("");
+    const [address, setAddress] = useState("");
+    const [role, setRole] = useState<"driver" | "sponsor" | "admin">("driver");
+    const [profilePicture, setProfilePicture] = useState<File | null>(null);
+    const [profileBorder, setProfileBorder] = useState("#EDEDED");
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const onSubmit = () => {
-    authClient.signUp.email({
-      name,
-      email,
-      password,
-    }).then((r) => {
-      if (r.error == null)
-        router.push("/")
-    })
-  }
+    const fileInputRef = useRef<HTMLInputElement | null>(null);
+    const generateUploadUrl = useMutation(api.userProfiles.generateUploadUrl);
 
-  return (
-    <main className="max-w-lg mx-auto">
-      <div className="flex flex-col">
-        <Input placeholder="Name" onChange={(e) => setName(e.target.value)} />
-        <Input placeholder="Email" type="email" onChange={(e) => setEmail(e.target.value)} />
-        <Input placeholder="Password" type="password" onChange={(e) => setPassword(e.target.value)} />
+    const onSubmit = async () => {
+        if (isSubmitting) return;
+        // locks inputs to avoid error when pressing submit twice and changing inputs in between
+        setIsSubmitting(true);
 
-        <Button onClick={onSubmit}>Sign Up</Button>
-        <Button asChild variant="outline">
-          <Link href="/signin">Already Have an Account? Sign In</Link>
-        </Button>
-      </div>
-    </main>
-  );
+        const cleanEmail = email.toLowerCase();
+        const roleAtSubmit = role;
+        const addressAtSubmit = address;
+        const borderAtSubmit = profileBorder;
+        const pictureAtSubmit = profilePicture;
+
+        try {
+            const result = validateSignUp(cleanEmail, password, addressAtSubmit);
+            if (!result.valid) {
+                toast.error(result.message, { position: "top-right" });
+                return;
+            }
+
+            const res = await authClient.signUp.email({
+                name,
+                email: cleanEmail,
+                password,
+            });
+
+            if (res?.error) {
+                if (res.error.code === "USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL") {
+                    toast.error("Email already in use", { position: "top-right" });
+                    return;
+                }
+                throw new Error(res.error.message ?? "Sign up failed");
+            }
+
+            const authValid = await waitForAuth();
+            if (!authValid) {
+                toast.error("Authentication successful, but account creation failed", {
+                    position: "top-right",
+                });
+                return;
+            }
+
+            let profilePictureId: string | undefined = undefined;
+            if (pictureAtSubmit) {
+                const uploadUrl = await generateUploadUrl();
+                const uploadRes = await fetch(uploadUrl, {
+                    method: "POST",
+                    headers: { "Content-Type": pictureAtSubmit.type },
+                    body: pictureAtSubmit,
+                });
+
+                if (!uploadRes.ok) {
+                    toast.error("Image upload failed", { position: "top-right" });
+                } else {
+                    const { storageId } = await uploadRes.json();
+                    profilePictureId = storageId;
+                }
+            }
+
+            await createUserProfileServer({
+                role: roleAtSubmit,
+                address: addressAtSubmit,
+                profilePictureBorderColor: borderAtSubmit,
+                profilePictureId,
+            });
+
+            router.push("/");
+        } catch (e: unknown) {
+            const message =
+                e instanceof Error ? e.message : "Sign up failed";
+            toast.error(message, { position: "top-right" });
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    return (
+        <main className="max-w-lg mx-auto">
+            <label className="block text-3xl font-semibold text-center mb-4">
+                Create an account
+            </label>
+
+            <form
+                className="flex flex-col"
+                onSubmit={(e) => {
+                    e.preventDefault();
+                    void onSubmit();
+                }}
+            >
+                <Input
+                    placeholder="Name"
+                    onChange={(e) => setName(e.target.value)}
+                    disabled={isSubmitting}
+                />
+                <Input
+                    placeholder="Email"
+                    type="email"
+                    onChange={(e) => setEmail(e.target.value)}
+                    disabled={isSubmitting}
+                />
+                <Input
+                    placeholder="Password"
+                    type="password"
+                    onChange={(e) => setPassword(e.target.value)}
+                    disabled={isSubmitting}
+                />
+                <Input
+                    placeholder="Mailing Address"
+                    onChange={(e) => setAddress(e.target.value)}
+                    disabled={isSubmitting}
+                />
+
+                <label className="block font-medium mb-2 mt-2">
+                    Choose a profile picture:
+                </label>
+                <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    disabled={isSubmitting}
+                    onChange={(e) => setProfilePicture(e.target.files?.[0] ?? null)}
+                />
+
+                <div className="flex items-center gap-6">
+                    <button
+                        type="button"
+                        disabled={isSubmitting}
+                        onClick={(e) => {
+                            e.preventDefault();
+                            fileInputRef.current?.click();
+                        }}
+                        className="flex items-center justify-center px-4 py-2 w-1/3
+              bg-slate-700 text-white border border-slate-700 rounded-lg shadow-sm
+              hover:bg-slate-800 transition-colors duration-200 cursor-pointer
+              disabled:opacity-60 disabled:cursor-not-allowed"
+                    >
+                        Upload image
+                    </button>
+
+                    <Image
+                        src={
+                            profilePicture
+                                ? URL.createObjectURL(profilePicture)
+                                : "/no_profile_picture.jpg"
+                        }
+                        alt="Profile Preview"
+                        width={128}
+                        height={128}
+                        className="object-cover rounded-full border-4 transition-colors duration-300"
+                        style={{ borderColor: profileBorder }}
+                    />
+                </div>
+
+                <div className="flex items-center gap-3 mt-4">
+                    <label className="font-medium">Customize border:</label>
+                    <Input
+                        type="color"
+                        className="w-16 h-10 cursor-pointer"
+                        disabled={isSubmitting}
+                        onChange={(e) => setProfileBorder(e.target.value)}
+                    />
+                </div>
+
+                <div className="mt-4">
+                    <label className="block font-medium mb-2">Select a role:</label>
+
+                    <div className="flex gap-3">
+                        {(
+                            [
+                                { label: "Driver", value: "driver" },
+                                { label: "Sponsor", value: "sponsor" },
+                                { label: "Admin", value: "admin" },
+                            ] as const
+                        ).map((r) => {
+                            const selected = role === r.value;
+
+                            return (
+                                <button
+                                    key={r.value}
+                                    type="button"
+                                    disabled={isSubmitting}
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        setRole(r.value);
+                                    }}
+                                    aria-pressed={selected}
+                                    className={[
+                                        "flex-1 rounded-lg border px-4 py-2 font-medium transition",
+                                        selected
+                                            ? "bg-slate-700 text-white border-slate-700 ring-2 ring-slate-700 ring-offset-2"
+                                            : "bg-slate-100 text-slate-700 border-slate-300 hover:bg-slate-200",
+                                        isSubmitting ? "opacity-60 cursor-not-allowed" : "",
+                                    ].join(" ")}
+                                >
+                                    {r.label}
+                                </button>
+                            );
+                        })}
+                    </div>
+                </div>
+
+                <Button type="submit" className="mt-4" disabled={isSubmitting}>
+                    {isSubmitting ? "Creating..." : "Sign Up"}
+                </Button>
+
+                <Button asChild variant="outline" disabled={isSubmitting}>
+                    <Link href="/signin">Already Have an Account? Sign In</Link>
+                </Button>
+            </form>
+        </main>
+    );
 }
-
