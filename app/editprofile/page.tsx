@@ -24,9 +24,9 @@ export default function Page() {
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const fileInputRef = useRef<HTMLInputElement | null>(null);
-    const userProfileInfo = useQuery(api.userProfiles.getUserProfileInfo);
-    const generateUploadUrl = useMutation(api.userProfiles.generateUploadUrl);
-    const updateUserProfile = useMutation(api.userProfiles.updateUserProfile);
+    const userProfileInfo = useQuery(api.services.userProfiles.getUserProfileInfo);
+    const generateUploadUrl = useMutation(api.services.userProfiles.generateUploadUrl);
+    const updateUserProfile = useMutation(api.services.userProfiles.updateUserProfile);
 
     useEffect(() => {
         if (userProfileInfo?.profilePictureBorderColor) {

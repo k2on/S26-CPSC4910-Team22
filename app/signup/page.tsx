@@ -12,7 +12,7 @@ import { api } from "@/convex/_generated/api";
 import { validateSignUp } from "@/app/utils/inputValidation";
 import { toast } from "sonner";
 import { waitForAuth } from "@/app/utils/authValidation";
-import { createUserProfileServer } from "./serverActions";
+import { createUserProfileAction } from "./serverActions";
 
 export default function Page() {
     const router = useRouter();
@@ -26,11 +26,10 @@ export default function Page() {
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const fileInputRef = useRef<HTMLInputElement | null>(null);
-    const generateUploadUrl = useMutation(api.userProfiles.generateUploadUrl);
+    const generateUploadUrl = useMutation(api.services.userProfiles.generateUploadUrl);
 
     const onSubmit = async () => {
         if (isSubmitting) return;
-        // locks inputs to avoid error when pressing submit twice and changing inputs in between
         setIsSubmitting(true);
 
         const cleanEmail = email.toLowerCase();
@@ -62,7 +61,7 @@ export default function Page() {
 
             const authValid = await waitForAuth();
             if (!authValid) {
-                toast.error("Authentication successful, but account creation failed", {
+                toast.error("Error occurred after authentication", {
                     position: "top-right",
                 });
                 return;
@@ -85,17 +84,16 @@ export default function Page() {
                 }
             }
 
-            await createUserProfileServer({
-                role: roleAtSubmit,
+            await createUserProfileAction({
                 address: addressAtSubmit,
                 profilePictureBorderColor: borderAtSubmit,
                 profilePictureId,
+                role: roleAtSubmit,
             });
 
             router.push("/");
         } catch (e: unknown) {
-            const message =
-                e instanceof Error ? e.message : "Sign up failed";
+            const message = e instanceof Error ? e.message : "Sign up failed";
             toast.error(message, { position: "top-right" });
         } finally {
             setIsSubmitting(false);
