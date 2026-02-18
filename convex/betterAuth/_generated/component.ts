@@ -31,12 +31,13 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
           input:
             | {
                 data: {
-                  address?: null | string;
+                  banExpires?: null | number;
+                  banReason?: null | string;
+                  banned?: null | boolean;
                   createdAt: number;
                   email: string;
                   emailVerified: boolean;
                   image?: null | string;
-                  imageBorderColor?: null | string;
                   name: string;
                   role?: null | string;
                   updatedAt: number;
@@ -48,6 +49,7 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
                 data: {
                   createdAt: number;
                   expiresAt: number;
+                  impersonatedBy?: null | string;
                   ipAddress?: null | string;
                   token: string;
                   updatedAt: number;
@@ -116,8 +118,9 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
                     | "updatedAt"
                     | "userId"
                     | "role"
-                    | "address"
-                    | "imageBorderColor"
+                    | "banned"
+                    | "banReason"
+                    | "banExpires"
                     | "_id";
                   operator?:
                     | "lt"
@@ -152,6 +155,7 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
                     | "ipAddress"
                     | "userAgent"
                     | "userId"
+                    | "impersonatedBy"
                     | "_id";
                   operator?:
                     | "lt"
@@ -307,8 +311,9 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
                     | "updatedAt"
                     | "userId"
                     | "role"
-                    | "address"
-                    | "imageBorderColor"
+                    | "banned"
+                    | "banReason"
+                    | "banExpires"
                     | "_id";
                   operator?:
                     | "lt"
@@ -343,6 +348,7 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
                     | "ipAddress"
                     | "userAgent"
                     | "userId"
+                    | "impersonatedBy"
                     | "_id";
                   operator?:
                     | "lt"
@@ -558,12 +564,13 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
             | {
                 model: "user";
                 update: {
-                  address?: null | string;
+                  banExpires?: null | number;
+                  banReason?: null | string;
+                  banned?: null | boolean;
                   createdAt?: number;
                   email?: string;
                   emailVerified?: boolean;
                   image?: null | string;
-                  imageBorderColor?: null | string;
                   name?: string;
                   role?: null | string;
                   updatedAt?: number;
@@ -580,8 +587,9 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
                     | "updatedAt"
                     | "userId"
                     | "role"
-                    | "address"
-                    | "imageBorderColor"
+                    | "banned"
+                    | "banReason"
+                    | "banExpires"
                     | "_id";
                   operator?:
                     | "lt"
@@ -609,6 +617,7 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
                 update: {
                   createdAt?: number;
                   expiresAt?: number;
+                  impersonatedBy?: null | string;
                   ipAddress?: null | string;
                   token?: string;
                   updatedAt?: number;
@@ -625,6 +634,7 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
                     | "ipAddress"
                     | "userAgent"
                     | "userId"
+                    | "impersonatedBy"
                     | "_id";
                   operator?:
                     | "lt"
@@ -797,12 +807,13 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
             | {
                 model: "user";
                 update: {
-                  address?: null | string;
+                  banExpires?: null | number;
+                  banReason?: null | string;
+                  banned?: null | boolean;
                   createdAt?: number;
                   email?: string;
                   emailVerified?: boolean;
                   image?: null | string;
-                  imageBorderColor?: null | string;
                   name?: string;
                   role?: null | string;
                   updatedAt?: number;
@@ -819,8 +830,9 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
                     | "updatedAt"
                     | "userId"
                     | "role"
-                    | "address"
-                    | "imageBorderColor"
+                    | "banned"
+                    | "banReason"
+                    | "banExpires"
                     | "_id";
                   operator?:
                     | "lt"
@@ -848,6 +860,7 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
                 update: {
                   createdAt?: number;
                   expiresAt?: number;
+                  impersonatedBy?: null | string;
                   ipAddress?: null | string;
                   token?: string;
                   updatedAt?: number;
@@ -864,6 +877,7 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
                     | "ipAddress"
                     | "userAgent"
                     | "userId"
+                    | "impersonatedBy"
                     | "_id";
                   operator?:
                     | "lt"
@@ -1017,6 +1031,15 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
               };
           onUpdateHandle?: string;
         },
+        any,
+        Name
+      >;
+    };
+    authUsers: {
+      setRoleForUserDocId: FunctionReference<
+        "mutation",
+        "internal",
+        { role: "driver" | "sponsor" | "admin"; userDocId: string },
         any,
         Name
       >;
