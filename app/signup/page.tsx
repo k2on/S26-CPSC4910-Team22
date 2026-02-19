@@ -16,8 +16,14 @@ import { createUserProfileAction } from "./serverActions";
 
 export default function Page() {
     const router = useRouter();
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
+
+    const emailRef = useRef<HTMLInputElement>(null);
+    const passwordRef = useRef<HTMLInputElement>(null);
+    const nameRef = useRef<HTMLInputElement>(null);
+    const roleRef = useRef<HTMLInputElement>(null);
+    const profilePictureRef = useRef<HTMLInputElement>(null);
+    const profilePictureRef = useRef<HTMLInputElement>(null);
+
     const [name, setName] = useState("");
     const [address, setAddress] = useState("");
     const [role, setRole] = useState<"driver" | "sponsor" | "admin">("driver");
