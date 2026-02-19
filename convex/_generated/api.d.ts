@@ -9,9 +9,7 @@
  */
 
 import type * as http from "../http.js";
-import type * as services_authUsers from "../services/authUsers.js";
-import type * as services_myFunctions from "../services/myFunctions.js";
-import type * as services_userProfiles from "../services/userProfiles.js";
+import type * as myFunctions from "../myFunctions.js";
 
 import type {
   ApiFromModules,
@@ -21,9 +19,7 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   http: typeof http;
-  "services/authUsers": typeof services_authUsers;
-  "services/myFunctions": typeof services_myFunctions;
-  "services/userProfiles": typeof services_userProfiles;
+  myFunctions: typeof myFunctions;
 }>;
 
 /**
@@ -62,6 +58,7 @@ export declare const components: {
           input:
             | {
                 data: {
+                  address?: null | string;
                   banExpires?: null | number;
                   banReason?: null | string;
                   banned?: null | boolean;
@@ -69,6 +66,7 @@ export declare const components: {
                   email: string;
                   emailVerified: boolean;
                   image?: null | string;
+                  imageBorderColor?: null | string;
                   name: string;
                   role?: null | string;
                   updatedAt: number;
@@ -151,6 +149,8 @@ export declare const components: {
                     | "banned"
                     | "banReason"
                     | "banExpires"
+                    | "address"
+                    | "imageBorderColor"
                     | "_id";
                   operator?:
                     | "lt"
@@ -343,6 +343,8 @@ export declare const components: {
                     | "banned"
                     | "banReason"
                     | "banExpires"
+                    | "address"
+                    | "imageBorderColor"
                     | "_id";
                   operator?:
                     | "lt"
@@ -590,6 +592,7 @@ export declare const components: {
             | {
                 model: "user";
                 update: {
+                  address?: null | string;
                   banExpires?: null | number;
                   banReason?: null | string;
                   banned?: null | boolean;
@@ -597,6 +600,7 @@ export declare const components: {
                   email?: string;
                   emailVerified?: boolean;
                   image?: null | string;
+                  imageBorderColor?: null | string;
                   name?: string;
                   role?: null | string;
                   updatedAt?: number;
@@ -616,6 +620,8 @@ export declare const components: {
                     | "banned"
                     | "banReason"
                     | "banExpires"
+                    | "address"
+                    | "imageBorderColor"
                     | "_id";
                   operator?:
                     | "lt"
@@ -832,6 +838,7 @@ export declare const components: {
             | {
                 model: "user";
                 update: {
+                  address?: null | string;
                   banExpires?: null | number;
                   banReason?: null | string;
                   banned?: null | boolean;
@@ -839,6 +846,7 @@ export declare const components: {
                   email?: string;
                   emailVerified?: boolean;
                   image?: null | string;
+                  imageBorderColor?: null | string;
                   name?: string;
                   role?: null | string;
                   updatedAt?: number;
@@ -858,6 +866,8 @@ export declare const components: {
                     | "banned"
                     | "banReason"
                     | "banExpires"
+                    | "address"
+                    | "imageBorderColor"
                     | "_id";
                   operator?:
                     | "lt"

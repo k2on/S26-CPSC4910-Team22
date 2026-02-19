@@ -32,14 +32,30 @@ export const createAuthOptions = (ctx: GenericCtx<DataModel>) => {
         enabled: true,
         updateEmailWithoutVerification: true
       },
+      additionalFields: {
+        role: {
+          type: "string",
+          defaultValue: "driver",
+        },
+        address: {
+          type: "string",
+          required: false,
+        },
+        imageBorderColor: {
+          type: "string",
+          defaultValue: "black"
+        }
+      }
     },
-    plugins: [convex({ authConfig }),
-              admin({
-                ac,
-                roles,
-                defaultRole: "driver",
-                allowImpersonatingAdmins: true
-              })]
+    plugins: [
+      convex({ authConfig }),
+      admin({
+        ac,
+        roles,
+        defaultRole: "driver",
+        allowImpersonatingAdmins: true
+      })
+    ]
   } satisfies BetterAuthOptions;
 }
 

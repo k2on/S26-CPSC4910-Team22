@@ -6,6 +6,9 @@ import { adminClient } from "better-auth/client/plugins";
 import { ac, roles } from "@/lib/permissions";
 
 export const authClient = createAuthClient({
+  fetchOptions: {
+    throw: true
+  },
   plugins: [
     convexClient(),
     inferAdditionalFields<typeof options>(),
