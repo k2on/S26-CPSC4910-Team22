@@ -5,106 +5,54 @@ import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import { Input } from "@/components/ui/input";
+import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import Link from "next/link";
 import Image from "next/image";
-import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { validateSignUp } from "@/app/utils/inputValidation";
 import { toast } from "sonner";
-import { waitForAuth } from "@/app/utils/authValidation";
-import { createUserProfileAction } from "./serverActions";
+import { useForm } from "@tanstack/react-form";
+import { useMutation } from "@tanstack/react-query";
+import { BetterFetchError } from "@better-fetch/fetch";
+import { BASE_ERROR_CODES } from "better-auth";
+import { parseFieldErrors } from "../utils/parseFieldErrors";
 
 export default function Page() {
     const router = useRouter();
 
-    const emailRef = useRef<HTMLInputElement>(null);
-    const passwordRef = useRef<HTMLInputElement>(null);
-    const nameRef = useRef<HTMLInputElement>(null);
-    const roleRef = useRef<HTMLInputElement>(null);
-    const profilePictureRef = useRef<HTMLInputElement>(null);
-    const profilePictureRef = useRef<HTMLInputElement>(null);
+    const form = useForm({
+        defaultValues: {
+            email: '',
+            password: '',
+            name: '',
+            address: '',
+            profileBorder: '#EDEDED',
+        },
+        onSubmit: async ({ value }) => {
+            mutate(value)
+        },
+    });
 
-    const [name, setName] = useState("");
-    const [address, setAddress] = useState("");
-    const [role, setRole] = useState<"driver" | "sponsor" | "admin">("driver");
-    const [profilePicture, setProfilePicture] = useState<File | null>(null);
-    const [profileBorder, setProfileBorder] = useState("#EDEDED");
-    const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const fileInputRef = useRef<HTMLInputElement | null>(null);
-    const generateUploadUrl = useMutation(api.services.userProfiles.generateUploadUrl);
+    const { isPending, mutate } = useMutation({
+        mutationFn: async (input: Parameters<typeof authClient.signUp.email>[0]) => authClient.signUp.email(input),
+        onError: (error: BetterFetchError) => {
+            if (error.error.code == "VALIDATION_ERROR") {
+                form.setErrorMap({
+                    onSubmit: {
+                        fields: parseFieldErrors(error.error.message)
+                    }
+                })
 
-    const onSubmit = async () => {
-        if (isSubmitting) return;
-        setIsSubmitting(true);
-
-        const cleanEmail = email.toLowerCase();
-        const roleAtSubmit = role;
-        const addressAtSubmit = address;
-        const borderAtSubmit = profileBorder;
-        const pictureAtSubmit = profilePicture;
-
-        try {
-            const result = validateSignUp(cleanEmail, password, addressAtSubmit);
-            if (!result.valid) {
-                toast.error(result.message, { position: "top-right" });
-                return;
             }
-
-            const res = await authClient.signUp.email({
-                name,
-                email: cleanEmail,
-                password,
-            });
-
-            if (res?.error) {
-                if (res.error.code === "USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL") {
-                    toast.error("Email already in use", { position: "top-right" });
-                    return;
-                }
-                throw new Error(res.error.message ?? "Sign up failed");
-            }
-
-            const authValid = await waitForAuth();
-            if (!authValid) {
-                toast.error("Error occurred after authentication", {
-                    position: "top-right",
-                });
-                return;
-            }
-
-            let profilePictureId: string | undefined = undefined;
-            if (pictureAtSubmit) {
-                const uploadUrl = await generateUploadUrl();
-                const uploadRes = await fetch(uploadUrl, {
-                    method: "POST",
-                    headers: { "Content-Type": pictureAtSubmit.type },
-                    body: pictureAtSubmit,
-                });
-
-                if (!uploadRes.ok) {
-                    toast.error("Image upload failed", { position: "top-right" });
-                } else {
-                    const { storageId } = await uploadRes.json();
-                    profilePictureId = storageId;
-                }
-            }
-
-            await createUserProfileAction({
-                address: addressAtSubmit,
-                profilePictureBorderColor: borderAtSubmit,
-                profilePictureId,
-                role: roleAtSubmit,
-            });
-
-            router.push("/");
-        } catch (e: unknown) {
-            const message = e instanceof Error ? e.message : "Sign up failed";
-            toast.error(message, { position: "top-right" });
-        } finally {
-            setIsSubmitting(false);
         }
-    };
+
+    })
+
+    // const [profilePicture, setProfilePicture] = useState<File | null>(null);
+    //
+    // const fileInputRef = useRef<HTMLInputElement | null>(null);
+    // const generateUploadUrl = useMutation(api.services.userProfiles.generateUploadUrl);
 
     return (
         <main className="max-w-lg mx-auto">
@@ -116,128 +64,161 @@ export default function Page() {
                 className="flex flex-col"
                 onSubmit={(e) => {
                     e.preventDefault();
-                    void onSubmit();
+                    e.stopPropagation();
+                    form.handleSubmit();
                 }}
             >
-                <Input
-                    placeholder="Name"
-                    onChange={(e) => setName(e.target.value)}
-                    disabled={isSubmitting}
-                />
-                <Input
-                    placeholder="Email"
-                    type="email"
-                    onChange={(e) => setEmail(e.target.value)}
-                    disabled={isSubmitting}
-                />
-                <Input
-                    placeholder="Password"
-                    type="password"
-                    onChange={(e) => setPassword(e.target.value)}
-                    disabled={isSubmitting}
-                />
-                <Input
-                    placeholder="Mailing Address"
-                    onChange={(e) => setAddress(e.target.value)}
-                    disabled={isSubmitting}
-                />
-
-                <label className="block font-medium mb-2 mt-2">
-                    Choose a profile picture:
-                </label>
-                <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    disabled={isSubmitting}
-                    onChange={(e) => setProfilePicture(e.target.files?.[0] ?? null)}
-                />
-
-                <div className="flex items-center gap-6">
-                    <button
-                        type="button"
-                        disabled={isSubmitting}
-                        onClick={(e) => {
-                            e.preventDefault();
-                            fileInputRef.current?.click();
-                        }}
-                        className="flex items-center justify-center px-4 py-2 w-1/3
-              bg-slate-700 text-white border border-slate-700 rounded-lg shadow-sm
-              hover:bg-slate-800 transition-colors duration-200 cursor-pointer
-              disabled:opacity-60 disabled:cursor-not-allowed"
-                    >
-                        Upload image
-                    </button>
-
-                    <Image
-                        src={
-                            profilePicture
-                                ? URL.createObjectURL(profilePicture)
-                                : "/no_profile_picture.jpg"
-                        }
-                        alt="Profile Preview"
-                        width={128}
-                        height={128}
-                        className="object-cover rounded-full border-4 transition-colors duration-300"
-                        style={{ borderColor: profileBorder }}
-                    />
-                </div>
-
-                <div className="flex items-center gap-3 mt-4">
-                    <label className="font-medium">Customize border:</label>
-                    <Input
-                        type="color"
-                        className="w-16 h-10 cursor-pointer"
-                        disabled={isSubmitting}
-                        onChange={(e) => setProfileBorder(e.target.value)}
-                    />
-                </div>
-
-                <div className="mt-4">
-                    <label className="block font-medium mb-2">Select a role:</label>
-
-                    <div className="flex gap-3">
-                        {(
-                            [
-                                { label: "Driver", value: "driver" },
-                                { label: "Sponsor", value: "sponsor" },
-                                { label: "Admin", value: "admin" },
-                            ] as const
-                        ).map((r) => {
-                            const selected = role === r.value;
-
+                <FieldGroup>
+                    <form.Field
+                        name="email"
+                        children={(field) => {
+                            const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
                             return (
-                                <button
-                                    key={r.value}
-                                    type="button"
-                                    disabled={isSubmitting}
-                                    onClick={(e) => {
-                                        e.preventDefault();
-                                        e.stopPropagation();
-                                        setRole(r.value);
-                                    }}
-                                    aria-pressed={selected}
-                                    className={[
-                                        "flex-1 rounded-lg border px-4 py-2 font-medium transition",
-                                        selected
-                                            ? "bg-slate-700 text-white border-slate-700 ring-2 ring-slate-700 ring-offset-2"
-                                            : "bg-slate-100 text-slate-700 border-slate-300 hover:bg-slate-200",
-                                        isSubmitting ? "opacity-60 cursor-not-allowed" : "",
-                                    ].join(" ")}
-                                >
-                                    {r.label}
-                                </button>
-                            );
-                        })}
-                    </div>
-                </div>
+                                <Field data-invalid={isInvalid}>
+                                    <FieldLabel htmlFor={field.name}>Email</FieldLabel>
+                                    <Input
+                                        id={field.name}
+                                        name={field.name}
+                                        value={field.state.value}
+                                        onBlur={field.handleBlur}
+                                        onChange={(e) => field.handleChange(e.target.value)}
+                                        aria-invalid={isInvalid}
+                                        disabled={isPending}
+                                        placeholder="Email"
+                                    />
+                                    {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                                </Field>
+                            )
+                        }}
+                    />
+                    <form.Field
+                        name="password"
+                        children={(field) => {
+                            const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+                            return (
+                                <Field data-invalid={isInvalid}>
+                                    <FieldLabel htmlFor={field.name}>Password</FieldLabel>
+                                    <Input
+                                        id={field.name}
+                                        name={field.name}
+                                        value={field.state.value}
+                                        onBlur={field.handleBlur}
+                                        onChange={(e) => field.handleChange(e.target.value)}
+                                        aria-invalid={isInvalid}
+                                        disabled={isPending}
+                                        type="password"
+                                        placeholder="Password"
+                                    />
+                                    {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                                </Field>
+                            )
+                        }}
+                    />
 
-                <Button type="submit" className="mt-4" disabled={isSubmitting}>
-                    {isSubmitting ? "Creating..." : "Sign Up"}
+                    <form.Field
+                        name="name"
+                        children={(field) => {
+                            const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+                            return (
+                                <Field data-invalid={isInvalid}>
+                                    <FieldLabel htmlFor={field.name}>Name</FieldLabel>
+                                    <Input
+                                        id={field.name}
+                                        name={field.name}
+                                        value={field.state.value}
+                                        onBlur={field.handleBlur}
+                                        onChange={(e) => field.handleChange(e.target.value)}
+                                        aria-invalid={isInvalid}
+                                        disabled={isPending}
+                                        placeholder="Name"
+                                    />
+                                    {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                                </Field>
+                            )
+                        }}
+                    />
+
+                    <form.Field
+                        name="address"
+                        children={(field) => {
+                            const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+                            return (
+                                <Field data-invalid={isInvalid}>
+                                    <FieldLabel htmlFor={field.name}>Address</FieldLabel>
+                                    <Input
+                                        id={field.name}
+                                        name={field.name}
+                                        value={field.state.value}
+                                        onBlur={field.handleBlur}
+                                        onChange={(e) => field.handleChange(e.target.value)}
+                                        aria-invalid={isInvalid}
+                                        disabled={isPending}
+                                        placeholder="Address"
+                                    />
+                                    {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                                </Field>
+                            )
+                        }}
+                    />
+
+                </FieldGroup>
+
+
+                {/*   <label className="block font-medium mb-2 mt-2"> */}
+                {/*       Choose a profile picture: */}
+                {/*   </label> */}
+                {/*   <input */}
+                {/*       ref={fileInputRef} */}
+                {/*       type="file" */}
+                {/*       accept="image/*" */}
+                {/*       className="hidden" */}
+                {/*       onChange={(e) => setProfilePicture(e.target.files?.[0] ?? null)} */}
+                {/*   /> */}
+                {/**/}
+                {/*   <div className="flex items-center gap-6"> */}
+                {/*       <button */}
+                {/*           type="button" */}
+                {/*           onClick={(e) => { */}
+                {/*               e.preventDefault(); */}
+                {/*               fileInputRef.current?.click(); */}
+                {/*           }} */}
+                {/*           className="flex items-center justify-center px-4 py-2 w-1/3 */}
+                {/* bg-slate-700 text-white border border-slate-700 rounded-lg shadow-sm */}
+                {/* hover:bg-slate-800 transition-colors duration-200 cursor-pointer */}
+                {/* disabled:opacity-60 disabled:cursor-not-allowed" */}
+                {/*       > */}
+                {/*           Upload image */}
+                {/*       </button> */}
+                {/**/}
+                {/*       <Image */}
+                {/*           src={ */}
+                {/*               profilePicture */}
+                {/*                   ? URL.createObjectURL(profilePicture) */}
+                {/*                   : "/no_profile_picture.jpg" */}
+                {/*           } */}
+                {/*           alt="Profile Preview" */}
+                {/*           width={128} */}
+                {/*           height={128} */}
+                {/*           className="object-cover rounded-full border-4 transition-colors duration-300" */}
+                {/*           style={{ borderColor: profileBorder }} */}
+                {/*       /> */}
+                {/*   </div> */}
+
+                {/* <div className="flex items-center gap-3 mt-4"> */}
+                {/*     <label className="font-medium">Customize border:</label> */}
+                {/*     <Input */}
+                {/*         type="color" */}
+                {/*         className="w-16 h-10 cursor-pointer" */}
+                {/*         disabled={isSubmitting} */}
+                {/*         onChange={(e) => setProfileBorder(e.target.value)} */}
+                {/*     /> */}
+                {/* </div> */}
+
+                <Button type="submit" className="mt-4" disabled={isPending}>
+                    {isPending ? "Creating..." : "Sign Up"}
                 </Button>
 
-                <Button asChild variant="outline" disabled={isSubmitting}>
+                <Button asChild variant="link" disabled={isPending}>
                     <Link href="/signin">Already Have an Account? Sign In</Link>
                 </Button>
             </form>
