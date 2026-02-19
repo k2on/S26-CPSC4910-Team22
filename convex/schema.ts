@@ -5,6 +5,10 @@ export default defineSchema({
   numbers: defineTable({
     number: v.number()
   }),
+  applications: defineTable({
+    submitter: v.string(),
+    organization: v.string()
+  }),
     userProfiles: defineTable({
         role: v.optional(v.union(
             v.literal('driver'),

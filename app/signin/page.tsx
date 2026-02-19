@@ -5,17 +5,22 @@ import { Input } from "@/components/ui/input";
 import { authClient } from "@/lib/auth-client";
 import { useState } from "react";
 import Link from "next/link";
+import { toast } from "sonner";
 
 export default function Page() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const onSubmit = () => {
-    authClient.signIn.email({
+  const onSubmit = async () => {
+    const {data, error} = await authClient.signIn.email({
       email,
       password,
       callbackURL: "/"
-    })
+    }, {
+      onError: (ctx) => {
+        toast.error("Failed to log in. Check your credentials and try again.", {position: "top-left"})
+      }
+    });
   }
 
   return (

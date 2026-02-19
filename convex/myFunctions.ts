@@ -13,6 +13,22 @@ export const getNumbers = query({
   }
 })
 
+// export const getOrganizations = query({
+//   handler: async (ctx) => {
+//     return {
+//       organizations: await ctx.db.query("organizations").collect()
+//     }
+//   }
+// })
+
+// export const addOrganization = mutation({
+//   args: {
+//     name: v.string()
+//   },
+//   handler: async (ctx, args) => {
+//   }
+// })
+
 export const addNumber = mutation({
   args: {
     number: v.number()
