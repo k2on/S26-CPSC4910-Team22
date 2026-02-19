@@ -1,4 +1,4 @@
-import { mutation, query } from "./_generated/server";
+import { mutation, query } from "../_generated/server";
 import { v } from "convex/values";
 
 export const generateUploadUrl = mutation({
@@ -10,9 +10,6 @@ export const generateUploadUrl = mutation({
 
 export const createUserProfile = mutation({
     args: {
-        role: v.optional(
-            v.union(v.literal("driver"), v.literal("sponsor"), v.literal("admin"))
-        ),
         address: v.optional(v.string()),
         profilePictureBorderColor: v.optional(v.string()),
         profilePictureId: v.optional(v.string()),
@@ -20,7 +17,7 @@ export const createUserProfile = mutation({
     handler: async (ctx, args) => {
         const identity = await ctx.auth.getUserIdentity();
         if (!identity) {
-            throw new Error("failed to create user");
+            throw new Error("not authenticated");
         }
 
         const existing = await ctx.db
@@ -33,7 +30,6 @@ export const createUserProfile = mutation({
         if (existing) return;
 
         await ctx.db.insert("userProfiles", {
-            role: args.role,
             address: args.address,
             profilePictureBorderColor: args.profilePictureBorderColor,
             profilePictureId: args.profilePictureId,

@@ -9,8 +9,9 @@
  */
 
 import type * as http from "../http.js";
-import type * as myFunctions from "../myFunctions.js";
-import type * as userProfiles from "../userProfiles.js";
+import type * as services_authUsers from "../services/authUsers.js";
+import type * as services_myFunctions from "../services/myFunctions.js";
+import type * as services_userProfiles from "../services/userProfiles.js";
 
 import type {
   ApiFromModules,
@@ -20,8 +21,9 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   http: typeof http;
-  myFunctions: typeof myFunctions;
-  userProfiles: typeof userProfiles;
+  "services/authUsers": typeof services_authUsers;
+  "services/myFunctions": typeof services_myFunctions;
+  "services/userProfiles": typeof services_userProfiles;
 }>;
 
 /**
@@ -60,12 +62,13 @@ export declare const components: {
           input:
             | {
                 data: {
-                  address?: null | string;
+                  banExpires?: null | number;
+                  banReason?: null | string;
+                  banned?: null | boolean;
                   createdAt: number;
                   email: string;
                   emailVerified: boolean;
                   image?: null | string;
-                  imageBorderColor?: null | string;
                   name: string;
                   role?: null | string;
                   updatedAt: number;
@@ -77,6 +80,7 @@ export declare const components: {
                 data: {
                   createdAt: number;
                   expiresAt: number;
+                  impersonatedBy?: null | string;
                   ipAddress?: null | string;
                   token: string;
                   updatedAt: number;
@@ -144,8 +148,9 @@ export declare const components: {
                     | "updatedAt"
                     | "userId"
                     | "role"
-                    | "address"
-                    | "imageBorderColor"
+                    | "banned"
+                    | "banReason"
+                    | "banExpires"
                     | "_id";
                   operator?:
                     | "lt"
@@ -180,6 +185,7 @@ export declare const components: {
                     | "ipAddress"
                     | "userAgent"
                     | "userId"
+                    | "impersonatedBy"
                     | "_id";
                   operator?:
                     | "lt"
@@ -334,8 +340,9 @@ export declare const components: {
                     | "updatedAt"
                     | "userId"
                     | "role"
-                    | "address"
-                    | "imageBorderColor"
+                    | "banned"
+                    | "banReason"
+                    | "banExpires"
                     | "_id";
                   operator?:
                     | "lt"
@@ -370,6 +377,7 @@ export declare const components: {
                     | "ipAddress"
                     | "userAgent"
                     | "userId"
+                    | "impersonatedBy"
                     | "_id";
                   operator?:
                     | "lt"
@@ -582,12 +590,13 @@ export declare const components: {
             | {
                 model: "user";
                 update: {
-                  address?: null | string;
+                  banExpires?: null | number;
+                  banReason?: null | string;
+                  banned?: null | boolean;
                   createdAt?: number;
                   email?: string;
                   emailVerified?: boolean;
                   image?: null | string;
-                  imageBorderColor?: null | string;
                   name?: string;
                   role?: null | string;
                   updatedAt?: number;
@@ -604,8 +613,9 @@ export declare const components: {
                     | "updatedAt"
                     | "userId"
                     | "role"
-                    | "address"
-                    | "imageBorderColor"
+                    | "banned"
+                    | "banReason"
+                    | "banExpires"
                     | "_id";
                   operator?:
                     | "lt"
@@ -633,6 +643,7 @@ export declare const components: {
                 update: {
                   createdAt?: number;
                   expiresAt?: number;
+                  impersonatedBy?: null | string;
                   ipAddress?: null | string;
                   token?: string;
                   updatedAt?: number;
@@ -649,6 +660,7 @@ export declare const components: {
                     | "ipAddress"
                     | "userAgent"
                     | "userId"
+                    | "impersonatedBy"
                     | "_id";
                   operator?:
                     | "lt"
@@ -820,12 +832,13 @@ export declare const components: {
             | {
                 model: "user";
                 update: {
-                  address?: null | string;
+                  banExpires?: null | number;
+                  banReason?: null | string;
+                  banned?: null | boolean;
                   createdAt?: number;
                   email?: string;
                   emailVerified?: boolean;
                   image?: null | string;
-                  imageBorderColor?: null | string;
                   name?: string;
                   role?: null | string;
                   updatedAt?: number;
@@ -842,8 +855,9 @@ export declare const components: {
                     | "updatedAt"
                     | "userId"
                     | "role"
-                    | "address"
-                    | "imageBorderColor"
+                    | "banned"
+                    | "banReason"
+                    | "banExpires"
                     | "_id";
                   operator?:
                     | "lt"
@@ -871,6 +885,7 @@ export declare const components: {
                 update: {
                   createdAt?: number;
                   expiresAt?: number;
+                  impersonatedBy?: null | string;
                   ipAddress?: null | string;
                   token?: string;
                   updatedAt?: number;
@@ -887,6 +902,7 @@ export declare const components: {
                     | "ipAddress"
                     | "userAgent"
                     | "userId"
+                    | "impersonatedBy"
                     | "_id";
                   operator?:
                     | "lt"
@@ -1040,6 +1056,14 @@ export declare const components: {
               };
           onUpdateHandle?: string;
         },
+        any
+      >;
+    };
+    authUsers: {
+      setRoleForUserDocId: FunctionReference<
+        "mutation",
+        "internal",
+        { role: "driver" | "sponsor" | "admin"; userDocId: string },
         any
       >;
     };

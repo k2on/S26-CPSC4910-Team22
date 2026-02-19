@@ -6,10 +6,6 @@ export default defineSchema({
     number: v.number()
   }),
     userProfiles: defineTable({
-        role: v.optional(v.union(
-            v.literal('driver'),
-            v.literal('sponsor'),
-            v.literal('admin'))), //optional to avoid errors
         address: v.optional(v.string()),
         profilePictureId: v.optional(v.string()),
         profilePictureBorderColor: v.optional(v.string()),
