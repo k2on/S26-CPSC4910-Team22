@@ -8,6 +8,7 @@ import authConfig from "../auth.config";
 import schema from "./schema";
 import { admin } from "better-auth/plugins";
 import { ac, roles } from "../../lib/permissions";
+import { Resend } from 'resend';
 
 export const authComponent = createClient<DataModel, typeof schema>(
   components.betterAuth,
@@ -26,6 +27,15 @@ export const createAuthOptions = (ctx: GenericCtx<DataModel>) => {
     database: authComponent.adapter(ctx),
     emailAndPassword: {
       enabled: true,
+      sendResetPassword: async ({ user, url, token }, request) => {
+        const resend = new Resend(process.env.RESEND_KEY);
+        await resend.emails.send({
+          from: 'onboarding@resend.dev',
+          to: user.email,
+          subject: 'Password Reset',
+          html: `Here is your <a href="https://team22.cpsc4911.com/reset-password/${token}">password reset link</a>.`
+        })
+      }
     },
     user: {
       changeEmail: {
