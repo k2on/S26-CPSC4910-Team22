@@ -29,6 +29,7 @@ export const createAuthOptions = (ctx: GenericCtx<DataModel>) => {
       enabled: true,
       sendResetPassword: async ({ user, url, token }, request) => {
         const resend = new Resend(process.env.RESEND_KEY);
+        console.log("Hmm", process.env.RESEND_KEY);
         await resend.emails.send({
           from: 'noreply@team22.cpsc4911.com',
           to: user.email,
