@@ -31,6 +31,7 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
           input:
             | {
                 data: {
+                  address?: null | string;
                   banExpires?: null | number;
                   banReason?: null | string;
                   banned?: null | boolean;
@@ -38,6 +39,7 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
                   email: string;
                   emailVerified: boolean;
                   image?: null | string;
+                  imageBorderColor?: null | string;
                   name: string;
                   role?: null | string;
                   updatedAt: number;
@@ -121,6 +123,8 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
                     | "banned"
                     | "banReason"
                     | "banExpires"
+                    | "address"
+                    | "imageBorderColor"
                     | "_id";
                   operator?:
                     | "lt"
@@ -314,6 +318,8 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
                     | "banned"
                     | "banReason"
                     | "banExpires"
+                    | "address"
+                    | "imageBorderColor"
                     | "_id";
                   operator?:
                     | "lt"
@@ -564,6 +570,7 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
             | {
                 model: "user";
                 update: {
+                  address?: null | string;
                   banExpires?: null | number;
                   banReason?: null | string;
                   banned?: null | boolean;
@@ -571,6 +578,7 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
                   email?: string;
                   emailVerified?: boolean;
                   image?: null | string;
+                  imageBorderColor?: null | string;
                   name?: string;
                   role?: null | string;
                   updatedAt?: number;
@@ -590,6 +598,8 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
                     | "banned"
                     | "banReason"
                     | "banExpires"
+                    | "address"
+                    | "imageBorderColor"
                     | "_id";
                   operator?:
                     | "lt"
@@ -807,6 +817,7 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
             | {
                 model: "user";
                 update: {
+                  address?: null | string;
                   banExpires?: null | number;
                   banReason?: null | string;
                   banned?: null | boolean;
@@ -814,6 +825,7 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
                   email?: string;
                   emailVerified?: boolean;
                   image?: null | string;
+                  imageBorderColor?: null | string;
                   name?: string;
                   role?: null | string;
                   updatedAt?: number;
@@ -833,6 +845,8 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
                     | "banned"
                     | "banReason"
                     | "banExpires"
+                    | "address"
+                    | "imageBorderColor"
                     | "_id";
                   operator?:
                     | "lt"
