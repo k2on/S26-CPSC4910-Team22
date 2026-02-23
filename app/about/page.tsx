@@ -6,7 +6,7 @@ import { useQuery } from "convex/react";
 const DAYS = 1000 * 60 * 60 * 24;
 
 export default function Page() {
-  const result = useQuery(api.services.myFunctions.getAbout);
+  const result = useQuery(api.myFunctions.getAbout);
 
   if (result == undefined) return <main>Loading...</main>
 
