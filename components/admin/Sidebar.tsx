@@ -43,7 +43,7 @@ export function AdminSidebar() {
         const pathname = usePathname();
 
         return (
-                <Sidebar collapsible="icon" className="top-(--header-height) h-[calc(100svh-var(--header-height))]!">
+                <Sidebar collapsible="offcanvas" className="top-(--header-height) h-[calc(100svh-var(--header-height))]!">
                         <SidebarContent>
                                 <SidebarGroup>
                                         <SidebarGroupLabel>Admin</SidebarGroupLabel>
@@ -51,7 +51,7 @@ export function AdminSidebar() {
                                                 <SidebarMenu>
 
                                                         {LINKS.map(link => <SidebarMenuItem key={link.href}>
-                                                                <SidebarMenuButton asChild isActive={pathname == link.href}>
+                                                                <SidebarMenuButton asChild isActive={link.href == "/admin" ? pathname == "/admin" : pathname.includes(link.href)}>
                                                                         <Link href={link.href}>
                                                                                 <link.icon />
                                                                                 <span>{link.label}</span>

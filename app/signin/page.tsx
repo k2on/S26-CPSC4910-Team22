@@ -3,22 +3,66 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { authClient } from "@/lib/auth-client";
-import { useState } from "react";
 import Link from "next/link";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
-import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui/field";
+import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
+import { useMutation } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
+import { BetterFetchError } from "better-auth/client";
+import { parseFieldErrors } from "@/utils/parseFieldErrors";
+import { useForm } from "@tanstack/react-form";
+import { Spinner } from "@/components/ui/spinner";
 
 export default function Page() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const router = useRouter();
 
-  const onSubmit = () => {
-    authClient.signIn.email({
-      email,
-      password,
-      callbackURL: "/"
-    })
-  }
+  const form = useForm({
+    defaultValues: {
+      email: '',
+      password: '',
+    },
+    onSubmit: async ({ value }) => {
+      mutate(value)
+    },
+  });
+
+
+  const { isPending, mutate, error } = useMutation({
+    mutationFn: async (input: Parameters<typeof authClient.signIn.email>[0]) => authClient.signIn.email(input),
+    onSuccess: () => {
+      router.push("/");
+    },
+    onError: (error: BetterFetchError) => {
+      switch (error.error.code) {
+        case "VALIDATION_ERROR":
+          form.setErrorMap({
+            onSubmit: {
+              fields: parseFieldErrors(error.error.message)
+            }
+          })
+          break;
+        case "INVALID_EMAIL":
+          form.setErrorMap({
+            onSubmit: {
+              fields: {
+                email: { message: error.error.message }
+              }
+            }
+          })
+          break;
+        case "INVALID_EMAIL_OR_PASSWORD":
+          form.setErrorMap({
+            onSubmit: {
+              form: error.error.message,
+              fields: {}
+            }
+          })
+          break;
+
+      }
+    }
+
+  })
 
   return (
     <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
@@ -35,41 +79,76 @@ export default function Page() {
             </CardHeader>
             <CardContent>
 
-              <FieldGroup>
-                <Field>
-                  <FieldLabel htmlFor="email">Email</FieldLabel>
-                  <Input
-                    required
-                    placeholder="Email"
-                    type="email"
-                    onChange={(e) => setEmail(e.target.value)}
+              <form
+                className="flex flex-col"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  form.handleSubmit();
+                }}
+              >
+                <FieldGroup>
+                  <form.Field
+                    name="email"
+                    children={(field) => {
+                      const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+                      return (
+                        <Field data-invalid={isInvalid}>
+                          <FieldLabel htmlFor={field.name}>Email</FieldLabel>
+                          <Input
+                            id={field.name}
+                            name={field.name}
+                            value={field.state.value}
+                            onBlur={field.handleBlur}
+                            onChange={(e) => field.handleChange(e.target.value)}
+                            aria-invalid={isInvalid}
+                            disabled={isPending}
+                            placeholder="Email"
+                            required
+                          />
+                          {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                        </Field>
+                      )
+                    }}
                   />
-                </Field>
-                <Field>
-                  <div className="flex items-center">
-                    <FieldLabel htmlFor="password">Password</FieldLabel>
-                    <Link
-                      href="/forgot-password"
-                      className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
-                    >
-                      Forgot your password?
-                    </Link>
-                  </div>
-                  <Input
-                    required
-                    placeholder="Password"
-                    type="password"
-                    onChange={(e) => setPassword(e.target.value)}
+                  <form.Field
+                    name="password"
+                    children={(field) => {
+                      const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+                      return (
+                        <Field data-invalid={isInvalid}>
+                          <FieldLabel htmlFor={field.name}>Password</FieldLabel>
+                          <Input
+                            id={field.name}
+                            name={field.name}
+                            value={field.state.value}
+                            onBlur={field.handleBlur}
+                            onChange={(e) => field.handleChange(e.target.value)}
+                            aria-invalid={isInvalid}
+                            disabled={isPending}
+                            type="password"
+                            placeholder="Password"
+                          />
+                          {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                        </Field>
+                      )
+                    }}
                   />
-                </Field>
 
-                <Field>
-                  <Button onClick={onSubmit}>Sign In</Button>
-                  <FieldDescription className="text-center">
-                    Don&apos;t have an account? <Link href="/signup">Sign up</Link>
-                  </FieldDescription>
-                </Field>
-              </FieldGroup>
+                  {error && <FieldError errors={[error.error]} />}
+
+                  <FieldGroup>
+                    <Field>
+                      <Button type="submit" className="mt-4" disabled={isPending}>
+                        {isPending ? <Spinner /> : "Sign In"}
+                      </Button>
+                      <FieldDescription className="px-6 text-center">
+                        Don't have an account? <Link href="/signup">Sign up</Link>
+                      </FieldDescription>
+                    </Field>
+                  </FieldGroup>
+                </FieldGroup>
+              </form>
             </CardContent>
           </Card>
         </div>
