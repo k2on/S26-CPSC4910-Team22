@@ -16,7 +16,7 @@ export default function Page() {
     authClient.signIn.email({
       email,
       password,
-      callbackURL: "/"
+      callbackURL: "/signin-redirect"
     })
   }
 
