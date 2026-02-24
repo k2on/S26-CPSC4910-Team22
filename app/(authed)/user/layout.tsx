@@ -1,4 +1,3 @@
-import { SidebarProvider } from "@/components/ui/sidebar";
 import { UserSidebar } from "@/components/user/Sidebar";
 
 export default function RootLayout({

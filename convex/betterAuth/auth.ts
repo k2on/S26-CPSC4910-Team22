@@ -6,7 +6,7 @@ import { DataModel } from "../_generated/dataModel";
 import { components } from "../_generated/api";
 import authConfig from "../auth.config";
 import schema from "./schema";
-import { admin } from "better-auth/plugins";
+import { admin, organization } from "better-auth/plugins";
 import { ac, roles } from "../../lib/permissions";
 import { Resend } from 'resend';
 
@@ -29,7 +29,6 @@ export const createAuthOptions = (ctx: GenericCtx<DataModel>) => {
       enabled: true,
       sendResetPassword: async ({ user, url, token }, request) => {
         const resend = new Resend(process.env.RESEND_KEY);
-        console.log("Hmm", process.env.RESEND_KEY);
         await resend.emails.send({
           from: 'noreply@team22.cpsc4911.com',
           to: user.email,
@@ -65,7 +64,8 @@ export const createAuthOptions = (ctx: GenericCtx<DataModel>) => {
         roles,
         defaultRole: "driver",
         allowImpersonatingAdmins: true
-      })
+      }),
+      organization()
     ]
   } satisfies BetterAuthOptions;
 }

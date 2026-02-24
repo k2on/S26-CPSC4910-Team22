@@ -44,3 +44,9 @@ export const getImageUrl = mutation({
     return await ctx.storage.getUrl(args.id)
   },
 });
+
+export const getMe = query({
+  handler: async (ctx) => {
+    return ctx.auth.getUserIdentity();
+  }
+})
