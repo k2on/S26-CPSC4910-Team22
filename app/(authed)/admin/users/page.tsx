@@ -9,19 +9,28 @@ import {
     UserFiltersToggle,
 } from "@/components/admin/users/UserFilters";
 import { UsersTable } from "@/components/admin/users/UsersTable";
+import { ManageAccountMenu } from "@/components/admin/users/ManageAccountMenu";
 import { useUserData } from "@/hooks/use-userData";
 
 type SortOrder = "newest" | "oldest";
 type RoleFilter = "all" | "driver" | "sponsor" | "admin";
 
 export default function Page() {
-    const { users, isLoading, errorMessage, loadUsers } = useUserData();
+    const {
+        users,
+        isLoading,
+        isUpdatingUser,
+        errorMessage,
+        loadUsers,
+        toggleUserActive,
+    } = useUserData();
 
     const [sortOrder, setSortOrder] = useState<SortOrder>("newest");
     const [roleFilter, setRoleFilter] = useState<RoleFilter>("all");
     const [nameSearch, setNameSearch] = useState("");
     const [emailSearch, setEmailSearch] = useState("");
     const [showFilters, setShowFilters] = useState(false);
+    const [selectedUserId, setSelectedUserId] = useState<string | undefined>(undefined);
 
     const getCreatedAtTimestamp = (value: string | Date | null | undefined) => {
         if (!value) return 0;
@@ -63,25 +72,57 @@ export default function Page() {
         return filtered;
     }, [users, sortOrder, roleFilter, nameSearch, emailSearch]);
 
+    const selectedUser = useMemo(() => {
+        if (!selectedUserId) return undefined;
+        return filteredAndSortedUsers.find((user) => user.id === selectedUserId);
+    }, [filteredAndSortedUsers, selectedUserId]);
+
+    const selectedUserText = selectedUser
+        ? `${selectedUser.name || "—"} (${selectedUser.email || "—"})`
+        : "Select a user to manage";
+
     return (
-        <main className="max-w-5xl mx-auto p-4 md:p-6">
-            <Card>
-                <CardHeader className="flex flex-row items-start justify-between gap-4">
-                    <CardTitle>Users</CardTitle>
+        <main className="w-full">
+            <Card className="w-full max-w-none">
+                <CardHeader className="space-y-4">
+                    <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
+                        <div className="space-y-1">
+                            <CardTitle>Users</CardTitle>
+                        </div>
 
-                    <div className="flex items-center gap-2">
-                        <UserFiltersToggle
-                            showFilters={showFilters}
-                            onToggleFilters={() => setShowFilters((prev) => !prev)}
-                        />
+                        <div className="flex flex-wrap items-center gap-2">
+                            <UserFiltersToggle
+                                showFilters={showFilters}
+                                onToggleFilters={() => setShowFilters((prev) => !prev)}
+                            />
 
-                        <Button type="button" onClick={loadUsers} disabled={isLoading}>
-                            Refresh
-                        </Button>
+                            <Button
+                                type="button"
+                                variant="outline"
+                                onClick={loadUsers}
+                                disabled={isLoading || isUpdatingUser}
+                            >
+                                Refresh
+                            </Button>
+                        </div>
+                    </div>
+
+                    <div className="rounded-md border bg-muted/20 p-3">
+                        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                            <p className="text-sm font-medium break-words">{selectedUserText}</p>
+
+                            <div className="shrink-0">
+                                <ManageAccountMenu
+                                    selectedUser={selectedUser}
+                                    isUpdatingUser={isUpdatingUser}
+                                    onToggleUserActive={toggleUserActive}
+                                />
+                            </div>
+                        </div>
                     </div>
                 </CardHeader>
 
-                <CardContent>
+                <CardContent className="space-y-4">
                     {showFilters && (
                         <UserFiltersPanel
                             sortOrder={sortOrder}
@@ -105,7 +146,11 @@ export default function Page() {
                     ) : filteredAndSortedUsers.length === 0 ? (
                         <div className="py-4 text-sm text-muted-foreground">No users found.</div>
                     ) : (
-                        <UsersTable users={filteredAndSortedUsers} />
+                        <UsersTable
+                            users={filteredAndSortedUsers}
+                            selectedUserId={selectedUserId}
+                            onSelectUser={(user) => setSelectedUserId(user.id)}
+                        />
                     )}
                 </CardContent>
             </Card>

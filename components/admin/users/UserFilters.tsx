@@ -44,61 +44,67 @@ export function UserFiltersPanel({
                                      onEmailSearchChange,
                                  }: PanelProps) {
     return (
-        <div className="mb-4 grid gap-4 md:grid-cols-2">
-            <div className="flex flex-col gap-1">
-                <label htmlFor="sortOrder" className="text-sm font-medium">
-                    Sort by account creation date
-                </label>
-                <select
-                    id="sortOrder"
-                    value={sortOrder}
-                    onChange={(e) => onSortOrderChange(e.target.value as SortOrder)}
-                    className="border-input bg-background h-9 rounded-md border px-3 text-sm"
-                >
-                    <option value="newest">Newest to oldest</option>
-                    <option value="oldest">Oldest to newest</option>
-                </select>
-            </div>
+        <div className="rounded-md border bg-muted/20 p-3">
+            <div className="space-y-3 overflow-x-auto">
+                <div className="flex flex-nowrap gap-3">
+                    <div className="w-[320px] shrink-0">
+                        <label htmlFor="sortOrder" className="mb-1 block text-sm font-medium">
+                            Sort by account creation date
+                        </label>
+                        <select
+                            id="sortOrder"
+                            value={sortOrder}
+                            onChange={(e) => onSortOrderChange(e.target.value as SortOrder)}
+                            className="border-input bg-background h-9 w-full rounded-md border px-3 text-sm"
+                        >
+                            <option value="newest">Newest to oldest</option>
+                            <option value="oldest">Oldest to newest</option>
+                        </select>
+                    </div>
 
-            <div className="flex flex-col gap-1">
-                <label htmlFor="roleFilter" className="text-sm font-medium">
-                    Filter users by role
-                </label>
-                <select
-                    id="roleFilter"
-                    value={roleFilter}
-                    onChange={(e) => onRoleFilterChange(e.target.value as RoleFilter)}
-                    className="border-input bg-background h-9 rounded-md border px-3 text-sm"
-                >
-                    <option value="all">All roles</option>
-                    <option value="driver">Driver</option>
-                    <option value="sponsor">Sponsor</option>
-                    <option value="admin">Admin</option>
-                </select>
-            </div>
+                    <div className="w-[320px] shrink-0">
+                        <label htmlFor="roleFilter" className="mb-1 block text-sm font-medium">
+                            Filter users by role
+                        </label>
+                        <select
+                            id="roleFilter"
+                            value={roleFilter}
+                            onChange={(e) => onRoleFilterChange(e.target.value as RoleFilter)}
+                            className="border-input bg-background h-9 w-full rounded-md border px-3 text-sm"
+                        >
+                            <option value="all">All roles</option>
+                            <option value="driver">Driver</option>
+                            <option value="sponsor">Sponsor</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                    </div>
+                </div>
 
-            <div className="flex flex-col gap-1">
-                <label htmlFor="nameSearch" className="text-sm font-medium">
-                    Search users by name
-                </label>
-                <Input
-                    id="nameSearch"
-                    value={nameSearch}
-                    onChange={(e) => onNameSearchChange(e.target.value)}
-                    placeholder="Enter name"
-                />
-            </div>
+                <div className="flex flex-nowrap gap-3">
+                    <div className="w-[320px] shrink-0">
+                        <label htmlFor="nameSearch" className="mb-1 block text-sm font-medium">
+                            Search by name
+                        </label>
+                        <Input
+                            id="nameSearch"
+                            value={nameSearch}
+                            onChange={(e) => onNameSearchChange(e.target.value)}
+                            placeholder="Enter name"
+                        />
+                    </div>
 
-            <div className="flex flex-col gap-1">
-                <label htmlFor="emailSearch" className="text-sm font-medium">
-                    Search users by email
-                </label>
-                <Input
-                    id="emailSearch"
-                    value={emailSearch}
-                    onChange={(e) => onEmailSearchChange(e.target.value)}
-                    placeholder="Enter email"
-                />
+                    <div className="w-[320px] shrink-0">
+                        <label htmlFor="emailSearch" className="mb-1 block text-sm font-medium">
+                            Search by email
+                        </label>
+                        <Input
+                            id="emailSearch"
+                            value={emailSearch}
+                            onChange={(e) => onEmailSearchChange(e.target.value)}
+                            placeholder="Enter email"
+                        />
+                    </div>
+                </div>
             </div>
         </div>
     );

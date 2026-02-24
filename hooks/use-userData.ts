@@ -10,6 +10,7 @@ export type UserData = {
     role: "driver" | "sponsor" | "admin";
     address?: string | null;
     createdAt?: string | Date | null;
+    banned?: boolean;
 };
 
 type ListUsersResponse =
@@ -17,9 +18,18 @@ type ListUsersResponse =
     | { data?: { users?: UserData[] } }
     | UserData[];
 
+type AdminClient = {
+    admin: {
+        listUsers: (args?: { limit?: number; offset?: number }) => Promise<unknown>;
+        banUser: (args: { userId: string }) => Promise<unknown>;
+        unbanUser: (args: { userId: string }) => Promise<unknown>;
+    };
+};
+
 export function useUserData() {
     const [users, setUsers] = useState<UserData[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [isUpdatingUser, setIsUpdatingUser] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
     const loadUsers = useCallback(async () => {
@@ -27,11 +37,7 @@ export function useUserData() {
         setErrorMessage(null);
 
         try {
-            const response = await (authClient as unknown as {
-                admin: {
-                    listUsers: (args?: { limit?: number; offset?: number }) => Promise<unknown>;
-                };
-            }).admin.listUsers({
+            const response = await (authClient as unknown as AdminClient).admin.listUsers({
                 limit: 100,
                 offset: 0,
             });
@@ -65,6 +71,39 @@ export function useUserData() {
         }
     }, []);
 
+    const toggleUserActive = useCallback(
+        async (user: UserData) => {
+            if (!user.id) {
+                setErrorMessage("Unable to update user: missing user id.");
+                return;
+            }
+
+            setIsUpdatingUser(true);
+            setErrorMessage(null);
+
+            try {
+                const adminClient = (authClient as unknown as AdminClient).admin;
+                const isCurrentlyActive = !user.banned;
+
+                if (isCurrentlyActive) {
+                    await adminClient.banUser({ userId: user.id });
+                } else {
+                    await adminClient.unbanUser({ userId: user.id });
+                }
+
+                await loadUsers();
+            } catch (error) {
+                console.error("Failed to update user active status:", error);
+                const message =
+                    error instanceof Error ? error.message : "Failed to update user.";
+                setErrorMessage(message);
+            } finally {
+                setIsUpdatingUser(false);
+            }
+        },
+        [loadUsers]
+    );
+
     useEffect(() => {
         loadUsers();
     }, [loadUsers]);
@@ -72,7 +111,9 @@ export function useUserData() {
     return {
         users,
         isLoading,
+        isUpdatingUser,
         errorMessage,
         loadUsers,
+        toggleUserActive,
     };
 }
