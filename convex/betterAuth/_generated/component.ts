@@ -103,6 +103,7 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
                   logo?: null | string;
                   metadata?: null | string;
                   name: string;
+                  pointValue: number;
                   slug: string;
                 };
                 model: "organization";
@@ -327,6 +328,7 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
                     | "logo"
                     | "createdAt"
                     | "metadata"
+                    | "pointValue"
                     | "_id";
                   operator?:
                     | "lt"
@@ -620,6 +622,7 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
                     | "logo"
                     | "createdAt"
                     | "metadata"
+                    | "pointValue"
                     | "_id";
                   operator?:
                     | "lt"
@@ -1049,6 +1052,7 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
                   logo?: null | string;
                   metadata?: null | string;
                   name?: string;
+                  pointValue?: number;
                   slug?: string;
                 };
                 where?: Array<{
@@ -1059,6 +1063,7 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
                     | "logo"
                     | "createdAt"
                     | "metadata"
+                    | "pointValue"
                     | "_id";
                   operator?:
                     | "lt"
@@ -1417,6 +1422,7 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
                   logo?: null | string;
                   metadata?: null | string;
                   name?: string;
+                  pointValue?: number;
                   slug?: string;
                 };
                 where?: Array<{
@@ -1427,6 +1433,7 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
                     | "logo"
                     | "createdAt"
                     | "metadata"
+                    | "pointValue"
                     | "_id";
                   operator?:
                     | "lt"

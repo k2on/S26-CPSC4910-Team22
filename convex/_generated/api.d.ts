@@ -130,6 +130,7 @@ export declare const components: {
                   logo?: null | string;
                   metadata?: null | string;
                   name: string;
+                  pointValue: number;
                   slug: string;
                 };
                 model: "organization";
@@ -353,6 +354,7 @@ export declare const components: {
                     | "logo"
                     | "createdAt"
                     | "metadata"
+                    | "pointValue"
                     | "_id";
                   operator?:
                     | "lt"
@@ -645,6 +647,7 @@ export declare const components: {
                     | "logo"
                     | "createdAt"
                     | "metadata"
+                    | "pointValue"
                     | "_id";
                   operator?:
                     | "lt"
@@ -1071,6 +1074,7 @@ export declare const components: {
                   logo?: null | string;
                   metadata?: null | string;
                   name?: string;
+                  pointValue?: number;
                   slug?: string;
                 };
                 where?: Array<{
@@ -1081,6 +1085,7 @@ export declare const components: {
                     | "logo"
                     | "createdAt"
                     | "metadata"
+                    | "pointValue"
                     | "_id";
                   operator?:
                     | "lt"
@@ -1438,6 +1443,7 @@ export declare const components: {
                   logo?: null | string;
                   metadata?: null | string;
                   name?: string;
+                  pointValue?: number;
                   slug?: string;
                 };
                 where?: Array<{
@@ -1448,6 +1454,7 @@ export declare const components: {
                     | "logo"
                     | "createdAt"
                     | "metadata"
+                    | "pointValue"
                     | "_id";
                   operator?:
                     | "lt"

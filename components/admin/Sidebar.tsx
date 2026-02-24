@@ -12,7 +12,7 @@ import {
         SidebarMenuButton,
         SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import { type LucideIcon, User2Icon, AtSignIcon, KeyIcon, ImageIcon, LogsIcon } from "lucide-react"
+import { type LucideIcon, User2Icon, AtSignIcon, KeyIcon, ImageIcon, LogsIcon, Users2Icon, HomeIcon, BuildingIcon } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation";
 
@@ -20,7 +20,17 @@ const LINKS = [
         {
                 label: "General",
                 href: "/admin",
-                icon: User2Icon
+                icon: HomeIcon
+        },
+        {
+                label: "Users",
+                href: "/admin/users",
+                icon: Users2Icon
+        },
+        {
+                label: "Organizations",
+                href: "/admin/orgs",
+                icon: BuildingIcon
         },
         {
                 label: "Audit Log",
@@ -36,7 +46,7 @@ export function AdminSidebar() {
                 <Sidebar collapsible="icon" className="top-(--header-height) h-[calc(100svh-var(--header-height))]!">
                         <SidebarContent>
                                 <SidebarGroup>
-                                        <SidebarGroupLabel>User</SidebarGroupLabel>
+                                        <SidebarGroupLabel>Admin</SidebarGroupLabel>
                                         <SidebarGroupContent>
                                                 <SidebarMenu>
 

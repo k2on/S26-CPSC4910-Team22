@@ -65,7 +65,19 @@ export const createAuthOptions = (ctx: GenericCtx<DataModel>) => {
         defaultRole: "driver",
         allowImpersonatingAdmins: true
       }),
-      organization()
+      organization({
+        schema: {
+          organization: {
+            additionalFields: {
+              pointValue: {
+                type: "number",
+                required: true,
+                defaultValue: 0.01
+              }
+            }
+          }
+        }
+      })
     ]
   } satisfies BetterAuthOptions;
 }
