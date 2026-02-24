@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupText } from "@/components/ui/input-group";
 import { Spinner } from "@/components/ui/spinner";
 import { authClient } from "@/lib/auth-client";
 import { parseFieldErrors } from "@/utils/parseFieldErrors";
@@ -116,29 +117,32 @@ export function CreateOrganizationModel() {
 
             <form.Field
               name="pointValue"
+              validators={{
+                onChange: ({ value }) => value <= 0 ? { message: "Must be greater than $0.00" } : undefined
+              }}
               children={(field) => {
                 const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
                 return (
                   <Field data-invalid={isInvalid}>
                     <FieldLabel htmlFor={field.name}>Point value</FieldLabel>
-                    <Input
-                      id={field.name}
-                      name={field.name}
-                      value={field.state.value}
-                      onBlur={field.handleBlur}
-                      onChange={(e) => {
-                        try {
-                          // TODO: add form validation
-                          field.handleChange(parseFloat(e.target.value))
-                        } catch (err) {
-                          console.error(err)
+                    <InputGroup>
+                      <InputGroupInput
+                        id={field.name}
+                        name={field.name}
+                        value={field.state.value}
+                        onBlur={field.handleBlur}
+                        type="number"
+                        onChange={(e) => field.handleChange(e.target.value === '' ? '' as unknown as number : parseFloat(e.target.value))}
+                        aria-invalid={isInvalid}
+                        disabled={isPending}
+                        placeholder="Point Value"
+                      />
+                      <InputGroupAddon>
+                        <InputGroupText>$</InputGroupText>
+                      </InputGroupAddon>
+                    </InputGroup>
 
-                        }
-                      }}
-                      aria-invalid={isInvalid}
-                      disabled={isPending}
-                      placeholder="Point Value"
-                    />
+
                     {isInvalid && <FieldError errors={field.state.meta.errors} />}
                   </Field>
                 )
