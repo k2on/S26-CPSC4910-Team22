@@ -13,8 +13,6 @@ import { authClient } from "@/lib/auth-client";
 import { BetterFetchError } from "better-auth/client";
 import { UpdateUserDialogContent } from "@/components/admin/UpdateUser";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
-import { UserIdentity } from "convex/server";
-import { UserWithRole } from "better-auth/plugins";
 import { type AppRole } from "@/lib/permissions";
 
 type User = Awaited<ReturnType<typeof authClient.admin.listUsers>>["users"][number];

@@ -4,8 +4,6 @@ import { authClient } from "@/lib/auth-client";
 import { columns } from "./users/columns";
 import { DataTable } from "./users/data-table";
 import { useQuery } from "@tanstack/react-query";
-import { UserPlus2Icon } from "lucide-react";
-import { Button } from "../ui/button";
 import { CreateUserModel } from "./users/CreateUserModel";
 
 export function AdminUsers() {
