@@ -5,8 +5,6 @@ import ConvexClientProvider from "@/components/ConvexClientProvider";
 import QueryClientProvider from "@/components/QueryClientProvider";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { Header } from "@/components/Header";
-import { SidebarProvider } from "@/components/ui/sidebar";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

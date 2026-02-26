@@ -11,11 +11,11 @@ import { Button } from "@/components/ui/button";;
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { OrganizationLoader } from "./OrganizationLoader";
-import { InfoIcon } from "lucide-react";
 import { InputGroup, InputGroupInput, InputGroupAddon, InputGroupText } from "../ui/input-group";
+import { OrganizationError } from "./Error";
 
 export default function OrganizationGeneral({ slug }: { slug: string }) {
-        const { data: organization, isLoading } = useQuery({
+        const { data: organization, isLoading, error } = useQuery({
                 queryKey: ["orgs", slug],
                 queryFn: () => authClient.organization.getFullOrganization({ query: { organizationSlug: slug } })
         });
@@ -56,6 +56,7 @@ export default function OrganizationGeneral({ slug }: { slug: string }) {
         });
 
         if (isLoading) return <OrganizationLoader />;
+        if (error) return <OrganizationError error={error} />;
 
         return (
                 <form

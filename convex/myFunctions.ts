@@ -51,3 +51,9 @@ export const getMe = query({
     return ctx.auth.getUserIdentity();
   }
 })
+
+export const getAuditLog = query({
+  handler: async (ctx) => {
+    return ctx.db.query("auditLog").collect();
+  }
+})

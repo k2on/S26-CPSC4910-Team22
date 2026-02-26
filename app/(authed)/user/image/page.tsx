@@ -1,7 +1,7 @@
-import { UpdateImage } from "@/components/user/UpdateImage";
+import { UserUpdateImage } from "@/components/user/UpdateImage";
 
 export default function Page() {
         return (
-                <UpdateImage />
-        )
+                <UserUpdateImage />
+        );
 }

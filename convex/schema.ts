@@ -11,5 +11,9 @@ export default defineSchema({
     releaseDate: v.number(),
     productName: v.string(),
     productDescription: v.string(),
+  }),
+  auditLog: defineTable({
+    time: v.number(),
+    event: v.string(),
   })
 });

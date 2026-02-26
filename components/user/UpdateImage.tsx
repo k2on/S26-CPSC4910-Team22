@@ -13,7 +13,7 @@ import { toast } from "sonner";
 import { useMutation as useRQMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 
-export function UpdateImage() {
+export function UserUpdateImage() {
     const router = useRouter();
 
     const { data, isPending } = authClient.useSession();
