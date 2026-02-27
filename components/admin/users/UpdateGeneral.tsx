@@ -13,10 +13,9 @@ import { Button } from "@/components/ui/button";
 
 export function UserUpdateGeneral({ userId }: { userId: string }) {
     const queryClient = useQueryClient();
-    const queryKey = ["users", userId];
 
     const { data, isLoading } = useQuery({
-        queryKey,
+        queryKey: ["users", userId],
         queryFn: () => authClient.admin.getUser({ query: { id: userId } }),
     });
 
@@ -34,7 +33,7 @@ export function UserUpdateGeneral({ userId }: { userId: string }) {
     const { isPending, mutate: updateUser } = useMutation({
         mutationFn: async (input: Parameters<typeof authClient.admin.updateUser>[0]) => authClient.admin.updateUser(input),
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey });
+            queryClient.invalidateQueries({ queryKey: ["users"] });
             toast.success("Profile updated");
         },
         onError: (error: BetterFetchError) => {
@@ -117,6 +116,7 @@ export function UserUpdateGeneral({ userId }: { userId: string }) {
         </form>
     )
 }
+
 
 
 
