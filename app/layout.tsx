@@ -6,6 +6,7 @@ import QueryClientProvider from "@/components/QueryClientProvider";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { ImpersonationBanner } from "@/components/ImpersonationBanner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -36,6 +37,7 @@ export default function RootLayout({
           <QueryClientProvider>
             <ConvexClientProvider>
               <TooltipProvider>
+                <ImpersonationBanner />
                 {children}
               </TooltipProvider>
             </ConvexClientProvider>

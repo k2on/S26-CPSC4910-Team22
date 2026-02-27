@@ -5,7 +5,7 @@ import { ColumnDef } from "@tanstack/react-table"
 import type { createAuth } from "@/convex/betterAuth/auth";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuPortal, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { CheckIcon, MoreHorizontal } from "lucide-react";
+import { CheckIcon, MoreHorizontal, TrashIcon, UserPenIcon, UserRoundKeyIcon, UserRoundPenIcon } from "lucide-react";
 import { toast } from "sonner";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
@@ -61,7 +61,10 @@ export const columns: ColumnDef<Member>[] = [
                                                 </DropdownMenuTrigger>
                                                 <DropdownMenuContent align="end">
                                                         <DialogTrigger asChild>
-                                                                <DropdownMenuItem>Update User</DropdownMenuItem>
+                                                                <DropdownMenuItem>
+                                                                        <UserRoundPenIcon />
+                                                                        Update User
+                                                                </DropdownMenuItem>
                                                         </DialogTrigger>
                                                         <UpdateMemberRole member={member} />
                                                         <DeleteMember member={member} />
@@ -89,7 +92,10 @@ function UpdateMemberRole({ member }: { member: Member }) {
 
         return (
                 <DropdownMenuSub>
-                        <DropdownMenuSubTrigger>Change Permission</DropdownMenuSubTrigger>
+                        <DropdownMenuSubTrigger>
+                                <UserRoundKeyIcon />
+                                Change Permission
+                        </DropdownMenuSubTrigger>
                         <DropdownMenuPortal>
                                 <DropdownMenuSubContent>
                                         {["owner", "admin", "member"].map((role) => (
@@ -138,6 +144,7 @@ function DeleteMember({ member }: { member: Member }) {
                         }
                         variant="destructive"
                 >
+                        <TrashIcon />
                         Delete Member
                 </DropdownMenuItem>
         );

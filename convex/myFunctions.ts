@@ -52,6 +52,21 @@ export const getMe = query({
   }
 })
 
+export const getImpersonationData = query({
+  handler: async (ctx) => {
+    const { auth, headers } = await authComponent.getAuth(createAuth, ctx);
+    const response = await auth.api.getSession({ headers });
+    if (!response) return;
+
+    if (!response.session.impersonatedBy) return;
+
+    return {
+      by: response.session.impersonatedBy,
+      name: response.user.name,
+    }
+  }
+})
+
 export const getAuditLog = query({
   handler: async (ctx) => {
     return ctx.db.query("auditLog").collect();

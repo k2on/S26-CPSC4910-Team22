@@ -10,22 +10,23 @@ import { parseFieldErrors } from "@/utils/parseFieldErrors";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { UserPageProps } from "./sidebar/types";
 
-export function UserUpdateEmail() {
+export function UserUpdateEmail({ userId }: UserPageProps) {
     const { data } = authClient.useSession();
 
     const form = useForm({
         defaultValues: {
-            newEmail: data?.user.email || '',
+            email: data?.user.email || '',
         },
         onSubmit: async ({ value }) => {
-            mutate(value)
+            updateUser({ userId, data: value });
         },
     });
 
 
-    const { isPending, mutate } = useMutation({
-        mutationFn: async (input: Parameters<typeof authClient.changeEmail>[0]) => authClient.changeEmail(input),
+    const { isPending, mutate: updateUser } = useMutation({
+        mutationFn: async (input: Parameters<typeof authClient.admin.updateUser>[0]) => authClient.admin.updateUser(input),
         onSuccess: () => {
             toast.success("Email updated");
         },
@@ -53,7 +54,7 @@ export function UserUpdateEmail() {
         >
             <FieldGroup>
                 <form.Field
-                    name="newEmail"
+                    name="email"
                     children={(field) => {
                         const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
                         return (

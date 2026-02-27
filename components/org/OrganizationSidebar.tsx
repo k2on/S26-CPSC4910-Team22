@@ -3,7 +3,7 @@
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { HomeIcon, LucideIcon, Users2Icon } from "lucide-react";
+import { HomeIcon, LucideIcon, UsersRoundIcon } from "lucide-react";
 
 const LINKS = [
         {
@@ -14,7 +14,7 @@ const LINKS = [
         {
                 label: "Members",
                 href: "/members",
-                icon: Users2Icon
+                icon: UsersRoundIcon
         },
 ] satisfies { label: string, href: string, icon: LucideIcon }[];
 

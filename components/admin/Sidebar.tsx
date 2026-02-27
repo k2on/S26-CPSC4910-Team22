@@ -3,16 +3,14 @@
 import {
         Sidebar,
         SidebarContent,
-        SidebarFooter,
         SidebarGroup,
         SidebarGroupContent,
         SidebarGroupLabel,
-        SidebarHeader,
         SidebarMenu,
         SidebarMenuButton,
         SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import { type LucideIcon, LineChartIcon, LogsIcon, Users2Icon, HomeIcon, BuildingIcon } from "lucide-react"
+import { type LucideIcon, LineChartIcon, LogsIcon, UsersRoundIcon, HomeIcon, BuildingIcon } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation";
 
@@ -25,7 +23,7 @@ const LINKS = [
         {
                 label: "Users",
                 href: "/admin/users",
-                icon: Users2Icon
+                icon: UsersRoundIcon
         },
         {
                 label: "Organizations",
@@ -71,6 +69,8 @@ export function AdminSidebar() {
                 </Sidebar>
         )
 }
+
+
 
 
 

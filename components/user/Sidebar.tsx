@@ -10,7 +10,7 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import { type LucideIcon, User2Icon, AtSignIcon, KeyIcon, ImageIcon } from "lucide-react"
+import { type LucideIcon, UserRoundIcon, AtSignIcon, KeyIcon, ImageIcon } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation";
 
@@ -18,7 +18,7 @@ const LINKS = [
     {
         label: "General",
         href: "/user",
-        icon: User2Icon
+        icon: UserRoundIcon
     },
     {
         label: "Profile Image",

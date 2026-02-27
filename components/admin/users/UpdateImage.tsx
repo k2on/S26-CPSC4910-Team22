@@ -10,13 +10,20 @@ import { DEFAULT_PROFILE_IMAGE } from "@/lib/const";
 import { useMutation } from "convex/react";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
-import { useMutation as useRQMutation } from "@tanstack/react-query";
+import {
+    useQuery,
+    useMutation as useRQMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
+import { UserPageProps } from "./sidebar/types";
 
-export function UserUpdateImage() {
+export function UserUpdateImage({ userId }: UserPageProps) {
     const router = useRouter();
 
-    const { data, isPending } = authClient.useSession();
+    const { data, isPending } = useQuery({
+        queryKey: ["user", userId],
+        queryFn: () => authClient.admin.getUser({ query: { id: userId } }),
+    })
+
     const generateUploadUrl = useMutation(api.myFunctions.generateUploadUrl);
     const getImageUrl = useMutation(api.myFunctions.getImageUrl);
 
@@ -27,11 +34,11 @@ export function UserUpdateImage() {
     })
 
     const [image, setImage] = useState<File>();
-    const [color, setColor] = useState<string>(data?.user.imageBorderColor || "#000000");
+    const [color, setColor] = useState<string>(data?.imageBorderColor || "#000000");
 
     const ref = useRef<HTMLInputElement>(null);
 
-    const avatarImage = image ? URL.createObjectURL(image) : data?.user.image || DEFAULT_PROFILE_IMAGE;
+    const avatarImage = image ? URL.createObjectURL(image) : data?.image || DEFAULT_PROFILE_IMAGE;
 
 
     const onSave = async () => {
@@ -58,9 +65,9 @@ export function UserUpdateImage() {
     return (
         <div>
             <div>
-                <Avatar style={{ borderColor: color || data.user.imageBorderColor }} onClick={() => ref?.current?.click()} className="w-64 h-64 border-4 mx-auto">
+                <Avatar style={{ borderColor: color || data.imageBorderColor }} onClick={() => ref?.current?.click()} className="w-32 h-32 border-4 mx-auto">
                     <AvatarImage src={avatarImage} />
-                    <AvatarFallback>{data?.user.name}</AvatarFallback>
+                    <AvatarFallback>{data?.name}</AvatarFallback>
                 </Avatar>
 
                 <Input
@@ -85,4 +92,11 @@ export function UserUpdateImage() {
         </div>
     )
 }
+
+
+
+
+
+
+
 

@@ -6,7 +6,9 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem,
 import Link from "next/link";
 import {
         CogIcon,
-        LogOutIcon, PencilIcon } from "lucide-react";
+        LogOutIcon,
+        UserRoundPenIcon
+} from "lucide-react";
 import { ThemeSelector } from "./ThemeSelector";
 
 export function UserDropdown() {
@@ -31,7 +33,7 @@ export function UserDropdown() {
                                         <DropdownMenuLabel>Signed in as {data?.user.name}</DropdownMenuLabel>
                                         <DropdownMenuItem asChild>
                                                 <Link href="/user">
-                                                        <PencilIcon />
+                                                        <UserRoundPenIcon />
                                                         Edit Profile
                                                 </Link>
                                         </DropdownMenuItem>

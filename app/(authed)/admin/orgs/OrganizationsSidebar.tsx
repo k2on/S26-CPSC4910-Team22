@@ -6,11 +6,12 @@ import { CreateOrganizationModel } from "./CreateOrganizationModel";
 import { authClient } from "@/lib/auth-client";
 import { useQuery } from "@tanstack/react-query";
 import { usePathname } from "next/navigation";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export function OrganizationsSidebar() {
   const pathname = usePathname();
 
-  const { data: orgs } = useQuery({
+  const { data: orgs, isLoading } = useQuery({
     queryKey: ["orgs"],
     queryFn: () => authClient.organization.list()
   })
@@ -23,7 +24,9 @@ export function OrganizationsSidebar() {
           <SidebarGroupLabel>Organizations</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {orgs?.map(org => {
+              {isLoading ? (
+                <OrganizationsSkeleton />
+              ) : orgs?.map(org => {
                 return (
                   <SidebarMenuItem key={org.id}>
                     <SidebarMenuButton asChild isActive={pathname.includes(org.slug)}>
@@ -40,4 +43,14 @@ export function OrganizationsSidebar() {
       </SidebarContent>
     </Sidebar>
   )
+}
+
+function OrganizationsSkeleton() {
+  return (
+    <div className="flex flex-col gap-2">
+      {Array.from({ length: 3 }).map((_, i) => (
+        <Skeleton key={i} className="h-8" />
+      ))}
+    </div>
+  );
 }

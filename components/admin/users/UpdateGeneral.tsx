@@ -10,8 +10,9 @@ import { parseFieldErrors } from "@/utils/parseFieldErrors";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { UserPageProps } from "./sidebar/types";
 
-export function UserUpdateGeneral({ userId }: { userId: string }) {
+export function UserUpdateGeneral({ userId }: UserPageProps) {
     const queryClient = useQueryClient();
 
     const { data, isLoading } = useQuery({
@@ -116,6 +117,8 @@ export function UserUpdateGeneral({ userId }: { userId: string }) {
         </form>
     )
 }
+
+
 
 
 

@@ -10,21 +10,21 @@ import { parseFieldErrors } from "@/utils/parseFieldErrors";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { UserPageProps } from "./sidebar/types";
 
-export function UserUpdatePassword() {
+export function UserUpdatePassword({ userId }: UserPageProps) {
         const form = useForm({
                 defaultValues: {
-                        currentPassword: '',
                         newPassword: '',
                 },
                 onSubmit: async ({ value }) => {
-                        mutate(value)
+                        mutate({ userId, newPassword: value.newPassword })
                 },
         });
 
 
         const { isPending, mutate } = useMutation({
-                mutationFn: async (input: Parameters<typeof authClient.changePassword>[0]) => authClient.changePassword(input),
+                mutationFn: async (input: Parameters<typeof authClient.admin.setUserPassword>[0]) => authClient.admin.setUserPassword(input),
                 onSuccess: () => {
                         toast.success("Password updated");
                 },
@@ -84,6 +84,9 @@ export function UserUpdatePassword() {
                 </form>
         )
 }
+
+
+
 
 
 
