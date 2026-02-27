@@ -2,6 +2,7 @@ import { createAccessControl } from "better-auth/plugins/access";
 
 export const statement = {
     user: [
+        "get",
         "create",
         "list",
         "set-role",
@@ -42,6 +43,7 @@ export const sponsor = ac.newRole({
 
 export const admin = ac.newRole({
     user: [
+        "get",
         "create",
         "list",
         "set-role",

@@ -67,7 +67,7 @@ export const columns: ColumnDef<Member>[] = [
                                                         <DeleteMember member={member} />
                                                 </DropdownMenuContent>
                                         </DropdownMenu>
-                                        <UpdateUserDialogContent />
+                                        <UpdateUserDialogContent userId={member.userId} />
                                 </Dialog>
                         );
                 },

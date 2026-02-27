@@ -8,7 +8,7 @@ import { CreateUserModel } from "./users/CreateUserModel";
 
 export function AdminUsers() {
         const { data: users } = useQuery({
-                queryKey: ["admin", "users"],
+                queryKey: ["users"],
                 queryFn: () => authClient.admin.listUsers({ query: {} })
         });
 

@@ -1,11 +1,11 @@
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "../ui/breadcrumb";
 import { DialogContent, DialogDescription, DialogTitle } from "../ui/dialog";
 import { SidebarProvider, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton, Sidebar } from "../ui/sidebar";
-import { LINKS } from "@/components/admin/users/sidebar/links";
 
 import { useState } from "react";
+import { LINKS } from "./users/sidebar/links";
 
-export function UpdateUserDialogContent() {
+export function UpdateUserDialogContent({ userId }: { userId: string }) {
         type Link = typeof LINKS[number]['label'];
         const [page, setPage] = useState<Link>("General");
 
@@ -57,7 +57,7 @@ export function UpdateUserDialogContent() {
                                                 </div>
                                         </header>
                                         <div className="flex flex-1 flex-col gap-4 overflow-y-auto p-4 pt-0">
-                                                <Page />
+                                                <Page userId={userId} />
                                         </div>
                                 </main>
                         </SidebarProvider>

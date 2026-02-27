@@ -5,6 +5,7 @@ import ConvexClientProvider from "@/components/ConvexClientProvider";
 import QueryClientProvider from "@/components/QueryClientProvider";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { ThemeProvider } from "@/components/ThemeProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -27,18 +28,20 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <QueryClientProvider>
-          <ConvexClientProvider>
-            <TooltipProvider>
-              {children}
-            </TooltipProvider>
-          </ConvexClientProvider>
-        </QueryClientProvider>
-        <Toaster />
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+          <QueryClientProvider>
+            <ConvexClientProvider>
+              <TooltipProvider>
+                {children}
+              </TooltipProvider>
+            </ConvexClientProvider>
+          </QueryClientProvider>
+          <Toaster />
+        </ThemeProvider>
       </body>
     </html>
   );

@@ -22,12 +22,12 @@ export default function Page() {
       password: '',
     },
     onSubmit: async ({ value }) => {
-      mutate(value)
+      signIn(value)
     },
   });
 
 
-  const { isPending, mutate, error } = useMutation({
+  const { isPending, mutate: signIn, error } = useMutation({
     mutationFn: async (input: Parameters<typeof authClient.signIn.email>[0]) => authClient.signIn.email(input),
     onSuccess: () => {
       router.push("/");

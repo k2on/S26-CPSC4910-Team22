@@ -4,30 +4,37 @@ import { authClient } from "@/lib/auth-client";
 import { Spinner } from "@/components/ui/spinner";
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { useForm } from "@tanstack/react-form";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { BetterFetchError } from "better-auth/client";
 import { parseFieldErrors } from "@/utils/parseFieldErrors";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 
-export function UserUpdateGeneral() {
-    const { data } = authClient.useSession();
+export function UserUpdateGeneral({ userId }: { userId: string }) {
+    const queryClient = useQueryClient();
+    const queryKey = ["users", userId];
+
+    const { data, isLoading } = useQuery({
+        queryKey,
+        queryFn: () => authClient.admin.getUser({ query: { id: userId } }),
+    });
 
     const form = useForm({
         defaultValues: {
-            name: data?.user.name || '',
-            address: data?.user.address || '',
+            name: data?.name || '',
+            address: data?.address || '',
         },
         onSubmit: async ({ value }) => {
-            updateUser(value)
+            updateUser({ userId, data: value })
         },
     });
 
 
     const { isPending, mutate: updateUser } = useMutation({
-        mutationFn: async (input: Parameters<typeof authClient.updateUser>[0]) => authClient.updateUser(input),
+        mutationFn: async (input: Parameters<typeof authClient.admin.updateUser>[0]) => authClient.admin.updateUser(input),
         onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey });
             toast.success("Profile updated");
         },
         onError: (error: BetterFetchError) => {
@@ -42,6 +49,8 @@ export function UserUpdateGeneral() {
             }
         }
     });
+
+    if (isLoading) return "Loading";
 
     return (
 
@@ -108,4 +117,41 @@ export function UserUpdateGeneral() {
         </form>
     )
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 
-export function AdminUserUpdatePassword() {
+export function UserUpdatePassword() {
         const form = useForm({
                 defaultValues: {
                         currentPassword: '',
