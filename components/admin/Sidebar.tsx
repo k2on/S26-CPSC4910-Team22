@@ -12,7 +12,7 @@ import {
         SidebarMenuButton,
         SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import { type LucideIcon, User2Icon, AtSignIcon, KeyIcon, ImageIcon, LogsIcon, Users2Icon, HomeIcon, BuildingIcon } from "lucide-react"
+import { type LucideIcon, LineChartIcon, LogsIcon, Users2Icon, HomeIcon, BuildingIcon } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation";
 
@@ -32,6 +32,11 @@ const LINKS = [
                 href: "/admin/orgs",
                 icon: BuildingIcon
         },
+        // {
+        //         label: "Reports",
+        //         href: "/admin/reports",
+        //         icon: LineChartIcon
+        // },
         {
                 label: "Audit Log",
                 href: "/admin/log",
@@ -66,4 +71,7 @@ export function AdminSidebar() {
                 </Sidebar>
         )
 }
+
+
+
 

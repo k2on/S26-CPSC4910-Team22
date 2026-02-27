@@ -26,5 +26,7 @@ export const LINKS = [
                 icon: KeyIcon,
                 component: UserUpdatePassword
         }
-] as const satisfies { label: string, icon: LucideIcon, component: () => JSX.Element }[];
+] as const satisfies { label: string, icon: LucideIcon, component: (props: { userId: string }) => JSX.Element }[];
+
+
 

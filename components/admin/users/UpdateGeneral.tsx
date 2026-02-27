@@ -50,7 +50,7 @@ export function UserUpdateGeneral({ userId }: { userId: string }) {
         }
     });
 
-    if (isLoading) return "Loading";
+    if (isLoading) return <Spinner />;
 
     return (
 
@@ -117,6 +117,7 @@ export function UserUpdateGeneral({ userId }: { userId: string }) {
         </form>
     )
 }
+
 
 
 

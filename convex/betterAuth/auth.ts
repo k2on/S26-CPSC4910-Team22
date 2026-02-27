@@ -60,8 +60,8 @@ export const createAuthOptions = (ctx: GenericCtx<DataModel>) => {
     plugins: [
       convex({ authConfig }),
       admin({
-        // ac,
-        // roles,
+        ac,
+        roles,
         defaultRole: "driver",
         allowImpersonatingAdmins: true
       }),

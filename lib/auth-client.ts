@@ -13,7 +13,7 @@ export const authClient = createAuthClient({
     convexClient(),
     inferAdditionalFields<typeof options>(),
     adminClient({
-      // ac, roles
+      ac, roles
     }),
     organizationClient({
       schema: inferOrgAdditionalFields<{ options: typeof options }>()
