@@ -1551,4 +1551,67 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
         Name
       >;
     };
+    organizations: {
+      getOrganizationBySlug: FunctionReference<
+        "query",
+        "internal",
+        { slug: string },
+        {
+          _creationTime: number;
+          _id: string;
+          createdAt: number;
+          logo?: null | string;
+          metadata?: null | string;
+          name: string;
+          pointValue: number;
+          slug: string;
+        } | null,
+        Name
+      >;
+      listOrganizationMembersBySlug: FunctionReference<
+        "query",
+        "internal",
+        { slug: string },
+        Array<{
+          createdAt: number;
+          id: string;
+          organizationId: string;
+          role: "owner" | "admin" | "member";
+          user: {
+            email: string;
+            id: string;
+            image?: null | string;
+            name: string;
+          };
+          userId: string;
+        }>,
+        Name
+      >;
+      listOrganizations: FunctionReference<
+        "query",
+        "internal",
+        {},
+        Array<{
+          _creationTime: number;
+          _id: string;
+          createdAt: number;
+          logo?: null | string;
+          metadata?: null | string;
+          name: string;
+          pointValue: number;
+          slug: string;
+        }>,
+        Name
+      >;
+      updateOrganization: FunctionReference<
+        "mutation",
+        "internal",
+        {
+          data: { name?: string; pointValue?: number; slug?: string };
+          organizationId: string;
+        },
+        null,
+        Name
+      >;
+    };
   };

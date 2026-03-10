@@ -1,7 +1,7 @@
 import { v } from "convex/values";
-import { query, mutation, action } from "./_generated/server";
-import { api } from "./_generated/api";
-import { authComponent, createAuth, options } from "./betterAuth/auth";
+import { mutation, query } from "./_generated/server";
+import { components } from "./_generated/api";
+import { authComponent, createAuth } from "./betterAuth/auth";
 
 // Write your Convex functions in any file inside this directory (`convex`).
 // See https://docs.convex.dev/functions for more.
@@ -49,6 +49,87 @@ export const getImageUrl = mutation({
 export const getMe = query({
   handler: async (ctx) => {
     return ctx.auth.getUserIdentity();
+  }
+})
+
+export const getAllOrganizations = query({
+  handler: async (ctx) => {
+    const { auth, headers } = await authComponent.getAuth(createAuth, ctx);
+    const response = await auth.api.getSession({ headers });
+
+    if (!response || response.user.role !== "admin") {
+      throw new Error("unauthorized");
+    }
+
+    return await ctx.runQuery(
+        components.betterAuth.organizations.listOrganizations,
+        {}
+    );
+  }
+})
+
+export const getOrganizationBySlug = query({
+  args: {
+    slug: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const { auth, headers } = await authComponent.getAuth(createAuth, ctx);
+    const response = await auth.api.getSession({ headers });
+
+    if (!response || response.user.role !== "admin") {
+      throw new Error("unauthorized");
+    }
+
+    return await ctx.runQuery(
+        components.betterAuth.organizations.getOrganizationBySlug,
+        { slug: args.slug }
+    );
+  }
+})
+
+export const getOrganizationMembersBySlug = query({
+  args: {
+    slug: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const { auth, headers } = await authComponent.getAuth(createAuth, ctx);
+    const response = await auth.api.getSession({ headers });
+
+    if (!response || response.user.role !== "admin") {
+      throw new Error("unauthorized");
+    }
+
+    return await ctx.runQuery(
+        components.betterAuth.organizations.listOrganizationMembersBySlug,
+        { slug: args.slug }
+    );
+  }
+})
+
+export const updateOrganization = mutation({
+  args: {
+    organizationId: v.string(),
+    data: v.object({
+      name: v.optional(v.string()),
+      slug: v.optional(v.string()),
+      pointValue: v.optional(v.number()),
+    }),
+  },
+  handler: async (ctx, args) => {
+    const { auth, headers } = await authComponent.getAuth(createAuth, ctx);
+    const response = await auth.api.getSession({ headers });
+
+    if (!response || response.user.role !== "admin") {
+      throw new Error("unauthorized");
+    }
+
+    await ctx.runMutation(
+        components.betterAuth.organizations.updateOrganization,
+        {
+          organizationId: args.organizationId as any,
+          data: args.data,
+        }
+    );
   }
 })
 
