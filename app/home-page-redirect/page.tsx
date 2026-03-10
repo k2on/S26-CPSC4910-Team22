@@ -23,6 +23,11 @@ export default function Page() {
             return;
         }
 
+        if (role === "sponsor") {
+            router.replace("/sponsor");
+            return;
+        }
+
         router.replace("/");
     }, [isPending, router, session]);
 
