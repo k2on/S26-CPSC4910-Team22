@@ -1,6 +1,10 @@
 import { Input } from "@/components/ui/input"
 import { Button, buttonVariants } from "@/components/ui/button"
 import Link from "next/link"
+import {
+    ArrowLeft,
+    ArrowRight
+}from "lucide-react";
 
 const mediaTypes = [//movies and short films are also supposed to work but they don't show up in search
     "all", "podcast", "music", "musicVideo", "audiobook", "tvShow", "software", "ebook"
@@ -11,6 +15,7 @@ interface iTunesResult{
     trackName: string;
     artistName: string;
     artworkUrl100: string;
+    resultCount: string;
 }
 
 interface iTunesResponse{
@@ -22,17 +27,28 @@ export default async function Page({searchParams}: {searchParams: Promise<{[key:
     const params = await searchParams;
     const queryTerm = params.q || "";
     const mediaType = params.media || "all";
-    const query = new URLSearchParams({
+    const currentPage = Number(params.page) || 0;
+    const itemsPerPage = 10;
+    const searchLimit = 15
+    const offset = currentPage * itemsPerPage
+    const fullQuery = new URLSearchParams({
         term: queryTerm,
         media: mediaType,
-        limit: "10"
+        limit: searchLimit.toString()
     });
-    const response = await fetch(`https://itunes.apple.com/search?${query.toString()}`);
-    if (!response.ok) {
-        return <div className="py-5">Failed to load iTunes results</div>
+
+    const fullResponse = await fetch(`https://itunes.apple.com/search?${fullQuery.toString()}`);
+    console.log(`https://itunes.apple.com/search?${fullQuery.toString()}`);
+    if (!fullResponse.ok){
+        console.error("Failed to fetch full search results");
     }
-    const data: iTunesResponse = await response.json();
-    const results = data.results;
+    const fullData: iTunesResponse = await fullResponse.json();
+    const fullResults = fullData.results;
+    const results = fullResults.slice(offset, offset+itemsPerPage);
+
+    const itemsOnPage = (offset+itemsPerPage < fullResults.length) ? itemsPerPage : fullResults.length-offset
+    const startIndex = offset+1
+    const endIndex = offset + itemsOnPage
 
     return (
     <div className="max-w-lg mx-auto">
@@ -43,7 +59,7 @@ export default async function Page({searchParams}: {searchParams: Promise<{[key:
         </form>
         <div className="flex flex-wrap gap-2 py-2 justify-center">
             {mediaTypes.map((type) => (
-                <Link key={type} href={`?q=${queryTerm}&media=${type}`} className={
+                <Link key={type} href={`?q=${queryTerm}&media=${type}&page=${currentPage}`} className={
                     buttonVariants({
                         variant: mediaType === type ? "default" : "outline",
                         size: "sm"
@@ -73,6 +89,29 @@ export default async function Page({searchParams}: {searchParams: Promise<{[key:
                 </div>
             )}
         </div>
+        <div className="flex flex-row justify-center">
+            {offset > 0 && <div>
+                <Link href={`?q=${queryTerm}&media=${mediaType}&page=${currentPage-1}`} className={
+                    buttonVariants({
+                        variant: "default",
+                        size: "lg"
+                    })}>
+                    <ArrowLeft />
+                </Link>
+            </div>}
+            {endIndex < fullResults.length && <div className="flex flex-row justify-end ml-auto">
+                <Link href={`?q=${queryTerm}&media=${mediaType}&page=${currentPage+1}`} className={
+                    buttonVariants({
+                        variant: "default",
+                        size: "lg"
+                    })} style={{ justifyContent: "right"}}>
+                    <ArrowRight />
+                </Link>
+            </div>}
+        </div>
+        <div className="flex flex-col py-2"></div>
+            {(fullResults.length > 0 && queryTerm != "") && <div className="py-2 text-center">
+                Showing {startIndex}-{endIndex} of {fullResults.length} Results </div>}
     </div>
   );
 }
