@@ -97,7 +97,75 @@ export const listOrganizationMembersBySlug = query({
             })
         );
 
-        return membersWithUsers.filter((member) => member !== null);
+        return membersWithUsers.filter(
+            (member): member is NonNullable<typeof member> => member !== null
+        );
+    },
+});
+
+export const addMemberByEmail = mutation({
+    args: {
+        slug: v.string(),
+        email: v.string(),
+    },
+    returns: v.object({
+        status: v.union(
+            v.literal("added"),
+            v.literal("already_exists"),
+            v.literal("user_not_found")
+        ),
+        organizationName: v.string(),
+    }),
+    handler: async (ctx, args) => {
+        const organization = await ctx.db
+            .query("organization")
+            .withIndex("slug", (q) => q.eq("slug", args.slug))
+            .unique();
+
+        if (!organization) {
+            throw new Error("Organization not found");
+        }
+
+        const user = await ctx.db
+            .query("user")
+            .withIndex("email_name", (q) => q.eq("email", args.email))
+            .unique();
+
+        if (!user) {
+            return {
+                status: "user_not_found" as const,
+                organizationName: organization.name,
+            };
+        }
+
+        const organizationId = String(organization._id);
+        const existingMembers = await ctx.db
+            .query("member")
+            .withIndex("organizationId", (q) => q.eq("organizationId", organizationId))
+            .collect();
+
+        const alreadyExists = existingMembers.some(
+            (member) => member.userId === String(user._id)
+        );
+
+        if (alreadyExists) {
+            return {
+                status: "already_exists" as const,
+                organizationName: organization.name,
+            };
+        }
+
+        await ctx.db.insert("member", {
+            organizationId,
+            userId: String(user._id),
+            role: "member",
+            createdAt: Date.now(),
+        });
+
+        return {
+            status: "added" as const,
+            organizationName: organization.name,
+        };
     },
 });
 

@@ -54,10 +54,9 @@ export const getMe = query({
 
 export const getAllOrganizations = query({
   handler: async (ctx) => {
-    const { auth, headers } = await authComponent.getAuth(createAuth, ctx);
-    const response = await auth.api.getSession({ headers });
+    const identity = await ctx.auth.getUserIdentity();
 
-    if (!response || response.user.role !== "admin") {
+    if (!identity || identity.role !== "admin") {
       throw new Error("unauthorized");
     }
 
@@ -73,10 +72,9 @@ export const getOrganizationBySlug = query({
     slug: v.string(),
   },
   handler: async (ctx, args) => {
-    const { auth, headers } = await authComponent.getAuth(createAuth, ctx);
-    const response = await auth.api.getSession({ headers });
+    const identity = await ctx.auth.getUserIdentity();
 
-    if (!response || response.user.role !== "admin") {
+    if (!identity || identity.role !== "admin") {
       throw new Error("unauthorized");
     }
 
@@ -92,16 +90,37 @@ export const getOrganizationMembersBySlug = query({
     slug: v.string(),
   },
   handler: async (ctx, args) => {
-    const { auth, headers } = await authComponent.getAuth(createAuth, ctx);
-    const response = await auth.api.getSession({ headers });
+    const identity = await ctx.auth.getUserIdentity();
 
-    if (!response || response.user.role !== "admin") {
+    if (!identity || identity.role !== "admin") {
       throw new Error("unauthorized");
     }
 
     return await ctx.runQuery(
         components.betterAuth.organizations.listOrganizationMembersBySlug,
         { slug: args.slug }
+    );
+  }
+})
+
+export const addOrganizationMemberByEmail = mutation({
+  args: {
+    slug: v.string(),
+    email: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+
+    if (!identity || identity.role !== "admin") {
+      throw new Error("unauthorized");
+    }
+
+    return await ctx.runMutation(
+        components.betterAuth.organizations.addMemberByEmail,
+        {
+          slug: args.slug,
+          email: args.email,
+        }
     );
   }
 })
@@ -116,10 +135,9 @@ export const updateOrganization = mutation({
     }),
   },
   handler: async (ctx, args) => {
-    const { auth, headers } = await authComponent.getAuth(createAuth, ctx);
-    const response = await auth.api.getSession({ headers });
+    const identity = await ctx.auth.getUserIdentity();
 
-    if (!response || response.user.role !== "admin") {
+    if (!identity || identity.role !== "admin") {
       throw new Error("unauthorized");
     }
 

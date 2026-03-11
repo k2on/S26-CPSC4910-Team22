@@ -1571,6 +1571,15 @@ export declare const components: {
       >;
     };
     organizations: {
+      addMemberByEmail: FunctionReference<
+        "mutation",
+        "internal",
+        { email: string; slug: string },
+        {
+          organizationName: string;
+          status: "added" | "already_exists" | "user_not_found";
+        }
+      >;
       getOrganizationBySlug: FunctionReference<
         "query",
         "internal",
