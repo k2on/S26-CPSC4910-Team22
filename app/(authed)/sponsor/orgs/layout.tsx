@@ -9,7 +9,7 @@ export default async function RootLayout({
     children: React.ReactNode;
 }>) {
     const result = await fetchAuthQuery(api.myFunctions.getMe);
-    if (!result || result.role != "admin") return notFound();
+    if (!result || result.role != "sponsor") return notFound();
 
     return (
         <div className="flex flex-1 h-full">

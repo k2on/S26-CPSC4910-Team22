@@ -7,16 +7,23 @@ import { api } from "@/convex/_generated/api";
 import { DataTable } from "./members/data-table";
 import { columns } from "./members/columns";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+        Dialog,
+        DialogContent,
+        DialogDescription,
+        DialogHeader,
+        DialogTitle,
+        DialogTrigger,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 
 type Auth = ReturnType<typeof createAuth>;
 type Member = Auth["$Infer"]["Member"];
 
 export function OrganizationMembers({ slug }: { slug: string }) {
-        const organization = useQuery(api.myFunctions.getOrganizationBySlug, { slug });
-        const members = useQuery(api.myFunctions.getOrganizationMembersBySlug, { slug });
-        const addMemberByEmail = useMutation(api.myFunctions.addOrganizationMemberByEmail);
+        const organization = useQuery(api.myFunctions.getVisibleOrganizationBySlug, { slug });
+        const members = useQuery(api.myFunctions.getVisibleOrganizationMembersBySlug, { slug });
+        const addMemberByEmail = useMutation(api.myFunctions.addVisibleOrganizationMemberByEmail);
 
         const [open, setOpen] = useState(false);
         const [email, setEmail] = useState("");

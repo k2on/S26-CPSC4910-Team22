@@ -14,7 +14,7 @@ import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupText } from "..
 import { OrganizationError } from "./Error";
 
 export default function OrganizationGeneral({ slug }: { slug: string }) {
-    const organization = useQuery(api.myFunctions.getOrganizationBySlug, { slug });
+    const organization = useQuery(api.myFunctions.getVisibleOrganizationBySlug, { slug });
 
     if (organization === undefined) {
         return <OrganizationLoader />;
@@ -38,7 +38,7 @@ function OrganizationGeneralForm({
     };
 }) {
     const [isPending, setIsPending] = useState(false);
-    const updateOrganization = useMutation(api.myFunctions.updateOrganization);
+    const updateOrganization = useMutation(api.myFunctions.updateVisibleOrganization);
 
     const form = useForm({
         defaultValues: {

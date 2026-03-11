@@ -27,6 +27,29 @@ const memberValidator = v.object({
     }),
 });
 
+async function getOrganizationBySlugInternal(
+    ctx: Parameters<typeof query>[0] extends never ? never : any,
+    slug: string
+) {
+    return await ctx.db
+        .query("organization")
+        .withIndex("slug", (q: any) => q.eq("slug", slug))
+        .unique();
+}
+
+async function userHasOrganizationAccess(
+    ctx: Parameters<typeof query>[0] extends never ? never : any,
+    userId: string,
+    organizationId: string
+) {
+    const memberships = await ctx.db
+        .query("member")
+        .withIndex("userId", (q: any) => q.eq("userId", userId))
+        .collect();
+
+    return memberships.some((member: { organizationId: string }) => member.organizationId === organizationId);
+}
+
 export const listOrganizations = query({
     args: {},
     returns: v.array(organizationValidator),
@@ -44,26 +67,97 @@ export const getOrganizationBySlug = query({
     },
     returns: v.union(organizationValidator, v.null()),
     handler: async (ctx, args) => {
-        return await ctx.db
-            .query("organization")
-            .withIndex("slug", (q) => q.eq("slug", args.slug))
-            .unique();
+        return await getOrganizationBySlugInternal(ctx, args.slug);
     },
 });
 
-export const listOrganizationMembersBySlug = query({
+export const listVisibleOrganizations = query({
+    args: {
+        currentUserId: v.string(),
+        canAccessAll: v.boolean(),
+    },
+    returns: v.array(organizationValidator),
+    handler: async (ctx, args) => {
+        if (args.canAccessAll) {
+            return await ctx.db
+                .query("organization")
+                .withIndex("name")
+                .collect();
+        }
+
+        const memberships = await ctx.db
+            .query("member")
+            .withIndex("userId", (q) => q.eq("userId", args.currentUserId))
+            .collect();
+
+        const organizations = await Promise.all(
+            memberships.map((member) =>
+                ctx.db.get(member.organizationId as Id<"organization">)
+            )
+        );
+
+        return organizations
+            .filter((org): org is NonNullable<typeof org> => org !== null)
+            .sort((a, b) => a.name.localeCompare(b.name));
+    },
+});
+
+export const getVisibleOrganizationBySlug = query({
     args: {
         slug: v.string(),
+        currentUserId: v.string(),
+        canAccessAll: v.boolean(),
+    },
+    returns: v.union(organizationValidator, v.null()),
+    handler: async (ctx, args) => {
+        const organization = await getOrganizationBySlugInternal(ctx, args.slug);
+
+        if (!organization) {
+            return null;
+        }
+
+        if (args.canAccessAll) {
+            return organization;
+        }
+
+        const hasAccess = await userHasOrganizationAccess(
+            ctx,
+            args.currentUserId,
+            String(organization._id)
+        );
+
+        if (!hasAccess) {
+            return null;
+        }
+
+        return organization;
+    },
+});
+
+export const listVisibleOrganizationMembersBySlug = query({
+    args: {
+        slug: v.string(),
+        currentUserId: v.string(),
+        canAccessAll: v.boolean(),
     },
     returns: v.array(memberValidator),
     handler: async (ctx, args) => {
-        const organization = await ctx.db
-            .query("organization")
-            .withIndex("slug", (q) => q.eq("slug", args.slug))
-            .unique();
+        const organization = await getOrganizationBySlugInternal(ctx, args.slug);
 
         if (!organization) {
             return [];
+        }
+
+        if (!args.canAccessAll) {
+            const hasAccess = await userHasOrganizationAccess(
+                ctx,
+                args.currentUserId,
+                String(organization._id)
+            );
+
+            if (!hasAccess) {
+                return [];
+            }
         }
 
         const organizationId = String(organization._id);
@@ -107,6 +201,8 @@ export const addMemberByEmail = mutation({
     args: {
         slug: v.string(),
         email: v.string(),
+        currentUserId: v.string(),
+        canAccessAll: v.boolean(),
     },
     returns: v.object({
         status: v.union(
@@ -117,13 +213,22 @@ export const addMemberByEmail = mutation({
         organizationName: v.string(),
     }),
     handler: async (ctx, args) => {
-        const organization = await ctx.db
-            .query("organization")
-            .withIndex("slug", (q) => q.eq("slug", args.slug))
-            .unique();
+        const organization = await getOrganizationBySlugInternal(ctx, args.slug);
 
         if (!organization) {
             throw new Error("Organization not found");
+        }
+
+        if (!args.canAccessAll) {
+            const hasAccess = await userHasOrganizationAccess(
+                ctx,
+                args.currentUserId,
+                String(organization._id)
+            );
+
+            if (!hasAccess) {
+                throw new Error("unauthorized");
+            }
         }
 
         const user = await ctx.db
@@ -139,6 +244,7 @@ export const addMemberByEmail = mutation({
         }
 
         const organizationId = String(organization._id);
+
         const existingMembers = await ctx.db
             .query("member")
             .withIndex("organizationId", (q) => q.eq("organizationId", organizationId))
@@ -169,18 +275,32 @@ export const addMemberByEmail = mutation({
     },
 });
 
-export const updateOrganization = mutation({
+export const updateVisibleOrganization = mutation({
     args: {
-        organizationId: v.id("organization"),
+        organizationId: v.string(),
         data: v.object({
             name: v.optional(v.string()),
             slug: v.optional(v.string()),
             pointValue: v.optional(v.number()),
         }),
+        currentUserId: v.string(),
+        canAccessAll: v.boolean(),
     },
     returns: v.null(),
     handler: async (ctx, args) => {
-        await ctx.db.patch(args.organizationId, args.data);
+        if (!args.canAccessAll) {
+            const hasAccess = await userHasOrganizationAccess(
+                ctx,
+                args.currentUserId,
+                args.organizationId
+            );
+
+            if (!hasAccess) {
+                throw new Error("unauthorized");
+            }
+        }
+
+        await ctx.db.patch(args.organizationId as Id<"organization">, args.data);
         return null;
     },
 });

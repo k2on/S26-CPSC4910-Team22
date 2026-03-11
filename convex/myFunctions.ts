@@ -52,58 +52,78 @@ export const getMe = query({
   }
 })
 
-export const getAllOrganizations = query({
+function getOrgAccess(identity: { subject: string; role?: string | null }) {
+  const canAccessAll = identity.role === "admin";
+  return {
+    currentUserId: identity.subject,
+    canAccessAll,
+  };
+}
+
+export const getVisibleOrganizations = query({
   handler: async (ctx) => {
     const identity = await ctx.auth.getUserIdentity();
 
-    if (!identity || identity.role !== "admin") {
-      throw new Error("unauthorized");
+    if (!identity || (identity.role !== "admin" && identity.role !== "sponsor")) {
+      return [];
     }
 
+    const access = getOrgAccess(identity);
+
     return await ctx.runQuery(
-        components.betterAuth.organizations.listOrganizations,
-        {}
+        components.betterAuth.organizations.listVisibleOrganizations,
+        access
     );
   }
 })
 
-export const getOrganizationBySlug = query({
+export const getVisibleOrganizationBySlug = query({
   args: {
     slug: v.string(),
   },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
 
-    if (!identity || identity.role !== "admin") {
-      throw new Error("unauthorized");
+    if (!identity || (identity.role !== "admin" && identity.role !== "sponsor")) {
+      return null;
     }
 
+    const access = getOrgAccess(identity);
+
     return await ctx.runQuery(
-        components.betterAuth.organizations.getOrganizationBySlug,
-        { slug: args.slug }
+        components.betterAuth.organizations.getVisibleOrganizationBySlug,
+        {
+          slug: args.slug,
+          ...access,
+        }
     );
   }
 })
 
-export const getOrganizationMembersBySlug = query({
+export const getVisibleOrganizationMembersBySlug = query({
   args: {
     slug: v.string(),
   },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
 
-    if (!identity || identity.role !== "admin") {
-      throw new Error("unauthorized");
+    if (!identity || (identity.role !== "admin" && identity.role !== "sponsor")) {
+      return [];
     }
 
+    const access = getOrgAccess(identity);
+
     return await ctx.runQuery(
-        components.betterAuth.organizations.listOrganizationMembersBySlug,
-        { slug: args.slug }
+        components.betterAuth.organizations.listVisibleOrganizationMembersBySlug,
+        {
+          slug: args.slug,
+          ...access,
+        }
     );
   }
 })
 
-export const addOrganizationMemberByEmail = mutation({
+export const addVisibleOrganizationMemberByEmail = mutation({
   args: {
     slug: v.string(),
     email: v.string(),
@@ -111,21 +131,24 @@ export const addOrganizationMemberByEmail = mutation({
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
 
-    if (!identity || identity.role !== "admin") {
+    if (!identity || (identity.role !== "admin" && identity.role !== "sponsor")) {
       throw new Error("unauthorized");
     }
+
+    const access = getOrgAccess(identity);
 
     return await ctx.runMutation(
         components.betterAuth.organizations.addMemberByEmail,
         {
           slug: args.slug,
           email: args.email,
+          ...access,
         }
     );
   }
 })
 
-export const updateOrganization = mutation({
+export const updateVisibleOrganization = mutation({
   args: {
     organizationId: v.string(),
     data: v.object({
@@ -137,15 +160,18 @@ export const updateOrganization = mutation({
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
 
-    if (!identity || identity.role !== "admin") {
+    if (!identity || (identity.role !== "admin" && identity.role !== "sponsor")) {
       throw new Error("unauthorized");
     }
 
+    const access = getOrgAccess(identity);
+
     await ctx.runMutation(
-        components.betterAuth.organizations.updateOrganization,
+        components.betterAuth.organizations.updateVisibleOrganization,
         {
-          organizationId: args.organizationId as any,
+          organizationId: args.organizationId,
           data: args.data,
+          ...access,
         }
     );
   }
