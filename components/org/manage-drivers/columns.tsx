@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { ColumnDef } from "@tanstack/react-table";
+import { useMutation as useConvexMutation } from "convex/react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -23,6 +24,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { MoreHorizontal } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
+import { api } from "@/convex/_generated/api";
 import { useMutation } from "@tanstack/react-query";
 import { BetterFetchError } from "better-auth/client";
 import { toast } from "sonner";
@@ -103,11 +105,19 @@ export const columns: ColumnDef<DriverRow>[] = [
 function DriverActions({ driver }: { driver: DriverRow }) {
     const [deactivateOpen, setDeactivateOpen] = useState(false);
     const [suspendOpen, setSuspendOpen] = useState(false);
+    const [updatePointsOpen, setUpdatePointsOpen] = useState(false);
+
     const [banReason, setBanReason] = useState("");
+
     const [suspensionReason, setSuspensionReason] = useState("");
     const [suspensionLength, setSuspensionLength] = useState("");
     const [suspensionUnit, setSuspensionUnit] = useState("days");
     const [suspensionError, setSuspensionError] = useState("");
+
+    const [pointMode, setPointMode] = useState<"reward" | "remove">("reward");
+    const [pointValue, setPointValue] = useState("");
+    const [pointReason, setPointReason] = useState("");
+    const [pointError, setPointError] = useState("");
 
     const { mutateAsync: banUser, isPending: isBanning } = useMutation({
         mutationFn: async (input: Parameters<typeof authClient.admin.banUser>[0]) =>
@@ -119,21 +129,10 @@ function DriverActions({ driver }: { driver: DriverRow }) {
             authClient.admin.unbanUser(input),
     });
 
+    const updateDriverPoints = useConvexMutation(api.myFunctions.updateDriverPoints);
+
     const isPending = isBanning || isActivating;
     const deactivateLabel = driver.active ? "Deactivate User" : "Activate User";
-
-    function resetDeactivateDialog() {
-        setBanReason("");
-        setDeactivateOpen(false);
-    }
-
-    function resetSuspendDialog() {
-        setSuspensionReason("");
-        setSuspensionLength("");
-        setSuspensionUnit("days");
-        setSuspensionError("");
-        setSuspendOpen(false);
-    }
 
     async function onSubmitDeactivate(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
@@ -151,7 +150,8 @@ function DriverActions({ driver }: { driver: DriverRow }) {
             }
         );
 
-        resetDeactivateDialog();
+        setBanReason("");
+        setDeactivateOpen(false);
     }
 
     async function onActivate() {
@@ -203,7 +203,57 @@ function DriverActions({ driver }: { driver: DriverRow }) {
             }
         );
 
-        resetSuspendDialog();
+        setSuspensionReason("");
+        setSuspensionLength("");
+        setSuspensionUnit("days");
+        setSuspensionError("");
+        setSuspendOpen(false);
+    }
+
+    async function onSubmitUpdatePoints(e: React.FormEvent<HTMLFormElement>) {
+        e.preventDefault();
+
+        const parsedValue = Number(pointValue);
+
+        if (!Number.isFinite(parsedValue) || parsedValue < 0) {
+            setPointError("Invalid point value");
+            return;
+        }
+
+        if (pointMode === "remove" && parsedValue > driver.points) {
+            setPointError("User cannot have less than 0 points");
+            return;
+        }
+
+        setPointError("");
+
+        const pointChange = pointMode === "reward" ? parsedValue : -parsedValue;
+
+        await toast.promise(
+            () =>
+                updateDriverPoints({
+                    driverUserId: driver.userId,
+                    pointChange,
+                    reason: pointReason.trim() || "Points updated by organization manager",
+                }),
+            {
+                loading: "Updating points...",
+                success: "Points updated",
+                error: (err) => {
+                    if (err instanceof Error) {
+                        return err.message;
+                    }
+
+                    return "Failed to update points";
+                },
+            }
+        );
+
+        setPointMode("reward");
+        setPointValue("");
+        setPointReason("");
+        setPointError("");
+        setUpdatePointsOpen(false);
     }
 
     return (
@@ -229,41 +279,118 @@ function DriverActions({ driver }: { driver: DriverRow }) {
                         }
                     }}
                 >
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="h-8 w-8 p-0">
-                                <span className="sr-only">Open menu</span>
-                                <MoreHorizontal />
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                            {driver.active ? (
+                    <Dialog
+                        open={updatePointsOpen}
+                        onOpenChange={(nextOpen) => {
+                            setUpdatePointsOpen(nextOpen);
+                            if (!nextOpen) {
+                                setPointMode("reward");
+                                setPointValue("");
+                                setPointReason("");
+                                setPointError("");
+                            }
+                        }}
+                    >
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" className="h-8 w-8 p-0">
+                                    <span className="sr-only">Open menu</span>
+                                    <MoreHorizontal />
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                                {driver.active ? (
+                                    <DialogTrigger asChild>
+                                        <DropdownMenuItem
+                                            onSelect={(e) => e.preventDefault()}
+                                            onClick={() => setDeactivateOpen(true)}
+                                        >
+                                            {deactivateLabel}
+                                        </DropdownMenuItem>
+                                    </DialogTrigger>
+                                ) : (
+                                    <DropdownMenuItem onClick={onActivate}>
+                                        {deactivateLabel}
+                                    </DropdownMenuItem>
+                                )}
+
                                 <DialogTrigger asChild>
                                     <DropdownMenuItem
                                         onSelect={(e) => e.preventDefault()}
-                                        onClick={() => setDeactivateOpen(true)}
+                                        onClick={() => setSuspendOpen(true)}
                                     >
-                                        {deactivateLabel}
+                                        Suspend User
                                     </DropdownMenuItem>
                                 </DialogTrigger>
-                            ) : (
-                                <DropdownMenuItem onClick={onActivate}>
-                                    {deactivateLabel}
-                                </DropdownMenuItem>
-                            )}
 
-                            <DialogTrigger asChild>
-                                <DropdownMenuItem
-                                    onSelect={(e) => e.preventDefault()}
-                                    onClick={() => setSuspendOpen(true)}
-                                >
-                                    Suspend User
-                                </DropdownMenuItem>
-                            </DialogTrigger>
+                                <DialogTrigger asChild>
+                                    <DropdownMenuItem
+                                        onSelect={(e) => e.preventDefault()}
+                                        onClick={() => setUpdatePointsOpen(true)}
+                                    >
+                                        Update Points
+                                    </DropdownMenuItem>
+                                </DialogTrigger>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
 
-                            <DropdownMenuItem>Update Points</DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
+                        <DialogContent>
+                            <form className="flex flex-col gap-4" onSubmit={onSubmitUpdatePoints}>
+                                <DialogHeader>
+                                    <DialogTitle>Update Points</DialogTitle>
+                                    <DialogDescription>
+                                        Update points for {driver.name}.
+                                    </DialogDescription>
+                                </DialogHeader>
+
+                                <p className="text-sm">Current Points: {driver.points}</p>
+
+                                <div className="flex gap-2">
+                                    <Button
+                                        type="button"
+                                        variant={pointMode === "reward" ? "default" : "outline"}
+                                        onClick={() => setPointMode("reward")}
+                                    >
+                                        Reward
+                                    </Button>
+                                    <Button
+                                        type="button"
+                                        variant={pointMode === "remove" ? "default" : "outline"}
+                                        onClick={() => setPointMode("remove")}
+                                    >
+                                        Remove
+                                    </Button>
+                                </div>
+
+                                <Input
+                                    value={pointValue}
+                                    onChange={(e) => setPointValue(e.target.value)}
+                                    placeholder="Number of points"
+                                />
+
+                                {pointError ? (
+                                    <p className="text-sm text-red-500">{pointError}</p>
+                                ) : null}
+
+                                <Input
+                                    value={pointReason}
+                                    onChange={(e) => setPointReason(e.target.value)}
+                                    placeholder="Reason"
+                                />
+
+                                <DialogFooter>
+                                    <DialogClose asChild>
+                                        <Button type="button" variant="outline">
+                                            Cancel
+                                        </Button>
+                                    </DialogClose>
+                                    <Button type="submit">
+                                        Submit
+                                    </Button>
+                                </DialogFooter>
+                            </form>
+                        </DialogContent>
+                    </Dialog>
 
                     <DialogContent>
                         <form className="flex flex-col gap-4" onSubmit={onSubmitSuspend}>

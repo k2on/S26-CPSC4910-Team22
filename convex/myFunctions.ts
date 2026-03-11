@@ -178,6 +178,59 @@ export const getVisibleOrganizationDriversBySlug = query({
   }
 })
 
+export const updateDriverPoints = mutation({
+  args: {
+    driverUserId: v.string(),
+    pointChange: v.number(),
+    reason: v.string(),
+  },
+  returns: v.object({
+    points: v.number(),
+  }),
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+
+    if (!identity || (identity.role !== "admin" && identity.role !== "sponsor")) {
+      throw new Error("unauthorized");
+    }
+
+    const existingTotal = await ctx.db
+        .query("pointTotals")
+        .filter((q) => q.eq(q.field("driverUserId"), args.driverUserId))
+        .first();
+
+    const currentPoints = existingTotal?.points ?? 0;
+    const nextPoints = currentPoints + args.pointChange;
+
+    if (nextPoints < 0) {
+      throw new Error("User cannot have less than 0 points");
+    }
+
+    if (existingTotal) {
+      await ctx.db.patch(existingTotal._id, {
+        points: nextPoints,
+      });
+    } else {
+      await ctx.db.insert("pointTotals", {
+        driverUserId: args.driverUserId,
+        points: nextPoints,
+      });
+    }
+
+    await ctx.db.insert("pointChanges", {
+      driverUserId: args.driverUserId,
+      changedByUserId: identity.subject,
+      pointChange: args.pointChange,
+      reason: args.reason,
+      time: Date.now(),
+    });
+
+    return {
+      points: nextPoints,
+    };
+  }
+})
+
 export const addVisibleOrganizationMemberByEmail = mutation({
   args: {
     slug: v.string(),
