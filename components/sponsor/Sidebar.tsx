@@ -10,7 +10,7 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import { type LucideIcon, LineChartIcon, LogsIcon, UsersRoundIcon, HomeIcon, BuildingIcon } from "lucide-react"
+import { type LucideIcon, LogsIcon, UsersRoundIcon, HomeIcon, BuildingIcon } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation";
 
@@ -46,22 +46,29 @@ export function SponsorSidebar() {
     const pathname = usePathname();
 
     return (
-        <Sidebar collapsible="offcanvas" className="top-(--header-height) h-[calc(100svh-var(--header-height))]!">
+        <Sidebar
+            collapsible="offcanvas"
+            showRail={false}
+            className="top-(--header-height) h-[calc(100svh-var(--header-height))]!"
+        >
             <SidebarContent>
                 <SidebarGroup>
                     <SidebarGroupLabel>Sponsor</SidebarGroupLabel>
                     <SidebarGroupContent>
                         <SidebarMenu>
-
-                            {LINKS.map(link => <SidebarMenuItem key={link.href}>
-                                <SidebarMenuButton asChild isActive={link.href == "/sponsor" ? pathname == "/sponsor" : pathname.includes(link.href)}>
-                                    <Link href={link.href}>
-                                        <link.icon />
-                                        <span>{link.label}</span>
-                                    </Link>
-                                </SidebarMenuButton>
-                            </SidebarMenuItem>)}
-
+                            {LINKS.map(link => (
+                                <SidebarMenuItem key={link.href}>
+                                    <SidebarMenuButton
+                                        asChild
+                                        isActive={link.href == "/sponsor" ? pathname == "/sponsor" : pathname.includes(link.href)}
+                                    >
+                                        <Link href={link.href}>
+                                            <link.icon />
+                                            <span>{link.label}</span>
+                                        </Link>
+                                    </SidebarMenuButton>
+                                </SidebarMenuItem>
+                            ))}
                         </SidebarMenu>
                     </SidebarGroupContent>
                 </SidebarGroup>
@@ -69,9 +76,3 @@ export function SponsorSidebar() {
         </Sidebar>
     )
 }
-
-
-
-
-
-
