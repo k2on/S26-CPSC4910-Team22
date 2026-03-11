@@ -27,6 +27,15 @@ const memberValidator = v.object({
     }),
 });
 
+const driverMemberValidator = v.object({
+    userId: v.string(),
+    name: v.string(),
+    email: v.string(),
+    active: v.boolean(),
+    suspended: v.boolean(),
+    suspensionEnd: v.optional(v.union(v.null(), v.number())),
+});
+
 async function getOrganizationBySlugInternal(
     ctx: Parameters<typeof query>[0] extends never ? never : any,
     slug: string
@@ -193,6 +202,69 @@ export const listVisibleOrganizationMembersBySlug = query({
 
         return membersWithUsers.filter(
             (member): member is NonNullable<typeof member> => member !== null
+        );
+    },
+});
+
+export const listVisibleOrganizationDriversBySlug = query({
+    args: {
+        slug: v.string(),
+        currentUserId: v.string(),
+        canAccessAll: v.boolean(),
+    },
+    returns: v.array(driverMemberValidator),
+    handler: async (ctx, args) => {
+        const organization = await getOrganizationBySlugInternal(ctx, args.slug);
+
+        if (!organization) {
+            return [];
+        }
+
+        if (!args.canAccessAll) {
+            const hasAccess = await userHasOrganizationAccess(
+                ctx,
+                args.currentUserId,
+                String(organization._id)
+            );
+
+            if (!hasAccess) {
+                return [];
+            }
+        }
+
+        const organizationId = String(organization._id);
+
+        const members = await ctx.db
+            .query("member")
+            .withIndex("organizationId", (q) => q.eq("organizationId", organizationId))
+            .collect();
+
+        const drivers = await Promise.all(
+            members.map(async (member) => {
+                const user = await ctx.db.get(member.userId as Id<"user">);
+
+                if (!user || user.role !== "driver") {
+                    return null;
+                }
+
+                const suspended =
+                    Boolean(user.banned) &&
+                    typeof user.banExpires === "number" &&
+                    user.banExpires > Date.now();
+
+                return {
+                    userId: String(user._id),
+                    name: user.name,
+                    email: user.email,
+                    active: !Boolean(user.banned),
+                    suspended,
+                    suspensionEnd: user.banExpires ?? null,
+                };
+            })
+        );
+
+        return drivers.filter(
+            (driver): driver is NonNullable<typeof driver> => driver !== null
         );
     },
 });

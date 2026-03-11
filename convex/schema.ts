@@ -15,5 +15,16 @@ export default defineSchema({
   auditLog: defineTable({
     time: v.number(),
     event: v.string(),
+  }),
+  pointTotals: defineTable({
+    driverUserId: v.string(),
+    points: v.number(),
+  }),
+  pointChanges: defineTable({
+    driverUserId: v.string(),
+    changedByUserId: v.string(),
+    pointChange: v.number(),
+    reason: v.string(),
+    time: v.number(),
   })
 });

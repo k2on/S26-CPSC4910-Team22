@@ -1615,6 +1615,20 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
         }>,
         Name
       >;
+      listVisibleOrganizationDriversBySlug: FunctionReference<
+        "query",
+        "internal",
+        { canAccessAll: boolean; currentUserId: string; slug: string },
+        Array<{
+          active: boolean;
+          email: string;
+          name: string;
+          suspended: boolean;
+          suspensionEnd?: null | number;
+          userId: string;
+        }>,
+        Name
+      >;
       listVisibleOrganizationMembersBySlug: FunctionReference<
         "query",
         "internal",

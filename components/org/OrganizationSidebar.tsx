@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/sidebar";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { HomeIcon, LucideIcon, UsersRoundIcon } from "lucide-react";
+import { HomeIcon, LucideIcon, UserRoundIcon, UsersRoundIcon } from "lucide-react";
 
 const LINKS = [
     {
@@ -25,13 +25,21 @@ const LINKS = [
         href: "/members",
         icon: UsersRoundIcon,
     },
+    {
+        label: "Manage Drivers",
+        href: "/manage-drivers",
+        icon: UserRoundIcon,
+    },
 ] satisfies { label: string; href: string; icon: LucideIcon }[];
 
 export function OrganizationSidebar({ baseUrl }: { baseUrl?: string }) {
     const pathname = usePathname();
 
     return (
-        <Sidebar collapsible="offcanvas" className="top-(--header-height) h-[calc(100svh-var(--header-height))]! left-[--sidebar-width]">
+        <Sidebar
+            collapsible="offcanvas"
+            className="top-(--header-height) h-[calc(100svh-var(--header-height))]! left-[--sidebar-width]"
+        >
             <SidebarContent>
                 <SidebarGroup>
                     <SidebarGroupLabel>Organization</SidebarGroupLabel>

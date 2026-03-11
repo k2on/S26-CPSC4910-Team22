@@ -1630,6 +1630,19 @@ export declare const components: {
           slug: string;
         }>
       >;
+      listVisibleOrganizationDriversBySlug: FunctionReference<
+        "query",
+        "internal",
+        { canAccessAll: boolean; currentUserId: string; slug: string },
+        Array<{
+          active: boolean;
+          email: string;
+          name: string;
+          suspended: boolean;
+          suspensionEnd?: null | number;
+          userId: string;
+        }>
+      >;
       listVisibleOrganizationMembersBySlug: FunctionReference<
         "query",
         "internal",

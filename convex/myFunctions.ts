@@ -3,6 +3,16 @@ import { mutation, query } from "./_generated/server";
 import { components } from "./_generated/api";
 import { authComponent, createAuth } from "./betterAuth/auth";
 
+const visibleOrganizationDriverValidator = v.object({
+  userId: v.string(),
+  name: v.string(),
+  email: v.string(),
+  points: v.number(),
+  active: v.boolean(),
+  suspended: v.boolean(),
+  suspensionEnd: v.optional(v.union(v.null(), v.number())),
+});
+
 // Write your Convex functions in any file inside this directory (`convex`).
 // See https://docs.convex.dev/functions for more.
 
@@ -119,6 +129,49 @@ export const getVisibleOrganizationMembersBySlug = query({
           slug: args.slug,
           ...access,
         }
+    );
+  }
+})
+
+export const getVisibleOrganizationDriversBySlug = query({
+  args: {
+    slug: v.string(),
+  },
+  returns: v.array(visibleOrganizationDriverValidator),
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+
+    if (!identity || (identity.role !== "admin" && identity.role !== "sponsor")) {
+      return [];
+    }
+
+    const access = getOrgAccess(identity);
+
+    const drivers = await ctx.runQuery(
+        components.betterAuth.organizations.listVisibleOrganizationDriversBySlug,
+        {
+          slug: args.slug,
+          ...access,
+        }
+    );
+
+    return await Promise.all(
+        drivers.map(async (driver) => {
+          const pointTotal = await ctx.db
+              .query("pointTotals")
+              .filter((q) => q.eq(q.field("driverUserId"), driver.userId))
+              .first();
+
+          return {
+            userId: driver.userId,
+            name: driver.name,
+            email: driver.email,
+            points: pointTotal?.points ?? 0,
+            active: driver.active,
+            suspended: driver.suspended,
+            suspensionEnd: driver.suspensionEnd ?? null,
+          };
+        })
     );
   }
 })
