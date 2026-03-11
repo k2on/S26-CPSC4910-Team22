@@ -23,13 +23,23 @@ interface iTunesResponse{
     results: iTunesResult[];
 }
 
+const fixMediaType = async (type: string) => {
+    if(type === "musicVideo"){
+        return "Music Video";
+    }else if(type === "tvShow"){
+        return "TV Show";
+    }else{
+        return type.charAt(0).toUpperCase() + type.slice(1);
+    }
+}
+
 export default async function Page({searchParams}: {searchParams: Promise<{[key: string]: string | undefined}>}) {
     const params = await searchParams;
     const queryTerm = params.q || "";
     const mediaType = params.media || "all";
     const currentPage = Number(params.page) || 0;
     const itemsPerPage = 10;
-    const searchLimit = 15
+    const searchLimit = 200
     const offset = currentPage * itemsPerPage
     const fullQuery = new URLSearchParams({
         term: queryTerm,
@@ -64,12 +74,12 @@ export default async function Page({searchParams}: {searchParams: Promise<{[key:
                         variant: mediaType === type ? "default" : "outline",
                         size: "sm"
                 })}>
-                    {type.charAt(0).toUpperCase() + type.slice(1)}
+                    {fixMediaType(type)}
                 </Link>
             ))}
         </div>
         <div className="text-xl font-bold py-2 text-center">Catalog Results</div>
-        <div className="flex flex-col py-2">
+        <div className="flex flex-col py-1">
             {(results.length > 0) ? (
                 results.map((track, index) => (
                     <div key={track.trackId || index}>
