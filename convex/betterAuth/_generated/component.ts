@@ -1621,6 +1621,7 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
         { canAccessAll: boolean; currentUserId: string; slug: string },
         Array<{
           active: boolean;
+          banReason?: null | string;
           email: string;
           name: string;
           suspended: boolean;

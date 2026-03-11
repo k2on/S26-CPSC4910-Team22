@@ -11,6 +11,7 @@ const visibleOrganizationDriverValidator = v.object({
   active: v.boolean(),
   suspended: v.boolean(),
   suspensionEnd: v.optional(v.union(v.null(), v.number())),
+  banReason: v.optional(v.union(v.null(), v.string())),
 });
 
 // Write your Convex functions in any file inside this directory (`convex`).
@@ -170,6 +171,7 @@ export const getVisibleOrganizationDriversBySlug = query({
             active: driver.active,
             suspended: driver.suspended,
             suspensionEnd: driver.suspensionEnd ?? null,
+            banReason: driver.banReason ?? null,
           };
         })
     );

@@ -34,6 +34,7 @@ const driverMemberValidator = v.object({
     active: v.boolean(),
     suspended: v.boolean(),
     suspensionEnd: v.optional(v.union(v.null(), v.number())),
+    banReason: v.optional(v.union(v.null(), v.string())),
 });
 
 async function getOrganizationBySlugInternal(
@@ -259,6 +260,7 @@ export const listVisibleOrganizationDriversBySlug = query({
                     active: !Boolean(user.banned),
                     suspended,
                     suspensionEnd: user.banExpires ?? null,
+                    banReason: user.banReason ?? null,
                 };
             })
         );

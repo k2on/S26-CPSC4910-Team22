@@ -1636,6 +1636,7 @@ export declare const components: {
         { canAccessAll: boolean; currentUserId: string; slug: string },
         Array<{
           active: boolean;
+          banReason?: null | string;
           email: string;
           name: string;
           suspended: boolean;
