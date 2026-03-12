@@ -61,7 +61,7 @@ const getName = async (item: iTunesResult) => {
     }
 }
 
-const getId = async (item: iTunesResult) => {
+const getId = (item: iTunesResult) => {
     if(item.wrapperType == "audiobook"){
         return item.collectionId;
     }else{
@@ -118,10 +118,19 @@ export default async function Page({searchParams}: {searchParams: Promise<{[key:
             <div className="flex flex-col py-1">
                 {(results.length > 0) ? (
                     results.map((track, index) => (
-                        <div key={track.trackId || index}>
+                        <div key={track.trackId || track.collectionId || index}>
                             <div className="flex py-2">
                                 <img src={track.artworkUrl100} alt="Thumbnail" />
                                 <div className="flex flex-col px-2"><strong>{getName(track)}</strong>{track.artistName}<div>Price: {getPrice(track)} Points</div></div>
+                                <div className="flex flex-row justify-end ml-auto">
+                                    <Link href={`/catalog/purchase?id=${getId(track)}`} className={
+                                        buttonVariants({
+                                            variant: "default",
+                                            size: "sm"
+                                        })} style={{justifyContent: "right"}}>
+                                        Purchase
+                                    </Link>
+                                </div>
                             </div>
                         </div>
                     ))
