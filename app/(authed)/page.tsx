@@ -1,5 +1,6 @@
 import { api } from "@/convex/_generated/api";
 import { fetchAuthQuery } from "@/lib/auth-server";
+import { Applications } from "@/components/driver/Applications";
 
 export default async function Home() {
   const result = await fetchAuthQuery(api.myFunctions.getMe)
@@ -9,6 +10,8 @@ export default async function Home() {
   return (
     <main className="max-w-lg mx-auto">
       You are a driver
+
+      <Applications />
     </main>
   );
 }

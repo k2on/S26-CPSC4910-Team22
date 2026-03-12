@@ -1,7 +1,7 @@
 import { v } from "convex/values";
 import { query, mutation, action } from "./_generated/server";
 import { api } from "./_generated/api";
-import { authComponent, createAuth, options } from "./betterAuth/auth";
+import { authComponent, createAuth, createAuthOptions, options } from "./betterAuth/auth";
 
 // Write your Convex functions in any file inside this directory (`convex`).
 // See https://docs.convex.dev/functions for more.
@@ -70,5 +70,24 @@ export const getImpersonationData = query({
 export const getAuditLog = query({
   handler: async (ctx) => {
     return ctx.db.query("auditLog").collect();
+  }
+})
+
+
+export const getDriverApplications = query({
+  handler: async (ctx) => {
+    const authed = await ctx.auth.getUserIdentity();
+    if (authed == null) return [];
+
+    const apps = await ctx.db.query("driverApplication")
+      .withIndex("by_user_id", q => q.eq("userId", authed.subject))
+      .collect();
+
+    const auth = createAuth(ctx);
+    // const org = auth.api.
+
+    const orgs = [...new Set(apps.map(a => a.orgId))]
+
+    return apps;
   }
 })

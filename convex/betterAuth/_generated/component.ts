@@ -1542,13 +1542,4 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
         Name
       >;
     };
-    authUsers: {
-      setRoleForUserDocId: FunctionReference<
-        "mutation",
-        "internal",
-        { role: "driver" | "sponsor" | "admin"; userDocId: string },
-        any,
-        Name
-      >;
-    };
   };
