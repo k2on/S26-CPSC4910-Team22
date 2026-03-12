@@ -10,12 +10,16 @@ const mediaTypes = [//movies and short films are also supposed to work but they 
     "all", "podcast", "music", "musicVideo", "audiobook", "tvShow", "software", "ebook"
 ]
 
+const pointsPerDollar = 100; //1 point = 1 cent
+
 interface iTunesResult{
     trackId: number;
     trackName: string;
     artistName: string;
     artworkUrl100: string;
     resultCount: string;
+    trackPrice: number;
+    collectionPrice: number;
 }
 
 interface iTunesResponse{
@@ -30,6 +34,14 @@ const fixMediaType = async (type: string) => {
         return "TV Show";
     }else{
         return type.charAt(0).toUpperCase() + type.slice(1);
+    }
+}
+
+const getPrice = async (item: iTunesResult) => {
+    if(item.trackPrice > 0){
+        return (item.trackPrice*pointsPerDollar).toFixed(0);
+    }else{
+        return (item.collectionPrice*pointsPerDollar).toFixed(0);
     }
 }
 
@@ -61,67 +73,67 @@ export default async function Page({searchParams}: {searchParams: Promise<{[key:
     const endIndex = offset + itemsOnPage
 
     return (
-    <div className="max-w-lg mx-auto">
-        <form className="flex flex-row">
-            <Input name="q" placeholder="Search the iTunes catalog" defaultValue={queryTerm}/>
-            <input type="hidden" name="media" value={mediaType} />
-            <Button type="submit">Search</Button>
-        </form>
-        <div className="flex flex-wrap gap-2 py-2 justify-center">
-            {mediaTypes.map((type) => (
-                <Link key={type} href={`?q=${queryTerm}&media=${type}&page=${currentPage}`} className={
-                    buttonVariants({
-                        variant: mediaType === type ? "default" : "outline",
-                        size: "sm"
-                })}>
-                    {fixMediaType(type)}
-                </Link>
-            ))}
-        </div>
-        <div className="text-xl font-bold py-2 text-center">Catalog Results</div>
-        <div className="flex flex-col py-1">
-            {(results.length > 0) ? (
-                results.map((track, index) => (
-                    <div key={track.trackId || index}>
-                        <div className="flex py-2">
-                            <img src={track.artworkUrl100} alt="Thumbnail" />
-                            <div className="flex flex-col px-2"><strong>{track.trackName}</strong>{track.artistName}</div>
+        <div className="max-w-lg mx-auto">
+            <form className="flex flex-row">
+                <Input name="q" placeholder="Search the iTunes catalog" defaultValue={queryTerm}/>
+                <input type="hidden" name="media" value={mediaType} />
+                <Button type="submit">Search</Button>
+            </form>
+            <div className="flex flex-wrap gap-2 py-2 justify-center">
+                {mediaTypes.map((type) => (
+                    <Link key={type} href={`?q=${queryTerm}&media=${type}&page=${currentPage}`} className={
+                        buttonVariants({
+                            variant: mediaType === type ? "default" : "outline",
+                            size: "sm"
+                        })}>
+                        {fixMediaType(type)}
+                    </Link>
+                ))}
+            </div>
+            <div className="text-xl font-bold py-2 text-center">Catalog Results</div>
+            <div className="flex flex-col py-1">
+                {(results.length > 0) ? (
+                    results.map((track, index) => (
+                        <div key={track.trackId || index}>
+                            <div className="flex py-2">
+                                <img src={track.artworkUrl100} alt="Thumbnail" />
+                                <div className="flex flex-col px-2"><strong>{track.trackName}</strong>{track.artistName}<div>Price: {getPrice(track)} Points</div></div>
+                            </div>
                         </div>
+                    ))
+                ) : (
+                    <div>
+                        {(queryTerm == "") ? (
+                            <div className="flex flex-col mx-auto py-5 text-center">Use the search bar to search for media!</div>
+                        ) : (
+                            <div className="flex flex-col mx-auto py-5 text-center">No results found</div>
+                        )}
                     </div>
-                ))
-            ) : (
-                <div>
-                    {(queryTerm == "") ? (
-                        <div className="flex flex-col mx-auto py-5 text-center">Use the search bar to search for media!</div>
-                    ) : (
-                        <div className="flex flex-col mx-auto py-5 text-center">No results found</div>
-                    )}
-                </div>
-            )}
-        </div>
-        <div className="flex flex-row justify-center">
-            {offset > 0 && <div>
-                <Link href={`?q=${queryTerm}&media=${mediaType}&page=${currentPage-1}`} className={
-                    buttonVariants({
-                        variant: "default",
-                        size: "lg"
-                    })}>
-                    <ArrowLeft />
-                </Link>
-            </div>}
-            {endIndex < fullResults.length && <div className="flex flex-row justify-end ml-auto">
-                <Link href={`?q=${queryTerm}&media=${mediaType}&page=${currentPage+1}`} className={
-                    buttonVariants({
-                        variant: "default",
-                        size: "lg"
-                    })} style={{ justifyContent: "right"}}>
-                    <ArrowRight />
-                </Link>
-            </div>}
-        </div>
-        <div className="flex flex-col py-2"></div>
+                )}
+            </div>
+            <div className="flex flex-row justify-center">
+                {currentPage > 0 && <div>
+                    <Link href={`?q=${queryTerm}&media=${mediaType}&page=${currentPage-1}`} className={
+                        buttonVariants({
+                            variant: "default",
+                            size: "lg"
+                        })}>
+                        <ArrowLeft />
+                    </Link>
+                </div>}
+                {endIndex < fullResults.length && <div className="flex flex-row justify-end ml-auto">
+                    <Link href={`?q=${queryTerm}&media=${mediaType}&page=${currentPage+1}`} className={
+                        buttonVariants({
+                            variant: "default",
+                            size: "lg"
+                        })} style={{ justifyContent: "right"}}>
+                        <ArrowRight />
+                    </Link>
+                </div>}
+            </div>
             {(fullResults.length > 0 && queryTerm != "") && <div className="py-2 text-center">
-                Showing {startIndex}-{endIndex} of {fullResults.length} Results </div>}
-    </div>
-  );
+                Showing {startIndex}-{endIndex} of {fullResults.length} Results 
+            </div>}
+        </div>
+    );
 }
