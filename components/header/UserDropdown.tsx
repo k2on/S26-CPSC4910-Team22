@@ -5,6 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "../ui/dropdown-menu";
 import Link from "next/link";
 import {
+        BookText,
         CogIcon,
         LogOutIcon,
         UserRoundPenIcon
@@ -35,6 +36,12 @@ export function UserDropdown() {
                                                 <Link href="/user">
                                                         <UserRoundPenIcon />
                                                         Edit Profile
+                                                </Link>
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem asChild>
+                                                <Link href="/catalog">
+                                                        <BookText />
+                                                        Catalog
                                                 </Link>
                                         </DropdownMenuItem>
                                         {data?.user.role == "admin" && <DropdownMenuItem asChild>
