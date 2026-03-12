@@ -18,12 +18,15 @@ interface iTunesResponse{
 }
 
 const pointsPerDollar = 100; //1 point = 1 cent
+const defaultPrice = 100;
 
 const getPrice = async (item: iTunesResult) => {
-    if(item.trackPrice > 0){
-        return (item.trackPrice*pointsPerDollar).toFixed(0);
+    const price = item.trackPrice || item.collectionPrice || 0;
+    const points = Math.abs(Math.round(price * pointsPerDollar));
+    if(points == 0){
+        return defaultPrice;
     }else{
-        return (item.collectionPrice*pointsPerDollar).toFixed(0);
+        return points;
     }
 }
 

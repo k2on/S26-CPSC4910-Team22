@@ -15,6 +15,7 @@ const mediaTypes = [
 ]
 
 const pointsPerDollar = 100; //1 point = 1 cent
+const defaultPrice = 100;
 
 interface iTunesResult{
     wrapperType: string;
@@ -46,10 +47,12 @@ const fixMediaType = async (type: string) => {
 }
 
 const getPrice = async (item: iTunesResult) => {
-    if(item.trackPrice > 0){
-        return (item.trackPrice*pointsPerDollar).toFixed(0);
+    const price = item.trackPrice || item.collectionPrice || 0;
+    const points = Math.abs(Math.round(price * pointsPerDollar));
+    if(points == 0){
+        return defaultPrice;
     }else{
-        return (item.collectionPrice*pointsPerDollar).toFixed(0);
+        return points;
     }
 }
 
@@ -75,8 +78,8 @@ export default async function Page({searchParams}: {searchParams: Promise<{[key:
     const mediaType = params.media || "music";
     const currentPage = Number(params.page) || 0;
     const itemsPerPage = 10;
-    const searchLimit = 200
-    const offset = currentPage * itemsPerPage
+    const searchLimit = 200;
+    const offset = currentPage * itemsPerPage;
     const fullQuery = new URLSearchParams({
         term: queryTerm,
         media: mediaType,
@@ -100,7 +103,7 @@ export default async function Page({searchParams}: {searchParams: Promise<{[key:
         <div className="max-w-lg mx-auto">
             <form className="flex flex-row">
                 <Input name="q" placeholder="Search the iTunes catalog" defaultValue={queryTerm}/>
-                <input type="hidden" name="media" value={mediaType} />
+                <Input type="hidden" name="media" value={mediaType} />
                 <Button type="submit">Search</Button>
             </form>
             <div className="flex flex-wrap gap-2 py-2 justify-center">
