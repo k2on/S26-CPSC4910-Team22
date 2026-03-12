@@ -6,15 +6,23 @@ import {
     ArrowRight
 }from "lucide-react";
 
-const mediaTypes = [//movies and short films are also supposed to work but they don't show up in search
-    "all", "podcast", "music", "musicVideo", "audiobook", "tvShow", "software", "ebook"
+const mediaTypes = [
+    "music", "musicVideo", "audiobook", "tvShow"
+    //movies and short films are excluded for not actually existing in search api
+    //software and ebooks are excluded for different return structure
+    //podcasts are excluded because they're almost all free and thus not really relevant to a purchasing system
+    //"all" is excluded so the other excluded categories don't show up and cause issues
 ]
 
 const pointsPerDollar = 100; //1 point = 1 cent
 
 interface iTunesResult{
+    wrapperType: string;
+    kind: string;
     trackId: number;
+    collectionId: number;
     trackName: string;
+    collectionName: string;
     artistName: string;
     artworkUrl100: string;
     resultCount: string;
@@ -45,10 +53,26 @@ const getPrice = async (item: iTunesResult) => {
     }
 }
 
+const getName = async (item: iTunesResult) => {
+    if(item.wrapperType == "audiobook"){
+        return item.collectionName;
+    }else{
+        return item.trackName;
+    }
+}
+
+const getId = async (item: iTunesResult) => {
+    if(item.wrapperType == "audiobook"){
+        return item.collectionId;
+    }else{
+        return item.trackId;
+    }
+}
+
 export default async function Page({searchParams}: {searchParams: Promise<{[key: string]: string | undefined}>}) {
     const params = await searchParams;
     const queryTerm = params.q || "";
-    const mediaType = params.media || "all";
+    const mediaType = params.media || "music";
     const currentPage = Number(params.page) || 0;
     const itemsPerPage = 10;
     const searchLimit = 200
@@ -60,7 +84,7 @@ export default async function Page({searchParams}: {searchParams: Promise<{[key:
     });
 
     const fullResponse = await fetch(`https://itunes.apple.com/search?${fullQuery.toString()}`);
-    console.log(`https://itunes.apple.com/search?${fullQuery.toString()}`);
+    //console.log(`https://itunes.apple.com/search?${fullQuery.toString()}`);
     if (!fullResponse.ok){
         console.error("Failed to fetch full search results");
     }
@@ -81,7 +105,7 @@ export default async function Page({searchParams}: {searchParams: Promise<{[key:
             </form>
             <div className="flex flex-wrap gap-2 py-2 justify-center">
                 {mediaTypes.map((type) => (
-                    <Link key={type} href={`?q=${queryTerm}&media=${type}&page=${currentPage}`} className={
+                    <Link key={type} href={`?q=${queryTerm}&media=${type}&page=0`} className={
                         buttonVariants({
                             variant: mediaType === type ? "default" : "outline",
                             size: "sm"
@@ -97,7 +121,7 @@ export default async function Page({searchParams}: {searchParams: Promise<{[key:
                         <div key={track.trackId || index}>
                             <div className="flex py-2">
                                 <img src={track.artworkUrl100} alt="Thumbnail" />
-                                <div className="flex flex-col px-2"><strong>{track.trackName}</strong>{track.artistName}<div>Price: {getPrice(track)} Points</div></div>
+                                <div className="flex flex-col px-2"><strong>{getName(track)}</strong>{track.artistName}<div>Price: {getPrice(track)} Points</div></div>
                             </div>
                         </div>
                     ))
