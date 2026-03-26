@@ -16,6 +16,11 @@ export default defineSchema({
     time: v.number(),
     event: v.string(),
   }),
+  driverApplication: defineTable({
+    userId: v.string(),
+    orgId: v.string(),
+    status: v.union(v.literal("waiting"), v.literal("denied"), v.literal("approved")),
+  }).index("by_user_id", { fields: ["userId"] }),
   pointTotals: defineTable({
     driverUserId: v.string(),
     points: v.number(),

@@ -1562,14 +1562,6 @@ export declare const components: {
         any
       >;
     };
-    authUsers: {
-      setRoleForUserDocId: FunctionReference<
-        "mutation",
-        "internal",
-        { role: "driver" | "sponsor" | "admin"; userDocId: string },
-        any
-      >;
-    };
     organizations: {
       addMemberByEmail: FunctionReference<
         "mutation",

@@ -1,7 +1,11 @@
 import { v } from "convex/values";
-import { mutation, query } from "./_generated/server";
+import { query, mutation, action } from "./_generated/server";
+import { api } from "./_generated/api";
+import { authComponent, createAuth, createAuthOptions, options } from "./betterAuth/auth";
+import { Organization } from "better-auth/plugins";
+import { Doc } from "./_generated/dataModel";
+import { Id } from "./betterAuth/_generated/dataModel";
 import { components } from "./_generated/api";
-import { authComponent, createAuth } from "./betterAuth/auth";
 
 const visibleOrganizationDriverValidator = v.object({
   userId: v.string(),
@@ -82,8 +86,8 @@ export const getVisibleOrganizations = query({
     const access = getOrgAccess(identity);
 
     return await ctx.runQuery(
-        components.betterAuth.organizations.listVisibleOrganizations,
-        access
+      components.betterAuth.organizations.listVisibleOrganizations,
+      access
     );
   }
 })
@@ -102,11 +106,11 @@ export const getVisibleOrganizationBySlug = query({
     const access = getOrgAccess(identity);
 
     return await ctx.runQuery(
-        components.betterAuth.organizations.getVisibleOrganizationBySlug,
-        {
-          slug: args.slug,
-          ...access,
-        }
+      components.betterAuth.organizations.getVisibleOrganizationBySlug,
+      {
+        slug: args.slug,
+        ...access,
+      }
     );
   }
 })
@@ -125,11 +129,11 @@ export const getVisibleOrganizationMembersBySlug = query({
     const access = getOrgAccess(identity);
 
     return await ctx.runQuery(
-        components.betterAuth.organizations.listVisibleOrganizationMembersBySlug,
-        {
-          slug: args.slug,
-          ...access,
-        }
+      components.betterAuth.organizations.listVisibleOrganizationMembersBySlug,
+      {
+        slug: args.slug,
+        ...access,
+      }
     );
   }
 })
@@ -149,31 +153,31 @@ export const getVisibleOrganizationDriversBySlug = query({
     const access = getOrgAccess(identity);
 
     const drivers = await ctx.runQuery(
-        components.betterAuth.organizations.listVisibleOrganizationDriversBySlug,
-        {
-          slug: args.slug,
-          ...access,
-        }
+      components.betterAuth.organizations.listVisibleOrganizationDriversBySlug,
+      {
+        slug: args.slug,
+        ...access,
+      }
     );
 
     return await Promise.all(
-        drivers.map(async (driver) => {
-          const pointTotal = await ctx.db
-              .query("pointTotals")
-              .filter((q) => q.eq(q.field("driverUserId"), driver.userId))
-              .first();
+      drivers.map(async (driver) => {
+        const pointTotal = await ctx.db
+          .query("pointTotals")
+          .filter((q) => q.eq(q.field("driverUserId"), driver.userId))
+          .first();
 
-          return {
-            userId: driver.userId,
-            name: driver.name,
-            email: driver.email,
-            points: pointTotal?.points ?? 0,
-            active: driver.active,
-            suspended: driver.suspended,
-            suspensionEnd: driver.suspensionEnd ?? null,
-            banReason: driver.banReason ?? null,
-          };
-        })
+        return {
+          userId: driver.userId,
+          name: driver.name,
+          email: driver.email,
+          points: pointTotal?.points ?? 0,
+          active: driver.active,
+          suspended: driver.suspended,
+          suspensionEnd: driver.suspensionEnd ?? null,
+          banReason: driver.banReason ?? null,
+        };
+      })
     );
   }
 })
@@ -195,9 +199,9 @@ export const updateDriverPoints = mutation({
     }
 
     const existingTotal = await ctx.db
-        .query("pointTotals")
-        .filter((q) => q.eq(q.field("driverUserId"), args.driverUserId))
-        .first();
+      .query("pointTotals")
+      .filter((q) => q.eq(q.field("driverUserId"), args.driverUserId))
+      .first();
 
     const currentPoints = existingTotal?.points ?? 0;
     const nextPoints = currentPoints + args.pointChange;
@@ -246,12 +250,12 @@ export const addVisibleOrganizationMemberByEmail = mutation({
     const access = getOrgAccess(identity);
 
     return await ctx.runMutation(
-        components.betterAuth.organizations.addMemberByEmail,
-        {
-          slug: args.slug,
-          email: args.email,
-          ...access,
-        }
+      components.betterAuth.organizations.addMemberByEmail,
+      {
+        slug: args.slug,
+        email: args.email,
+        ...access,
+      }
     );
   }
 })
@@ -275,12 +279,12 @@ export const updateVisibleOrganization = mutation({
     const access = getOrgAccess(identity);
 
     await ctx.runMutation(
-        components.betterAuth.organizations.updateVisibleOrganization,
-        {
-          organizationId: args.organizationId,
-          data: args.data,
-          ...access,
-        }
+      components.betterAuth.organizations.updateVisibleOrganization,
+      {
+        organizationId: args.organizationId,
+        data: args.data,
+        ...access,
+      }
     );
   }
 })
@@ -303,5 +307,79 @@ export const getImpersonationData = query({
 export const getAuditLog = query({
   handler: async (ctx) => {
     return ctx.db.query("auditLog").collect();
+  }
+})
+
+
+function parseOrg(org: any) {
+  return {
+    ...org,
+    createdAt: org.createdAt ? new Date(org.createdAt).getTime() : null,
+    logo: org.logo === "undefined" ? null : org.logo,
+    metadata: org.metadata === "undefined" ? null : org.metadata,
+    id: org.id as Id<"organization">
+  };
+
+}
+
+export const getDriverApplications = query({
+  handler: async (ctx) => {
+    const authed = await ctx.auth.getUserIdentity();
+    if (authed == null) return [];
+
+    const apps = await ctx.db.query("driverApplication")
+      .withIndex("by_user_id", q => q.eq("userId", authed.subject))
+      .collect();
+
+    const { auth } = await authComponent.getAuth(createAuth, ctx);
+    const db = auth.options.database(auth.options);
+
+
+    let newApps: { application: Doc<"driverApplication">, organization: typeof auth.$Infer.Organization }[] = [];
+
+    for (const application of apps) {
+      const organization = await db.findOne({
+        model: "organization",
+        where: [
+          {
+            field: "_id",
+            value: application.orgId,
+          }
+        ],
+      });
+      if (!organization) continue;
+
+      newApps.push({ organization: parseOrg(organization), application });
+    }
+
+    return newApps;
+  }
+})
+
+export const applyForDriverApplication = mutation({
+  args: {
+    organizationId: v.string()
+  },
+  handler: async (ctx, args) => {
+    const me = await ctx.auth.getUserIdentity();
+    if (!me) throw new Error("You are not authed");
+
+    await ctx.db.insert("driverApplication", {
+      orgId: args.organizationId,
+      status: 'waiting',
+      userId: me.subject,
+    })
+  }
+})
+
+export const listOrgs = query({
+  handler: async (ctx) => {
+    const { auth } = await authComponent.getAuth(createAuth, ctx);
+    const db = auth.options.database(auth.options);
+    const allOrgs = await db.findMany({
+      model: "organization",
+      where: [],
+    });
+    return allOrgs.map(parseOrg);
   }
 })
