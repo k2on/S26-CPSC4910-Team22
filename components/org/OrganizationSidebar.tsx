@@ -12,7 +12,13 @@ import {
 } from "@/components/ui/sidebar";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { HomeIcon, LucideIcon, UserRoundIcon, UsersRoundIcon } from "lucide-react";
+import {
+    ChartColumnIcon,
+    HomeIcon,
+    LucideIcon,
+    UserRoundIcon,
+    UsersRoundIcon,
+} from "lucide-react";
 
 const LINKS = [
     {
@@ -29,6 +35,11 @@ const LINKS = [
         label: "Manage Drivers",
         href: "/manage-drivers",
         icon: UserRoundIcon,
+    },
+    {
+        label: "Manage Organization",
+        href: "/manage-organization",
+        icon: ChartColumnIcon,
     },
 ] satisfies { label: string; href: string; icon: LucideIcon }[];
 

@@ -4,14 +4,14 @@ import { useMemo } from "react";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { DataTable } from "@/components/org/members/data-table";
-import { columns, type DriverRow } from "@/components/org/manage-drivers/columns";
+import { columns, type DriverPointChangeRow } from "@/components/org/manage-drivers/columns";
 
 export function OrganizationDrivers({ slug }: { slug: string }) {
-    const drivers = useQuery(api.myFunctions.getVisibleOrganizationDriversBySlug, { slug });
+    const pointChanges = useQuery(api.myFunctions.getVisibleOrganizationPointChangesBySlug, { slug });
 
-    const tableData = useMemo<DriverRow[]>(() => {
-        return drivers ?? [];
-    }, [drivers]);
+    const tableData = useMemo<DriverPointChangeRow[]>(() => {
+        return pointChanges ?? [];
+    }, [pointChanges]);
 
     return (
         <div className="flex flex-col gap-4">

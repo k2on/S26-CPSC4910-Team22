@@ -1583,6 +1583,13 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
         } | null,
         Name
       >;
+      getUserNamesByIds: FunctionReference<
+        "query",
+        "internal",
+        { userIds: Array<string> },
+        Array<{ name: string; userId: string }>,
+        Name
+      >;
       getVisibleOrganizationBySlug: FunctionReference<
         "query",
         "internal",

@@ -1600,6 +1600,12 @@ export declare const components: {
           slug: string;
         } | null
       >;
+      getUserNamesByIds: FunctionReference<
+        "query",
+        "internal",
+        { userIds: Array<string> },
+        Array<{ name: string; userId: string }>
+      >;
       getVisibleOrganizationBySlug: FunctionReference<
         "query",
         "internal",
