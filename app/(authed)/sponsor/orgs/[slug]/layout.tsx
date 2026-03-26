@@ -11,7 +11,7 @@ export default async function RootLayout({
 
     return (
         <div className="flex flex-1 h-full">
-            <OrganizationSidebar baseUrl={`/admin/orgs/${slug}`} />
+            <OrganizationSidebar baseUrl={`/sponsor/orgs/${slug}`} />
             <div className="flex-1">
                 {children}
             </div>

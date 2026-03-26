@@ -10,7 +10,7 @@ import {
         SidebarMenuButton,
         SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import { type LucideIcon, LineChartIcon, LogsIcon, UsersRoundIcon, HomeIcon, BuildingIcon } from "lucide-react"
+import { type LucideIcon, LogsIcon, UsersRoundIcon, HomeIcon, BuildingIcon } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation";
 
@@ -46,32 +46,33 @@ export function AdminSidebar() {
         const pathname = usePathname();
 
         return (
-                <Sidebar collapsible="offcanvas" className="top-(--header-height) h-[calc(100svh-var(--header-height))]!">
-                        <SidebarContent>
-                                <SidebarGroup>
-                                        <SidebarGroupLabel>Admin</SidebarGroupLabel>
-                                        <SidebarGroupContent>
-                                                <SidebarMenu>
-
-                                                        {LINKS.map(link => <SidebarMenuItem key={link.href}>
-                                                                <SidebarMenuButton asChild isActive={link.href == "/admin" ? pathname == "/admin" : pathname.includes(link.href)}>
+            <Sidebar
+                collapsible="offcanvas"
+                showRail={false}
+                className="top-(--header-height) h-[calc(100svh-var(--header-height))]!"
+            >
+                    <SidebarContent>
+                            <SidebarGroup>
+                                    <SidebarGroupLabel>Admin</SidebarGroupLabel>
+                                    <SidebarGroupContent>
+                                            <SidebarMenu>
+                                                    {LINKS.map(link => (
+                                                        <SidebarMenuItem key={link.href}>
+                                                                <SidebarMenuButton
+                                                                    asChild
+                                                                    isActive={link.href == "/admin" ? pathname == "/admin" : pathname.includes(link.href)}
+                                                                >
                                                                         <Link href={link.href}>
                                                                                 <link.icon />
                                                                                 <span>{link.label}</span>
                                                                         </Link>
                                                                 </SidebarMenuButton>
-                                                        </SidebarMenuItem>)}
-
-                                                </SidebarMenu>
-                                        </SidebarGroupContent>
-                                </SidebarGroup>
-                        </SidebarContent>
-                </Sidebar>
+                                                        </SidebarMenuItem>
+                                                    ))}
+                                            </SidebarMenu>
+                                    </SidebarGroupContent>
+                            </SidebarGroup>
+                    </SidebarContent>
+            </Sidebar>
         )
 }
-
-
-
-
-
-

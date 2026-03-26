@@ -20,6 +20,16 @@ export default defineSchema({
     userId: v.string(),
     orgId: v.string(),
     status: v.union(v.literal("waiting"), v.literal("denied"), v.literal("approved")),
+  }).index("by_user_id", { fields: ["userId"] }),
+  pointTotals: defineTable({
+    driverUserId: v.string(),
+    points: v.number(),
+  }),
+  pointChanges: defineTable({
+    driverUserId: v.string(),
+    changedByUserId: v.string(),
+    pointChange: v.number(),
+    reason: v.string(),
+    time: v.number(),
   })
-    .index("by_user_id", { fields: ["userId"] })
 });

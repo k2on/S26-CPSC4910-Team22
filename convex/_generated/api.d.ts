@@ -1562,5 +1562,124 @@ export declare const components: {
         any
       >;
     };
+    organizations: {
+      addMemberByEmail: FunctionReference<
+        "mutation",
+        "internal",
+        {
+          canAccessAll: boolean;
+          currentUserId: string;
+          email: string;
+          slug: string;
+        },
+        {
+          organizationName: string;
+          status: "added" | "already_exists" | "user_not_found";
+        }
+      >;
+      getOrganizationBySlug: FunctionReference<
+        "query",
+        "internal",
+        { slug: string },
+        {
+          _creationTime: number;
+          _id: string;
+          createdAt: number;
+          logo?: null | string;
+          metadata?: null | string;
+          name: string;
+          pointValue: number;
+          slug: string;
+        } | null
+      >;
+      getVisibleOrganizationBySlug: FunctionReference<
+        "query",
+        "internal",
+        { canAccessAll: boolean; currentUserId: string; slug: string },
+        {
+          _creationTime: number;
+          _id: string;
+          createdAt: number;
+          logo?: null | string;
+          metadata?: null | string;
+          name: string;
+          pointValue: number;
+          slug: string;
+        } | null
+      >;
+      listOrganizations: FunctionReference<
+        "query",
+        "internal",
+        {},
+        Array<{
+          _creationTime: number;
+          _id: string;
+          createdAt: number;
+          logo?: null | string;
+          metadata?: null | string;
+          name: string;
+          pointValue: number;
+          slug: string;
+        }>
+      >;
+      listVisibleOrganizationDriversBySlug: FunctionReference<
+        "query",
+        "internal",
+        { canAccessAll: boolean; currentUserId: string; slug: string },
+        Array<{
+          active: boolean;
+          banReason?: null | string;
+          email: string;
+          name: string;
+          suspended: boolean;
+          suspensionEnd?: null | number;
+          userId: string;
+        }>
+      >;
+      listVisibleOrganizationMembersBySlug: FunctionReference<
+        "query",
+        "internal",
+        { canAccessAll: boolean; currentUserId: string; slug: string },
+        Array<{
+          createdAt: number;
+          id: string;
+          organizationId: string;
+          role: "owner" | "admin" | "member";
+          user: {
+            email: string;
+            id: string;
+            image?: null | string;
+            name: string;
+          };
+          userId: string;
+        }>
+      >;
+      listVisibleOrganizations: FunctionReference<
+        "query",
+        "internal",
+        { canAccessAll: boolean; currentUserId: string },
+        Array<{
+          _creationTime: number;
+          _id: string;
+          createdAt: number;
+          logo?: null | string;
+          metadata?: null | string;
+          name: string;
+          pointValue: number;
+          slug: string;
+        }>
+      >;
+      updateVisibleOrganization: FunctionReference<
+        "mutation",
+        "internal",
+        {
+          canAccessAll: boolean;
+          currentUserId: string;
+          data: { name?: string; pointValue?: number; slug?: string };
+          organizationId: string;
+        },
+        null
+      >;
+    };
   };
 };
