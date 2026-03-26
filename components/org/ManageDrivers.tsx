@@ -13,6 +13,7 @@ import {
     CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 
 export function OrganizationDrivers({ slug }: { slug: string }) {
     const pointChanges = useQuery(api.myFunctions.getVisibleOrganizationPointChangesBySlug, { slug });
@@ -41,6 +42,49 @@ export function OrganizationDrivers({ slug }: { slug: string }) {
         };
     }, [pointChanges, drivers]);
 
+    function escapeCsvValue(value: string | number) {
+        const stringValue = String(value);
+        const escapedValue = stringValue.replace(/"/g, '""');
+        return `"${escapedValue}"`;
+    }
+
+    function downloadCsv() {
+        const headers = [
+            "Driver Name",
+            "Driver Email",
+            "Changed By",
+            "Point Change",
+            "Reason",
+            "Time",
+        ];
+
+        const rows = tableData.map((row) => [
+            row.driverName,
+            row.driverEmail,
+            row.changedByName,
+            row.pointChange,
+            row.reason || "—",
+            new Date(row.time).toLocaleString(),
+        ]);
+
+        const csvContent = [
+            headers.map(escapeCsvValue).join(","),
+            ...rows.map((row) => row.map(escapeCsvValue).join(",")),
+        ].join("\n");
+
+        const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+        const url = URL.createObjectURL(blob);
+
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `point-update-history-${slug}.csv`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        URL.revokeObjectURL(url);
+    }
+
     if (pointChanges === undefined || drivers === undefined) {
         return (
             <Card>
@@ -55,8 +99,14 @@ export function OrganizationDrivers({ slug }: { slug: string }) {
     return (
         <Card className="mt-8">
             <CardHeader className="gap-4">
-                <div>
-                    <CardTitle>Point Update History</CardTitle>
+                <div className="flex items-start justify-between gap-4">
+                    <div>
+                        <CardTitle>Point Update History</CardTitle>
+                    </div>
+
+                    <Button type="button" onClick={downloadCsv}>
+                        Download CSV
+                    </Button>
                 </div>
 
                 <div className="flex flex-wrap gap-2">
