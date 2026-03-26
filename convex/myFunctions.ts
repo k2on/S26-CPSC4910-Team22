@@ -2,6 +2,9 @@ import { v } from "convex/values";
 import { query, mutation, action } from "./_generated/server";
 import { api } from "./_generated/api";
 import { authComponent, createAuth, createAuthOptions, options } from "./betterAuth/auth";
+import { Organization } from "better-auth/plugins";
+import { Doc } from "./_generated/dataModel";
+import { Id } from "./betterAuth/_generated/dataModel";
 
 // Write your Convex functions in any file inside this directory (`convex`).
 // See https://docs.convex.dev/functions for more.
@@ -74,6 +77,17 @@ export const getAuditLog = query({
 })
 
 
+function parseOrg(org: any) {
+  return {
+    ...org,
+    createdAt: org.createdAt ? new Date(org.createdAt).getTime() : null,
+    logo: org.logo === "undefined" ? null : org.logo,
+    metadata: org.metadata === "undefined" ? null : org.metadata,
+    id: org.id as Id<"organization">
+  };
+
+}
+
 export const getDriverApplications = query({
   handler: async (ctx) => {
     const authed = await ctx.auth.getUserIdentity();
@@ -83,11 +97,55 @@ export const getDriverApplications = query({
       .withIndex("by_user_id", q => q.eq("userId", authed.subject))
       .collect();
 
-    const auth = createAuth(ctx);
-    // const org = auth.api.
+    const { auth } = await authComponent.getAuth(createAuth, ctx);
+    const db = auth.options.database(auth.options);
 
-    const orgs = [...new Set(apps.map(a => a.orgId))]
 
-    return apps;
+    let newApps: { application: Doc<"driverApplication">, organization: typeof auth.$Infer.Organization }[] = [];
+
+    for (const application of apps) {
+      const organization = await db.findOne({
+        model: "organization",
+        where: [
+          {
+            field: "_id",
+            value: application.orgId,
+          }
+        ],
+      });
+      if (!organization) continue;
+
+      newApps.push({ organization: parseOrg(organization), application });
+    }
+
+    return newApps;
+  }
+})
+
+export const applyForDriverApplication = mutation({
+  args: {
+    organizationId: v.string()
+  },
+  handler: async (ctx, args) => {
+    const me = await ctx.auth.getUserIdentity();
+    if (!me) throw new Error("You are not authed");
+
+    await ctx.db.insert("driverApplication", {
+      orgId: args.organizationId,
+      status: 'waiting',
+      userId: me.subject,
+    })
+  }
+})
+
+export const listOrgs = query({
+  handler: async (ctx) => {
+    const { auth } = await authComponent.getAuth(createAuth, ctx);
+    const db = auth.options.database(auth.options);
+    const allOrgs = await db.findMany({
+      model: "organization",
+      where: [],
+    });
+    return allOrgs.map(parseOrg);
   }
 })
