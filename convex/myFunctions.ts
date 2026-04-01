@@ -324,7 +324,7 @@ export const getVisibleOrganizationPointChangesBySlug = query({
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
 
-    if (!identity || (identity.role !== "admin" && identity.role !== "sponsor")) {
+    if (!identity) {
       return [];
     }
 
@@ -491,5 +491,24 @@ export const getOrganizationGeneralBySlug = query({
       name: organization.name,
       totalMembers: organization.totalMembers,
     };
+  },
+});
+
+export const getCurrentUserName = query({
+  handler: async (ctx) => {
+    const identity = await ctx.auth.getUserIdentity();
+
+    if (!identity) {
+      return null;
+    }
+
+    const users = await ctx.runQuery(
+        components.betterAuth.organizations.getUserNamesByIds,
+        {
+          userIds: [identity.subject],
+        }
+    );
+
+    return users[0]?.name ?? null;
   },
 });
