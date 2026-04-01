@@ -105,6 +105,7 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
                   name: string;
                   pointValue: number;
                   slug: string;
+                  totalMembers?: number;
                 };
                 model: "organization";
               }
@@ -329,6 +330,7 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
                     | "createdAt"
                     | "metadata"
                     | "pointValue"
+                    | "totalMembers"
                     | "_id";
                   operator?:
                     | "lt"
@@ -623,6 +625,7 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
                     | "createdAt"
                     | "metadata"
                     | "pointValue"
+                    | "totalMembers"
                     | "_id";
                   operator?:
                     | "lt"
@@ -1054,6 +1057,7 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
                   name?: string;
                   pointValue?: number;
                   slug?: string;
+                  totalMembers?: number;
                 };
                 where?: Array<{
                   connector?: "AND" | "OR";
@@ -1064,6 +1068,7 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
                     | "createdAt"
                     | "metadata"
                     | "pointValue"
+                    | "totalMembers"
                     | "_id";
                   operator?:
                     | "lt"
@@ -1424,6 +1429,7 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
                   name?: string;
                   pointValue?: number;
                   slug?: string;
+                  totalMembers?: number;
                 };
                 where?: Array<{
                   connector?: "AND" | "OR";
@@ -1434,6 +1440,7 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
                     | "createdAt"
                     | "metadata"
                     | "pointValue"
+                    | "totalMembers"
                     | "_id";
                   operator?:
                     | "lt"
@@ -1581,6 +1588,13 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
           pointValue: number;
           slug: string;
         } | null,
+        Name
+      >;
+      getOrganizationSelectionData: FunctionReference<
+        "query",
+        "internal",
+        { authUserId: string; role: "admin" | "sponsor" | "driver" },
+        any,
         Name
       >;
       getUserNamesByIds: FunctionReference<

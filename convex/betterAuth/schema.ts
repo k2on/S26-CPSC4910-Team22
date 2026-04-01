@@ -85,6 +85,7 @@ export const tables = {
     createdAt: v.number(),
     metadata: v.optional(v.union(v.null(), v.string())),
     pointValue: v.number(),
+    totalMembers: v.optional(v.number()),
   })
     .index("name", ["name"])
     .index("slug", ["slug"]),

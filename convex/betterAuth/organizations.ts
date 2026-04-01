@@ -42,6 +42,12 @@ const userNameByIdValidator = v.object({
     name: v.string(),
 });
 
+const organizationSelectionRoleValidator = v.union(
+    v.literal("admin"),
+    v.literal("sponsor"),
+    v.literal("driver")
+);
+
 async function getOrganizationBySlugInternal(
     ctx: Parameters<typeof query>[0] extends never ? never : any,
     slug: string
@@ -408,5 +414,73 @@ export const getUserNamesByIds = query({
         );
 
         return users.filter((user): user is NonNullable<typeof user> => user !== null);
+    },
+});
+
+type OrganizationSelectionRole = "admin" | "sponsor" | "driver";
+
+type OrganizationSelectionRow = {
+    name: string;
+    slug: string;
+    totalMembers?: number;
+    inOrganization?: "Yes" | "No";
+    points?: number;
+};
+
+type OrganizationSelectionData = {
+    role: OrganizationSelectionRole;
+    rows: OrganizationSelectionRow[];
+};
+
+export const getOrganizationSelectionData = query({
+    args: {
+        authUserId: v.string(),
+        role: organizationSelectionRoleValidator,
+    },
+    handler: async (ctx, args): Promise<OrganizationSelectionData> => {
+        const memberships = await ctx.db
+            .query("member")
+            .withIndex("userId", (q) => q.eq("userId", args.authUserId))
+            .collect();
+
+        const memberOrganizationIds = new Set<string>(
+            memberships.map((membership) => membership.organizationId)
+        );
+
+        if (args.role === "admin") {
+            const organizations = await ctx.db.query("organization").collect();
+
+            return {
+                role: args.role,
+                rows: organizations.map((organization) => ({
+                    name: organization.name,
+                    slug: organization.slug,
+                    totalMembers: organization.totalMembers,
+                    inOrganization: memberOrganizationIds.has(String(organization._id))
+                        ? "Yes"
+                        : "No",
+                })),
+            };
+        }
+
+        const visibleOrganizations = (
+            await Promise.all(
+                memberships.map((membership) =>
+                    ctx.db.get(membership.organizationId as Id<"organization">)
+                )
+            )
+        ).filter(
+            (organization): organization is NonNullable<typeof organization> =>
+                organization !== null
+        );
+
+        return {
+            role: args.role,
+            rows: visibleOrganizations.map((organization) => ({
+                name: organization.name,
+                slug: organization.slug,
+                totalMembers: organization.totalMembers,
+            })),
+        };
     },
 });

@@ -386,3 +386,44 @@ export const getVisibleOrganizationPointChangesBySlug = query({
         .sort((a, b) => b.time - a.time);
   }
 });
+
+type OrganizationSelectionRole = "admin" | "sponsor" | "driver";
+
+type OrganizationSelectionRow = {
+  name: string;
+  slug: string;
+  totalMembers?: number;
+  inOrganization?: "Yes" | "No";
+  points?: number;
+};
+
+type OrganizationSelectionData = {
+  role: OrganizationSelectionRole;
+  rows: OrganizationSelectionRow[];
+};
+
+export const getOrganizationSelectionData = query({
+  handler: async (ctx): Promise<OrganizationSelectionData> => {
+    const identity = await ctx.auth.getUserIdentity();
+
+    if (
+        !identity ||
+        (identity.role !== "admin" &&
+            identity.role !== "sponsor" &&
+            identity.role !== "driver")
+    ) {
+      return {
+        role: "driver",
+        rows: [],
+      };
+    }
+
+    return await ctx.runQuery(
+        components.betterAuth.organizations.getOrganizationSelectionData,
+        {
+          authUserId: identity.subject,
+          role: identity.role,
+        }
+    );
+  },
+});

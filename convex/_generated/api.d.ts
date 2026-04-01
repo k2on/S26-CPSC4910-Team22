@@ -132,6 +132,7 @@ export declare const components: {
                   name: string;
                   pointValue: number;
                   slug: string;
+                  totalMembers?: number;
                 };
                 model: "organization";
               }
@@ -355,6 +356,7 @@ export declare const components: {
                     | "createdAt"
                     | "metadata"
                     | "pointValue"
+                    | "totalMembers"
                     | "_id";
                   operator?:
                     | "lt"
@@ -648,6 +650,7 @@ export declare const components: {
                     | "createdAt"
                     | "metadata"
                     | "pointValue"
+                    | "totalMembers"
                     | "_id";
                   operator?:
                     | "lt"
@@ -1076,6 +1079,7 @@ export declare const components: {
                   name?: string;
                   pointValue?: number;
                   slug?: string;
+                  totalMembers?: number;
                 };
                 where?: Array<{
                   connector?: "AND" | "OR";
@@ -1086,6 +1090,7 @@ export declare const components: {
                     | "createdAt"
                     | "metadata"
                     | "pointValue"
+                    | "totalMembers"
                     | "_id";
                   operator?:
                     | "lt"
@@ -1445,6 +1450,7 @@ export declare const components: {
                   name?: string;
                   pointValue?: number;
                   slug?: string;
+                  totalMembers?: number;
                 };
                 where?: Array<{
                   connector?: "AND" | "OR";
@@ -1455,6 +1461,7 @@ export declare const components: {
                     | "createdAt"
                     | "metadata"
                     | "pointValue"
+                    | "totalMembers"
                     | "_id";
                   operator?:
                     | "lt"
@@ -1599,6 +1606,12 @@ export declare const components: {
           pointValue: number;
           slug: string;
         } | null
+      >;
+      getOrganizationSelectionData: FunctionReference<
+        "query",
+        "internal",
+        { authUserId: string; role: "admin" | "sponsor" | "driver" },
+        any
       >;
       getUserNamesByIds: FunctionReference<
         "query",
