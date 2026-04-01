@@ -1,4 +1,4 @@
-import { OrganizationDrivers } from "@/components/org/ManageDrivers";
+import { OrganizationPoints } from "@/components/org/ManagePoints";
 
 // need to update for driver role
 export default async function Page({ params }: { params: Promise<{ slug: string }> }) {
@@ -6,7 +6,7 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
 
     return (
         <div className="pt-8">
-            <OrganizationDrivers slug={slug} />
+            <OrganizationPoints slug={slug} />
         </div>
     );
 }

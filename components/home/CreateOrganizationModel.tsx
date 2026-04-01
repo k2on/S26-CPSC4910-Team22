@@ -30,7 +30,7 @@ import { PlusIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
-export function CreateOrganizationModal() {
+export function CreateOrganizationModel() {
     const router = useRouter();
     const [open, setOpen] = useState(false);
 

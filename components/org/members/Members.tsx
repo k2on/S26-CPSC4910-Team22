@@ -4,8 +4,8 @@ import { useMemo, useState } from "react";
 import { useMutation, useQuery } from "convex/react";
 import type { createAuth } from "@/convex/betterAuth/auth";
 import { api } from "@/convex/_generated/api";
-import { DataTable } from "./members/data-table";
-import { columns } from "./members/columns";
+import { DataTable } from "./data-table";
+import { columns } from "./columns";
 import { Button } from "@/components/ui/button";
 import {
         Dialog,

@@ -17,7 +17,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
-export function OrganizationDrivers({ slug }: { slug: string }) {
+export function OrganizationPoints({ slug }: { slug: string }) {
     const [showFilters, setShowFilters] = useState(false);
     const [driverNameSearch, setDriverNameSearch] = useState("");
     const [driverEmailSearch, setDriverEmailSearch] = useState("");

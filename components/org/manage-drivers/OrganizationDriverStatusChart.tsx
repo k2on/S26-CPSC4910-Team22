@@ -3,7 +3,7 @@
 import { useMemo } from "react";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import { columns, DriverRow } from "./manage-organization/columns";
+import { columns, DriverRow } from "../manage-organization/columns";
 import {
     Card,
     CardContent,

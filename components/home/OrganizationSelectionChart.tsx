@@ -15,7 +15,7 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
-import { CreateOrganizationModal } from "@/components/home/CreateOrganizationModal";
+import { CreateOrganizationModel } from "@/components/home/CreateOrganizationModel";
 
 export type OrganizationSelectionRole = "admin" | "sponsor" | "driver";
 
@@ -68,7 +68,7 @@ export function OrganizationSelectionChart() {
                 <CardHeader className="flex flex-row items-center justify-between gap-4">
                     <CardTitle>Organizations</CardTitle>
                     <div className="flex items-center gap-2">
-                        {canCreateOrganization && <CreateOrganizationModal />}
+                        {canCreateOrganization && <CreateOrganizationModel />}
                         <Button disabled>Select Organization</Button>
                     </div>
                 </CardHeader>
@@ -86,7 +86,7 @@ export function OrganizationSelectionChart() {
                 <CardTitle>Organizations</CardTitle>
 
                 <div className="flex items-center gap-2">
-                    {canCreateOrganization && <CreateOrganizationModal />}
+                    {canCreateOrganization && <CreateOrganizationModel />}
                     <Button onClick={handleSelectOrganization} disabled={!selectedRow}>
                         Select Organization
                     </Button>
