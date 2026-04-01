@@ -13,38 +13,86 @@ import {
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-    ChartColumnIcon,
-    HomeIcon,
+    BookUp,
+    CircleDollarSign,
+    House,
     LucideIcon,
+    Settings,
+    ScrollText,
     UserRoundIcon,
     UsersRoundIcon,
 } from "lucide-react";
+
+export type OrganizationSidebarRole = "admin" | "sponsor" | "driver";
 
 const LINKS = [
     {
         label: "General",
         href: "",
-        icon: HomeIcon,
+        icon: House,
+        roles: ["admin", "sponsor", "driver"],
     },
     {
         label: "Members",
         href: "/members",
         icon: UsersRoundIcon,
+        roles: ["admin", "sponsor"],
     },
     {
-        label: "Manage Drivers",
-        href: "/manage-drivers",
+        label: "Driver Management",
+        href: "/driver-management",
         icon: UserRoundIcon,
+        roles: ["admin", "sponsor"],
     },
     {
-        label: "Manage Organization",
-        href: "/manage-organization",
-        icon: ChartColumnIcon,
+        label: "Points",
+        href: "/points",
+        icon: CircleDollarSign,
+        roles: ["admin", "sponsor", "driver"],
     },
-] satisfies { label: string; href: string; icon: LucideIcon }[];
+    {
+        label: "Catalog",
+        href: "/catalog",
+        icon: BookUp,
+        roles: ["admin", "sponsor", "driver"],
+    },
+    {
+        label: "Audit Log",
+        href: "/log",
+        icon: ScrollText,
+        roles: ["admin"],
+    },
+    {
+        label: "Settings",
+        href: "/settings",
+        icon: Settings,
+        roles: ["admin", "sponsor"],
+    },
+] satisfies {
+    label: string;
+    href: string;
+    icon: LucideIcon;
+    roles: OrganizationSidebarRole[];
+}[];
 
-export function OrganizationSidebar({ baseUrl }: { baseUrl?: string }) {
+function isLinkActive(pathname: string, href: string) {
+    if (href === "") {
+        return pathname === "";
+    }
+
+    return pathname === href || pathname.startsWith(`${href}/`);
+}
+
+export function OrganizationSidebar({
+                                        baseUrl,
+                                        role,
+                                    }: {
+    baseUrl: string;
+    role: OrganizationSidebarRole;
+}) {
     const pathname = usePathname();
+
+    const visibleLinks = LINKS.filter((link) => link.roles.includes(role));
 
     return (
         <Sidebar
@@ -56,11 +104,14 @@ export function OrganizationSidebar({ baseUrl }: { baseUrl?: string }) {
                     <SidebarGroupLabel>Organization</SidebarGroupLabel>
                     <SidebarGroupContent>
                         <SidebarMenu>
-                            {LINKS.map((link) => {
-                                const href = baseUrl ? baseUrl + link.href : link.href;
+                            {visibleLinks.map((link) => {
+                                const href = `${baseUrl}${link.href}`;
                                 return (
                                     <SidebarMenuItem key={href}>
-                                        <SidebarMenuButton asChild isActive={pathname.endsWith(href)}>
+                                        <SidebarMenuButton
+                                            asChild
+                                            isActive={isLinkActive(pathname, href)}
+                                        >
                                             <Link href={href}>
                                                 <link.icon />
                                                 <span>{link.label}</span>

@@ -8,7 +8,7 @@ import { useQuery } from "convex/react";
 export default function Page() {
   const data = useQuery(api.myFunctions.getAuditLog);
 
-  return <div className="pt-4 max-w-2xl mx-auto">
+  return <div className="pt-4">
     <DataTable columns={columns} data={data || []} />
   </div>
 }

@@ -168,7 +168,7 @@ export default async function Page({searchParams}: {searchParams: Promise<{[key:
                 </div>}
             </div>
             {(fullResults.length > 0 && queryTerm != "") && <div className="py-2 text-center">
-                Showing {startIndex}-{endIndex} of {fullResults.length} Results 
+                Showing {startIndex}-{endIndex} of {fullResults.length} Results
             </div>}
         </div>
     );
