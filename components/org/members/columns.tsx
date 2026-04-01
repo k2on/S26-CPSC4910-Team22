@@ -35,7 +35,7 @@ type Auth = ReturnType<typeof createAuth>;
 type Member = Auth["$Infer"]["Member"];
 
 // replacement for BetterFetchError
-// couldn't figure out why line "import { BetterFetchError } from "better-auth/client";" started causing this error:
+// couldn't figure out how to fix line "import { BetterFetchError } from "better-auth/client";" causing this error:
 // "Export BetterFetchError doesn't exist in target module"
 function getErrorMessage(error: unknown) {
         if (
