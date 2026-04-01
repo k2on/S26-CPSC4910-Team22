@@ -57,12 +57,6 @@ const LINKS = [
         roles: ["admin", "sponsor", "driver"],
     },
     {
-        label: "Audit Log",
-        href: "/log",
-        icon: ScrollText,
-        roles: ["admin"],
-    },
-    {
         label: "Settings",
         href: "/settings",
         icon: Settings,

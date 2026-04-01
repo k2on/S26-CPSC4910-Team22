@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { fetchAuthQuery } from "@/lib/auth-server";
 import { api } from "@/convex/_generated/api";
 
-export default async function LogLayout({
+export default async function AdminOnlyLayout({
                                                  children,
                                              }: {
     children: ReactNode;
