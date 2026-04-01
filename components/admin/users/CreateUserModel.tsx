@@ -148,7 +148,7 @@ export function CreateUserModel() {
                                                                 const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
                                                                 return (
                                                                         <Field data-invalid={isInvalid}>
-                                                                                <FieldLabel htmlFor={field.name}>Name</FieldLabel>
+                                                                                <FieldLabel htmlFor={field.name}>Role</FieldLabel>
                                                                                 <Select
                                                                                         name={field.name}
                                                                                         value={field.state.value}
