@@ -158,6 +158,18 @@ export const getVisibleOrganizationDriversBySlug = query({
 
     const access = getOrgAccess(identity);
 
+    const organization = await ctx.runQuery(
+        components.betterAuth.organizations.getVisibleOrganizationBySlug,
+        {
+          slug: args.slug,
+          ...access,
+        }
+    );
+
+    if (!organization) {
+      return [];
+    }
+
     const drivers = await ctx.runQuery(
         components.betterAuth.organizations.listVisibleOrganizationDriversBySlug,
         {
@@ -170,7 +182,12 @@ export const getVisibleOrganizationDriversBySlug = query({
         drivers.map(async (driver) => {
           const pointTotal = await ctx.db
               .query("pointTotals")
-              .filter((q) => q.eq(q.field("driverUserId"), driver.userId))
+              .filter((q) =>
+                  q.and(
+                      q.eq(q.field("driverUserId"), driver.userId),
+                      q.eq(q.field("organizationId"), String(organization._id))
+                  )
+              )
               .first();
 
           return {
@@ -191,6 +208,7 @@ export const getVisibleOrganizationDriversBySlug = query({
 export const updateDriverPoints = mutation({
   args: {
     driverUserId: v.string(),
+    slug: v.string(),
     pointChange: v.number(),
     reason: v.string(),
   },
@@ -204,9 +222,30 @@ export const updateDriverPoints = mutation({
       throw new Error("unauthorized");
     }
 
+    const access = getOrgAccess(identity);
+
+    const organization = await ctx.runQuery(
+        components.betterAuth.organizations.getVisibleOrganizationBySlug,
+        {
+          slug: args.slug,
+          ...access,
+        }
+    );
+
+    if (!organization) {
+      throw new Error("Organization not found");
+    }
+
+    const organizationId = String(organization._id);
+
     const existingTotal = await ctx.db
         .query("pointTotals")
-        .filter((q) => q.eq(q.field("driverUserId"), args.driverUserId))
+        .filter((q) =>
+            q.and(
+                q.eq(q.field("driverUserId"), args.driverUserId),
+                q.eq(q.field("organizationId"), organizationId)
+            )
+        )
         .first();
 
     const currentPoints = existingTotal?.points ?? 0;
@@ -223,12 +262,14 @@ export const updateDriverPoints = mutation({
     } else {
       await ctx.db.insert("pointTotals", {
         driverUserId: args.driverUserId,
+        organizationId,
         points: nextPoints,
       });
     }
 
     await ctx.db.insert("pointChanges", {
       driverUserId: args.driverUserId,
+      organizationId,
       changedByUserId: identity.subject,
       pointChange: args.pointChange,
       reason: args.reason,
@@ -376,6 +417,20 @@ export const getVisibleOrganizationPointChangesBySlug = query({
 
     const access = getOrgAccess(identity);
 
+    const organization = await ctx.runQuery(
+        components.betterAuth.organizations.getVisibleOrganizationBySlug,
+        {
+          slug: args.slug,
+          ...access,
+        }
+    );
+
+    if (!organization) {
+      return [];
+    }
+
+    const organizationId = String(organization._id);
+
     const drivers = await ctx.runQuery(
         components.betterAuth.organizations.listVisibleOrganizationDriversBySlug,
         {
@@ -394,7 +449,10 @@ export const getVisibleOrganizationPointChangesBySlug = query({
         ])
     );
 
-    const pointChanges = await ctx.db.query("pointChanges").collect();
+    const pointChanges = await ctx.db
+        .query("pointChanges")
+        .filter((q) => q.eq(q.field("organizationId"), organizationId))
+        .collect();
 
     const relevantPointChanges = pointChanges.filter((change) =>
         driverMap.has(change.driverUserId)
@@ -519,7 +577,12 @@ export const getOrganizationGeneralBySlug = query({
     if (identity.role === "driver") {
       const pointTotal = await ctx.db
           .query("pointTotals")
-          .filter((q) => q.eq(q.field("driverUserId"), identity.subject))
+          .filter((q) =>
+              q.and(
+                  q.eq(q.field("driverUserId"), identity.subject),
+                  q.eq(q.field("organizationId"), organization._id)
+              )
+          )
           .first();
 
       const currentPoints = pointTotal?.points ?? 0;

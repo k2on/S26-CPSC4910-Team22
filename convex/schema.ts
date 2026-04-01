@@ -18,10 +18,12 @@ export default defineSchema({
   }),
   pointTotals: defineTable({
     driverUserId: v.string(),
+    organizationId: v.string(),
     points: v.number(),
   }),
   pointChanges: defineTable({
     driverUserId: v.string(),
+    organizationId: v.string(),
     changedByUserId: v.string(),
     pointChange: v.number(),
     reason: v.string(),
