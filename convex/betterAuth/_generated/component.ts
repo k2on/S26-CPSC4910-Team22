@@ -1574,6 +1574,13 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
         },
         Name
       >;
+      decrementOrganizationMemberCount: FunctionReference<
+        "mutation",
+        "internal",
+        { canAccessAll: boolean; currentUserId: string; slug: string },
+        null,
+        Name
+      >;
       getOrganizationBySlug: FunctionReference<
         "query",
         "internal",
@@ -1587,6 +1594,7 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
           name: string;
           pointValue: number;
           slug: string;
+          totalMembers?: number;
         } | null,
         Name
       >;
@@ -1624,7 +1632,15 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
           name: string;
           pointValue: number;
           slug: string;
+          totalMembers?: number;
         } | null,
+        Name
+      >;
+      incrementOrganizationMemberCount: FunctionReference<
+        "mutation",
+        "internal",
+        { canAccessAll: boolean; currentUserId: string; slug: string },
+        null,
         Name
       >;
       listOrganizations: FunctionReference<
@@ -1640,6 +1656,7 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
           name: string;
           pointValue: number;
           slug: string;
+          totalMembers?: number;
         }>,
         Name
       >;
@@ -1690,6 +1707,7 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
           name: string;
           pointValue: number;
           slug: string;
+          totalMembers?: number;
         }>,
         Name
       >;

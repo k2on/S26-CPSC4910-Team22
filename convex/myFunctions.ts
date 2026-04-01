@@ -266,6 +266,52 @@ export const addVisibleOrganizationMemberByEmail = mutation({
   }
 })
 
+export const incrementOrganizationMemberCount = mutation({
+  args: {
+    slug: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+
+    if (!identity || (identity.role !== "admin" && identity.role !== "sponsor")) {
+      throw new Error("unauthorized");
+    }
+
+    const access = getOrgAccess(identity);
+
+    return await ctx.runMutation(
+        components.betterAuth.organizations.incrementOrganizationMemberCount,
+        {
+          slug: args.slug,
+          ...access,
+        }
+    );
+  }
+})
+
+export const decrementOrganizationMemberCount = mutation({
+  args: {
+    slug: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+
+    if (!identity || (identity.role !== "admin" && identity.role !== "sponsor")) {
+      throw new Error("unauthorized");
+    }
+
+    const access = getOrgAccess(identity);
+
+    return await ctx.runMutation(
+        components.betterAuth.organizations.decrementOrganizationMemberCount,
+        {
+          slug: args.slug,
+          ...access,
+        }
+    );
+  }
+})
+
 export const updateVisibleOrganization = mutation({
   args: {
     organizationId: v.string(),

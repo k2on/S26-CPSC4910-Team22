@@ -11,6 +11,7 @@ const organizationValidator = v.object({
     createdAt: v.number(),
     metadata: v.optional(v.union(v.null(), v.string())),
     pointValue: v.number(),
+    totalMembers: v.optional(v.number()),
 });
 
 const memberValidator = v.object({
@@ -69,6 +70,27 @@ async function userHasOrganizationAccess(
         .collect();
 
     return memberships.some((member: { organizationId: string }) => member.organizationId === organizationId);
+}
+
+async function adjustOrganizationMemberCount(
+    ctx: Parameters<typeof mutation>[0] extends never ? never : any,
+    slug: string,
+    change: 1 | -1
+) {
+    const organization = await getOrganizationBySlugInternal(ctx, slug);
+
+    if (!organization) {
+        throw new Error("Organization not found");
+    }
+
+    const currentTotal = organization.totalMembers ?? 0;
+    const nextTotal = Math.max(0, currentTotal + change);
+
+    await ctx.db.patch(organization._id, {
+        totalMembers: nextTotal,
+    });
+
+    return null;
 }
 
 export const listOrganizations = query({
@@ -353,10 +375,72 @@ export const addMemberByEmail = mutation({
             createdAt: Date.now(),
         });
 
+        await adjustOrganizationMemberCount(ctx, args.slug, 1);
+
         return {
             status: "added" as const,
             organizationName: organization.name,
         };
+    },
+});
+
+export const incrementOrganizationMemberCount = mutation({
+    args: {
+        slug: v.string(),
+        currentUserId: v.string(),
+        canAccessAll: v.boolean(),
+    },
+    returns: v.null(),
+    handler: async (ctx, args) => {
+        const organization = await getOrganizationBySlugInternal(ctx, args.slug);
+
+        if (!organization) {
+            throw new Error("Organization not found");
+        }
+
+        if (!args.canAccessAll) {
+            const hasAccess = await userHasOrganizationAccess(
+                ctx,
+                args.currentUserId,
+                String(organization._id)
+            );
+
+            if (!hasAccess) {
+                throw new Error("unauthorized");
+            }
+        }
+
+        return await adjustOrganizationMemberCount(ctx, args.slug, 1);
+    },
+});
+
+export const decrementOrganizationMemberCount = mutation({
+    args: {
+        slug: v.string(),
+        currentUserId: v.string(),
+        canAccessAll: v.boolean(),
+    },
+    returns: v.null(),
+    handler: async (ctx, args) => {
+        const organization = await getOrganizationBySlugInternal(ctx, args.slug);
+
+        if (!organization) {
+            throw new Error("Organization not found");
+        }
+
+        if (!args.canAccessAll) {
+            const hasAccess = await userHasOrganizationAccess(
+                ctx,
+                args.currentUserId,
+                String(organization._id)
+            );
+
+            if (!hasAccess) {
+                throw new Error("unauthorized");
+            }
+        }
+
+        return await adjustOrganizationMemberCount(ctx, args.slug, -1);
     },
 });
 
@@ -484,7 +568,6 @@ export const getOrganizationSelectionData = query({
         };
     },
 });
-
 
 type OrganizationGeneral = {
     _id: string;

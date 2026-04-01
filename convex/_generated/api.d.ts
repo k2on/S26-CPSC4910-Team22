@@ -1592,6 +1592,12 @@ export declare const components: {
           status: "added" | "already_exists" | "user_not_found";
         }
       >;
+      decrementOrganizationMemberCount: FunctionReference<
+        "mutation",
+        "internal",
+        { canAccessAll: boolean; currentUserId: string; slug: string },
+        null
+      >;
       getOrganizationBySlug: FunctionReference<
         "query",
         "internal",
@@ -1605,6 +1611,7 @@ export declare const components: {
           name: string;
           pointValue: number;
           slug: string;
+          totalMembers?: number;
         } | null
       >;
       getOrganizationGeneralBySlug: FunctionReference<
@@ -1638,7 +1645,14 @@ export declare const components: {
           name: string;
           pointValue: number;
           slug: string;
+          totalMembers?: number;
         } | null
+      >;
+      incrementOrganizationMemberCount: FunctionReference<
+        "mutation",
+        "internal",
+        { canAccessAll: boolean; currentUserId: string; slug: string },
+        null
       >;
       listOrganizations: FunctionReference<
         "query",
@@ -1653,6 +1667,7 @@ export declare const components: {
           name: string;
           pointValue: number;
           slug: string;
+          totalMembers?: number;
         }>
       >;
       listVisibleOrganizationDriversBySlug: FunctionReference<
@@ -1700,6 +1715,7 @@ export declare const components: {
           name: string;
           pointValue: number;
           slug: string;
+          totalMembers?: number;
         }>
       >;
       updateVisibleOrganization: FunctionReference<
