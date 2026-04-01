@@ -417,7 +417,7 @@ export const getUserNamesByIds = query({
     },
 });
 
-type OrganizationSelectionRole = "admin" | "sponsor" | "driver";
+type OrganizationRole = "admin" | "sponsor" | "driver";
 
 type OrganizationSelectionRow = {
     name: string;
@@ -428,7 +428,7 @@ type OrganizationSelectionRow = {
 };
 
 type OrganizationSelectionData = {
-    role: OrganizationSelectionRole;
+    role: OrganizationRole;
     rows: OrganizationSelectionRow[];
 };
 
@@ -481,6 +481,61 @@ export const getOrganizationSelectionData = query({
                 slug: organization.slug,
                 totalMembers: organization.totalMembers,
             })),
+        };
+    },
+});
+
+
+type OrganizationGeneral = {
+    _id: string;
+    name: string;
+    pointValue: number;
+    totalMembers?: number;
+};
+
+export const getOrganizationGeneralBySlug = query({
+    args: {
+        slug: v.string(),
+        userId: v.string(),
+        role: v.union(v.literal("admin"), v.literal("sponsor"), v.literal("driver")),
+    },
+    handler: async (ctx, args): Promise<OrganizationGeneral | null> => {
+        const organization = await ctx.db
+            .query("organization")
+            .withIndex("slug", (q) => q.eq("slug", args.slug))
+            .unique();
+
+        if (!organization) {
+            return null;
+        }
+
+        if (args.role === "admin") {
+            return {
+                _id: String(organization._id),
+                name: organization.name,
+                pointValue: organization.pointValue,
+                totalMembers: organization.totalMembers,
+            };
+        }
+
+        const membership = await ctx.db
+            .query("member")
+            .withIndex("userId", (q) => q.eq("userId", args.userId))
+            .collect();
+
+        const isMember = membership.some(
+            (member) => member.organizationId === String(organization._id)
+        );
+
+        if (!isMember) {
+            return null;
+        }
+
+        return {
+            _id: String(organization._id),
+            name: organization.name,
+            pointValue: organization.pointValue,
+            totalMembers: organization.totalMembers,
         };
     },
 });

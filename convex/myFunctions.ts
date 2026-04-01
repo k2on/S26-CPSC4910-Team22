@@ -387,7 +387,7 @@ export const getVisibleOrganizationPointChangesBySlug = query({
   }
 });
 
-type OrganizationSelectionRole = "admin" | "sponsor" | "driver";
+type OrganizationRole = "admin" | "sponsor" | "driver";
 
 type OrganizationSelectionRow = {
   name: string;
@@ -398,7 +398,7 @@ type OrganizationSelectionRow = {
 };
 
 type OrganizationSelectionData = {
-  role: OrganizationSelectionRole;
+  role: OrganizationRole;
   rows: OrganizationSelectionRow[];
 };
 
@@ -425,5 +425,71 @@ export const getOrganizationSelectionData = query({
           role: identity.role,
         }
     );
+  },
+});
+
+type OrganizationGeneralResult =
+    | {
+  role: "admin" | "sponsor";
+  name: string;
+  totalMembers: number;
+}
+    | {
+  role: "driver";
+  name: string;
+  currentPoints: number;
+  currentPointValue: number;
+};
+
+export const getOrganizationGeneralBySlug = query({
+  args: {
+    slug: v.string(),
+  },
+  handler: async (ctx, args): Promise<OrganizationGeneralResult | null> => {
+    const identity = await ctx.auth.getUserIdentity();
+
+    if (
+        !identity ||
+        (identity.role !== "admin" &&
+            identity.role !== "sponsor" &&
+            identity.role !== "driver")
+    ) {
+      return null;
+    }
+
+    const organization = await ctx.runQuery(
+        components.betterAuth.organizations.getOrganizationGeneralBySlug,
+        {
+          slug: args.slug,
+          userId: identity.subject,
+          role: identity.role,
+        }
+    );
+
+    if (!organization) {
+      return null;
+    }
+
+    if (identity.role === "driver") {
+      const pointTotal = await ctx.db
+          .query("pointTotals")
+          .filter((q) => q.eq(q.field("driverUserId"), identity.subject))
+          .first();
+
+      const currentPoints = pointTotal?.points ?? 0;
+
+      return {
+        role: "driver",
+        name: organization.name,
+        currentPoints,
+        currentPointValue: currentPoints * organization.pointValue,
+      };
+    }
+
+    return {
+      role: identity.role,
+      name: organization.name,
+      totalMembers: organization.totalMembers,
+    };
   },
 });

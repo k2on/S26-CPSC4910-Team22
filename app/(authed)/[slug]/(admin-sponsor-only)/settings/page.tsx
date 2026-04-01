@@ -1,11 +1,11 @@
-import OrganizationGeneral from "@/components/org/OrganizationGeneral";
+import OrganizationSettings from "@/components/org/OrganizationSettings";
 
 export default async function Page({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = await params;
 
     return (
         <div className="p-8">
-            <OrganizationGeneral slug={slug} />
+            <OrganizationSettings slug={slug} />
         </div>
     );
 }

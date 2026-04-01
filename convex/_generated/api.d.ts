@@ -1607,6 +1607,12 @@ export declare const components: {
           slug: string;
         } | null
       >;
+      getOrganizationGeneralBySlug: FunctionReference<
+        "query",
+        "internal",
+        { role: "admin" | "sponsor" | "driver"; slug: string; userId: string },
+        any
+      >;
       getOrganizationSelectionData: FunctionReference<
         "query",
         "internal",

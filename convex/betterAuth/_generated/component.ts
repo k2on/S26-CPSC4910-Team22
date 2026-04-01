@@ -1590,6 +1590,13 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
         } | null,
         Name
       >;
+      getOrganizationGeneralBySlug: FunctionReference<
+        "query",
+        "internal",
+        { role: "admin" | "sponsor" | "driver"; slug: string; userId: string },
+        any,
+        Name
+      >;
       getOrganizationSelectionData: FunctionReference<
         "query",
         "internal",
