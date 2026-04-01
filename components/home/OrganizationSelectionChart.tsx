@@ -64,16 +64,16 @@ export function OrganizationSelectionChart() {
 
     if (data === undefined) {
         return (
-            <Card>
+            <Card className="w-full min-w-0">
                 <CardHeader className="flex flex-row items-center justify-between gap-4">
                     <CardTitle>Organizations</CardTitle>
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-2">
                         {canCreateOrganization && <CreateOrganizationModel />}
                         <Button disabled>Select Organization</Button>
                     </div>
                 </CardHeader>
 
-                <CardContent>
+                <CardContent className="w-full min-w-0">
                     <p className="text-sm text-muted-foreground">Loading organizations...</p>
                 </CardContent>
             </Card>
@@ -81,11 +81,11 @@ export function OrganizationSelectionChart() {
     }
 
     return (
-        <Card>
+        <Card className="w-full min-w-0">
             <CardHeader className="flex flex-row items-center justify-between gap-4">
                 <CardTitle>Organizations</CardTitle>
 
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                     {canCreateOrganization && <CreateOrganizationModel />}
                     <Button onClick={handleSelectOrganization} disabled={!selectedRow}>
                         Select Organization
@@ -93,48 +93,50 @@ export function OrganizationSelectionChart() {
                 </div>
             </CardHeader>
 
-            <CardContent>
+            <CardContent className="w-full min-w-0">
                 {rows.length === 0 ? (
                     <p className="text-sm text-muted-foreground">
                         No organizations are available for this account.
                     </p>
                 ) : (
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                {columnsByRole[role].map((columnName) => (
-                                    <TableHead key={columnName}>{columnName}</TableHead>
-                                ))}
-                            </TableRow>
-                        </TableHeader>
+                    <div className="w-full min-w-0 overflow-x-auto">
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    {columnsByRole[role].map((columnName) => (
+                                        <TableHead key={columnName}>{columnName}</TableHead>
+                                    ))}
+                                </TableRow>
+                            </TableHeader>
 
-                        <TableBody>
-                            {rows.map((row) => {
-                                const isSelected = row.slug === selectedSlug;
+                            <TableBody>
+                                {rows.map((row) => {
+                                    const isSelected = row.slug === selectedSlug;
 
-                                return (
-                                    <TableRow
-                                        key={row.slug}
-                                        className={`cursor-pointer ${isSelected ? "bg-muted" : ""}`}
-                                        onClick={() => setSelectedSlug(row.slug)}
-                                    >
-                                        <TableCell>{row.name}</TableCell>
+                                    return (
+                                        <TableRow
+                                            key={row.slug}
+                                            className={`cursor-pointer ${isSelected ? "bg-muted" : ""}`}
+                                            onClick={() => setSelectedSlug(row.slug)}
+                                        >
+                                            <TableCell>{row.name}</TableCell>
 
-                                        {role === "admin" && (
-                                            <>
+                                            {role === "admin" && (
+                                                <>
+                                                    <TableCell>{row.totalMembers ?? 0}</TableCell>
+                                                    <TableCell>{row.inOrganization ?? "No"}</TableCell>
+                                                </>
+                                            )}
+
+                                            {role === "sponsor" && (
                                                 <TableCell>{row.totalMembers ?? 0}</TableCell>
-                                                <TableCell>{row.inOrganization ?? "No"}</TableCell>
-                                            </>
-                                        )}
-
-                                        {role === "sponsor" && (
-                                            <TableCell>{row.totalMembers ?? 0}</TableCell>
-                                        )}
-                                    </TableRow>
-                                );
-                            })}
-                        </TableBody>
-                    </Table>
+                                            )}
+                                        </TableRow>
+                                    );
+                                })}
+                            </TableBody>
+                        </Table>
+                    </div>
                 )}
             </CardContent>
         </Card>

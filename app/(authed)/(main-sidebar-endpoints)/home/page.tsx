@@ -2,7 +2,7 @@ import { OrganizationSelectionChart } from "@/components/home/OrganizationSelect
 
 export default function HomePage() {
     return (
-        <div className="p-6">
+        <div className="min-w-0 p-6">
             <OrganizationSelectionChart />
         </div>
     );

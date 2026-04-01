@@ -80,7 +80,7 @@ export function MainSidebar({ role }: { role: MainSidebarRole }) {
     return (
         <Sidebar
             collapsible="offcanvas"
-            className="top-(--header-height) h-[calc(100svh-var(--header-height))]! left-0"
+            className="top-(--header-height) h-[calc(100svh-var(--header-height))]! left-[--sidebar-width]"
         >
             <SidebarContent>
                 <SidebarGroup>
