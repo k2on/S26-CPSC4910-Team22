@@ -15,6 +15,7 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
+import { CreateOrganizationModal } from "@/components/home/CreateOrganizationModal";
 
 export type OrganizationSelectionRole = "admin" | "sponsor" | "driver";
 
@@ -46,6 +47,7 @@ export function OrganizationSelectionChart() {
 
     const role: OrganizationSelectionRole = data?.role ?? "driver";
     const rows: OrganizationSelectionRow[] = data?.rows ?? [];
+    const canCreateOrganization = role === "admin" || role === "sponsor";
 
     const selectedRow = useMemo(
         () => rows.find((row) => row.slug === selectedSlug) ?? null,
@@ -65,8 +67,12 @@ export function OrganizationSelectionChart() {
             <Card>
                 <CardHeader className="flex flex-row items-center justify-between gap-4">
                     <CardTitle>Organizations</CardTitle>
-                    <Button disabled>Select Organization</Button>
+                    <div className="flex items-center gap-2">
+                        {canCreateOrganization && <CreateOrganizationModal />}
+                        <Button disabled>Select Organization</Button>
+                    </div>
                 </CardHeader>
+
                 <CardContent>
                     <p className="text-sm text-muted-foreground">Loading organizations...</p>
                 </CardContent>
@@ -78,9 +84,13 @@ export function OrganizationSelectionChart() {
         <Card>
             <CardHeader className="flex flex-row items-center justify-between gap-4">
                 <CardTitle>Organizations</CardTitle>
-                <Button onClick={handleSelectOrganization} disabled={!selectedRow}>
-                    Select Organization
-                </Button>
+
+                <div className="flex items-center gap-2">
+                    {canCreateOrganization && <CreateOrganizationModal />}
+                    <Button onClick={handleSelectOrganization} disabled={!selectedRow}>
+                        Select Organization
+                    </Button>
+                </div>
             </CardHeader>
 
             <CardContent>
