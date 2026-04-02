@@ -18,6 +18,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from ".
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useConvexMutation } from "@convex-dev/react-query";
+import { PlusIcon } from "lucide-react";
+import { toast } from "sonner";
 
 export function Applications() {
         const data = useQuery(api.myFunctions.getDriverApplications);
@@ -25,7 +27,7 @@ export function Applications() {
         // return JSON.stringify(data);
 
         return (
-                <div className="w-xl">
+                <div className="">
                         <Card className="w-full">
                                 <CardHeader>
                                         <CardTitle>Driver Applications</CardTitle>
@@ -67,8 +69,11 @@ function CreateApplicationDialog() {
         const orgs = useQuery(api.myFunctions.listOrgs) || [];
 
         const { mutate: apply } = useMutation({
-                mutationFn: useConvexMutation(api.myFunctions.applyForDriverApplication),
+                mutationFn: useConvexMutation(api.driver.application.apply),
                 onSuccess: () => setOpen(false),
+                onError: (error) => {
+                        toast.error(error.message);
+                }
         });
 
         const onClick = () => {
@@ -81,7 +86,7 @@ function CreateApplicationDialog() {
         return (
                 <Dialog open={open} onOpenChange={setOpen}>
                         <DialogTrigger asChild>
-                                <Button>New Application</Button>
+                                <Button><PlusIcon /> New Application</Button>
                         </DialogTrigger>
                         <DialogContent>
                                 <DialogHeader>

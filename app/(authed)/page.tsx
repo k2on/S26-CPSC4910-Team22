@@ -1,17 +1,18 @@
 import { api } from "@/convex/_generated/api";
 import { fetchAuthQuery } from "@/lib/auth-server";
 import { Applications } from "@/components/driver/Applications";
+import { VisibleOrganizations } from "@/components/VisibleOrganizations";
 
 export default async function Home() {
-  const result = await fetchAuthQuery(api.myFunctions.getMe)
-  if (result?.role == "admin") return <div>You are an admin</div>
-  if (result?.role == "sponsor") return <div>You are a sponsor</div>
+  const me = await fetchAuthQuery(api.myFunctions.getMe)
 
   return (
-    <main className="max-w-lg mx-auto">
-      You are a driver
+    <div className="pt-4 w-2xl mx-auto">
 
-      <Applications />
-    </main>
+      {me?.role != "admin" && <VisibleOrganizations />}
+
+      {me?.role == "driver" && <Applications />}
+
+    </div>
   );
 }

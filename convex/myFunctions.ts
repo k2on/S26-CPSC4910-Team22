@@ -6,6 +6,7 @@ import { Organization } from "better-auth/plugins";
 import { Doc } from "./_generated/dataModel";
 import { Id } from "./betterAuth/_generated/dataModel";
 import { components } from "./_generated/api";
+import { getOrganizationBySlug } from "./betterAuth/organizations";
 
 const visibleOrganizationDriverValidator = v.object({
   userId: v.string(),
@@ -20,23 +21,6 @@ const visibleOrganizationDriverValidator = v.object({
 
 // Write your Convex functions in any file inside this directory (`convex`).
 // See https://docs.convex.dev/functions for more.
-
-export const getNumbers = query({
-  handler: async (ctx) => {
-    return {
-      numbers: await ctx.db.query("numbers").collect()
-    }
-  }
-})
-
-export const addNumber = mutation({
-  args: {
-    number: v.number()
-  },
-  handler: async (ctx, args) => {
-
-  }
-})
 
 export const getAbout = query({
   handler: async (ctx) => {
@@ -65,6 +49,15 @@ export const getMe = query({
   handler: async (ctx) => {
     return ctx.auth.getUserIdentity();
   }
+});
+
+export const getOrg = query({
+  args: {
+    organizationSlug: v.string(),
+  },
+  handler: async (ctx, args) => {
+    return await ctx.runQuery(components.betterAuth.organizations.getOrganizationBySlug, { slug: args.organizationSlug })
+  }
 })
 
 function getOrgAccess(identity: { subject: string; role?: string | null }) {
@@ -75,22 +68,24 @@ function getOrgAccess(identity: { subject: string; role?: string | null }) {
   };
 }
 
-export const getVisibleOrganizations = query({
-  handler: async (ctx) => {
-    const identity = await ctx.auth.getUserIdentity();
-
-    if (!identity || (identity.role !== "admin" && identity.role !== "sponsor")) {
-      return [];
-    }
-
-    const access = getOrgAccess(identity);
-
-    return await ctx.runQuery(
-      components.betterAuth.organizations.listVisibleOrganizations,
-      access
-    );
-  }
-})
+// export const getVisibleOrganizations = query({
+//   handler: async (ctx) => {
+//     const identity = await ctx.auth.getUserIdentity();
+//
+//     if (!identity || (identity.role !== "admin" && identity.role !== "sponsor")) {
+//       console.log("ID", identity);
+//       return [];
+//     }
+//     console.log("after???");
+//
+//     const access = getOrgAccess(identity);
+//
+//     return await ctx.runQuery(
+//       components.betterAuth.organizations.listVisibleOrganizations,
+//       access
+//     );
+//   }
+// })
 
 export const getVisibleOrganizationBySlug = query({
   args: {
@@ -317,7 +312,7 @@ function parseOrg(org: any) {
     createdAt: org.createdAt ? new Date(org.createdAt).getTime() : null,
     logo: org.logo === "undefined" ? null : org.logo,
     metadata: org.metadata === "undefined" ? null : org.metadata,
-    id: org.id as Id<"organization">
+    id: org.id as Id<"organization">,
   };
 
 }
@@ -328,7 +323,7 @@ export const getDriverApplications = query({
     if (authed == null) return [];
 
     const apps = await ctx.db.query("driverApplication")
-      .withIndex("by_user_id", q => q.eq("userId", authed.subject))
+      .withIndex("by_user_id", q => q.eq("userId", authed.subject as Id<"user">))
       .collect();
 
     const { auth } = await authComponent.getAuth(createAuth, ctx);
@@ -356,22 +351,6 @@ export const getDriverApplications = query({
   }
 })
 
-export const applyForDriverApplication = mutation({
-  args: {
-    organizationId: v.string()
-  },
-  handler: async (ctx, args) => {
-    const me = await ctx.auth.getUserIdentity();
-    if (!me) throw new Error("You are not authed");
-
-    await ctx.db.insert("driverApplication", {
-      orgId: args.organizationId,
-      status: 'waiting',
-      userId: me.subject,
-    })
-  }
-})
-
 export const listOrgs = query({
   handler: async (ctx) => {
     const { auth } = await authComponent.getAuth(createAuth, ctx);
@@ -382,4 +361,4 @@ export const listOrgs = query({
     });
     return allOrgs.map(parseOrg);
   }
-})
+});

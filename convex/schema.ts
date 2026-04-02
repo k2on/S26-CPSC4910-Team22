@@ -20,7 +20,9 @@ export default defineSchema({
     userId: v.string(),
     orgId: v.string(),
     status: v.union(v.literal("waiting"), v.literal("denied"), v.literal("approved")),
-  }).index("by_user_id", { fields: ["userId"] }),
+    decisionBy: v.optional(v.string())
+  }).index("by_user_id", { fields: ["userId"] })
+    .index("by_org_id", { fields: ["orgId"] }),
   pointTotals: defineTable({
     driverUserId: v.string(),
     points: v.number(),

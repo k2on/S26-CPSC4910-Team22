@@ -1640,22 +1640,6 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
         }>,
         Name
       >;
-      listVisibleOrganizations: FunctionReference<
-        "query",
-        "internal",
-        { canAccessAll: boolean; currentUserId: string },
-        Array<{
-          _creationTime: number;
-          _id: string;
-          createdAt: number;
-          logo?: null | string;
-          metadata?: null | string;
-          name: string;
-          pointValue: number;
-          slug: string;
-        }>,
-        Name
-      >;
       updateVisibleOrganization: FunctionReference<
         "mutation",
         "internal",
@@ -1666,6 +1650,31 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
           organizationId: string;
         },
         null,
+        Name
+      >;
+    };
+    user: {
+      getUsersFromIds: FunctionReference<
+        "query",
+        "internal",
+        { ids: Array<string> },
+        Array<{
+          _creationTime: number;
+          _id: string;
+          address?: null | string;
+          banExpires?: null | number;
+          banReason?: null | string;
+          banned?: null | boolean;
+          createdAt: number;
+          email: string;
+          emailVerified: boolean;
+          image?: null | string;
+          imageBorderColor?: null | string;
+          name: string;
+          role?: null | string;
+          updatedAt: number;
+          userId?: null | string;
+        }>,
         Name
       >;
     };

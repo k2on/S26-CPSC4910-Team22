@@ -28,7 +28,7 @@ export default function Page() {
 
   const { isPending, mutate: signIn, error } = useMutation({
     mutationFn: async (input: Parameters<typeof authClient.signIn.email>[0]) =>
-        authClient.signIn.email(input),
+      authClient.signIn.email(input),
     onError: (error: BetterFetchError) => {
       switch (error.error.code) {
         case "VALIDATION_ERROR":
@@ -60,91 +60,91 @@ export default function Page() {
   });
 
   return (
-      <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
-        <div className="w-full max-w-sm">
-          <div className="flex flex-col gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Login to your account</CardTitle>
-                <CardDescription>
-                  Enter your email below to login to your account
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <form
-                    className="flex flex-col"
-                    onSubmit={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      form.handleSubmit();
+    <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
+      <div className="w-full max-w-sm">
+        <div className="flex flex-col gap-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Login to your account</CardTitle>
+              <CardDescription>
+                Enter your email below to login to your account
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form
+                className="flex flex-col"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  form.handleSubmit();
+                }}
+              >
+                <FieldGroup>
+                  <form.Field
+                    name="email"
+                    children={(field) => {
+                      const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+                      return (
+                        <Field data-invalid={isInvalid}>
+                          <FieldLabel htmlFor={field.name}>Email</FieldLabel>
+                          <Input
+                            id={field.name}
+                            name={field.name}
+                            value={field.state.value}
+                            onBlur={field.handleBlur}
+                            onChange={(e) => field.handleChange(e.target.value)}
+                            aria-invalid={isInvalid}
+                            disabled={isPending}
+                            placeholder="Email"
+                            required
+                          />
+                          {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                        </Field>
+                      );
                     }}
-                >
+                  />
+                  <form.Field
+                    name="password"
+                    children={(field) => {
+                      const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+                      return (
+                        <Field data-invalid={isInvalid}>
+                          <FieldLabel htmlFor={field.name}>Password</FieldLabel>
+                          <Input
+                            id={field.name}
+                            name={field.name}
+                            value={field.state.value}
+                            onBlur={field.handleBlur}
+                            onChange={(e) => field.handleChange(e.target.value)}
+                            aria-invalid={isInvalid}
+                            disabled={isPending}
+                            type="password"
+                            placeholder="Password"
+                          />
+                          {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                        </Field>
+                      );
+                    }}
+                  />
+
+                  {error && <FieldError errors={[error.error]} />}
+
                   <FieldGroup>
-                    <form.Field
-                        name="email"
-                        children={(field) => {
-                          const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
-                          return (
-                              <Field data-invalid={isInvalid}>
-                                <FieldLabel htmlFor={field.name}>Email</FieldLabel>
-                                <Input
-                                    id={field.name}
-                                    name={field.name}
-                                    value={field.state.value}
-                                    onBlur={field.handleBlur}
-                                    onChange={(e) => field.handleChange(e.target.value)}
-                                    aria-invalid={isInvalid}
-                                    disabled={isPending}
-                                    placeholder="Email"
-                                    required
-                                />
-                                {isInvalid && <FieldError errors={field.state.meta.errors} />}
-                              </Field>
-                          );
-                        }}
-                    />
-                    <form.Field
-                        name="password"
-                        children={(field) => {
-                          const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
-                          return (
-                              <Field data-invalid={isInvalid}>
-                                <FieldLabel htmlFor={field.name}>Password</FieldLabel>
-                                <Input
-                                    id={field.name}
-                                    name={field.name}
-                                    value={field.state.value}
-                                    onBlur={field.handleBlur}
-                                    onChange={(e) => field.handleChange(e.target.value)}
-                                    aria-invalid={isInvalid}
-                                    disabled={isPending}
-                                    type="password"
-                                    placeholder="Password"
-                                />
-                                {isInvalid && <FieldError errors={field.state.meta.errors} />}
-                              </Field>
-                          );
-                        }}
-                    />
-
-                    {error && <FieldError errors={[error.error]} />}
-
-                    <FieldGroup>
-                      <Field>
-                        <Button type="submit" className="mt-4" disabled={isPending}>
-                          {isPending ? <Spinner /> : "Sign In"}
-                        </Button>
-                        <FieldDescription className="px-6 text-center">
-                          Don't have an account? <Link href="/signup">Sign up</Link>
-                        </FieldDescription>
-                      </Field>
-                    </FieldGroup>
+                    <Field>
+                      <Button type="submit" className="mt-4" disabled={isPending}>
+                        {isPending ? <Spinner /> : "Sign In"}
+                      </Button>
+                      <FieldDescription className="px-6 text-center">
+                        Don't have an account? <Link href="/signup">Sign up</Link>
+                      </FieldDescription>
+                    </Field>
                   </FieldGroup>
-                </form>
-              </CardContent>
-            </Card>
-          </div>
+                </FieldGroup>
+              </form>
+            </CardContent>
+          </Card>
         </div>
       </div>
+    </div>
   );
-}
+} 

@@ -16,15 +16,10 @@ export default function Page() {
             return;
         }
 
-        const role = (session.user as { role?: string }).role;
+        const role = session.user.role;
 
         if (role === "admin") {
             router.replace("/admin");
-            return;
-        }
-
-        if (role === "sponsor") {
-            router.replace("/sponsor");
             return;
         }
 
@@ -32,4 +27,4 @@ export default function Page() {
     }, [isPending, router, session]);
 
     return <div className="min-h-svh" />;
-}
+} 
