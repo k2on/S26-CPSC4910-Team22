@@ -1,7 +1,12 @@
 import { v } from "convex/values";
-import { mutation, query } from "./_generated/server";
+import { query, mutation, action } from "./_generated/server";
+import { api } from "./_generated/api";
+import { authComponent, createAuth, createAuthOptions, options } from "./betterAuth/auth";
+import { Organization } from "better-auth/plugins";
+import { Doc } from "./_generated/dataModel";
+import { Id } from "./betterAuth/_generated/dataModel";
 import { components } from "./_generated/api";
-import { authComponent, createAuth } from "./betterAuth/auth";
+import { getOrganizationBySlug } from "./betterAuth/organizations";
 
 const visibleOrganizationDriverValidator = v.object({
   userId: v.string(),
@@ -26,23 +31,6 @@ const visibleOrganizationPointChangeValidator = v.object({
 
 // Write your Convex functions in any file inside this directory (`convex`).
 // See https://docs.convex.dev/functions for more.
-
-export const getNumbers = query({
-  handler: async (ctx) => {
-    return {
-      numbers: await ctx.db.query("numbers").collect()
-    }
-  }
-})
-
-export const addNumber = mutation({
-  args: {
-    number: v.number()
-  },
-  handler: async (ctx, args) => {
-
-  }
-})
 
 export const getAbout = query({
   handler: async (ctx) => {
@@ -71,6 +59,15 @@ export const getMe = query({
   handler: async (ctx) => {
     return ctx.auth.getUserIdentity();
   }
+});
+
+export const getOrg = query({
+  args: {
+    organizationSlug: v.string(),
+  },
+  handler: async (ctx, args) => {
+    return await ctx.runQuery(components.betterAuth.organizations.getOrganizationBySlug, { slug: args.organizationSlug })
+  }
 })
 
 function getOrgAccess(identity: { subject: string; role?: string | null }) {
@@ -81,22 +78,24 @@ function getOrgAccess(identity: { subject: string; role?: string | null }) {
   };
 }
 
-export const getVisibleOrganizations = query({
-  handler: async (ctx) => {
-    const identity = await ctx.auth.getUserIdentity();
-
-    if (!identity || (identity.role !== "admin" && identity.role !== "sponsor")) {
-      return [];
-    }
-
-    const access = getOrgAccess(identity);
-
-    return await ctx.runQuery(
-        components.betterAuth.organizations.listVisibleOrganizations,
-        access
-    );
-  }
-})
+// export const getVisibleOrganizations = query({
+//   handler: async (ctx) => {
+//     const identity = await ctx.auth.getUserIdentity();
+//
+//     if (!identity || (identity.role !== "admin" && identity.role !== "sponsor")) {
+//       console.log("ID", identity);
+//       return [];
+//     }
+//     console.log("after???");
+//
+//     const access = getOrgAccess(identity);
+//
+//     return await ctx.runQuery(
+//       components.betterAuth.organizations.listVisibleOrganizations,
+//       access
+//     );
+//   }
+// })
 
 export const getVisibleOrganizationBySlug = query({
   args: {
@@ -112,11 +111,11 @@ export const getVisibleOrganizationBySlug = query({
     const access = getOrgAccess(identity);
 
     return await ctx.runQuery(
-        components.betterAuth.organizations.getVisibleOrganizationBySlug,
-        {
-          slug: args.slug,
-          ...access,
-        }
+      components.betterAuth.organizations.getVisibleOrganizationBySlug,
+      {
+        slug: args.slug,
+        ...access,
+      }
     );
   }
 })
@@ -135,11 +134,11 @@ export const getVisibleOrganizationMembersBySlug = query({
     const access = getOrgAccess(identity);
 
     return await ctx.runQuery(
-        components.betterAuth.organizations.listVisibleOrganizationMembersBySlug,
-        {
-          slug: args.slug,
-          ...access,
-        }
+      components.betterAuth.organizations.listVisibleOrganizationMembersBySlug,
+      {
+        slug: args.slug,
+        ...access,
+      }
     );
   }
 })
@@ -159,31 +158,31 @@ export const getVisibleOrganizationDriversBySlug = query({
     const access = getOrgAccess(identity);
 
     const drivers = await ctx.runQuery(
-        components.betterAuth.organizations.listVisibleOrganizationDriversBySlug,
-        {
-          slug: args.slug,
-          ...access,
-        }
+      components.betterAuth.organizations.listVisibleOrganizationDriversBySlug,
+      {
+        slug: args.slug,
+        ...access,
+      }
     );
 
     return await Promise.all(
-        drivers.map(async (driver) => {
-          const pointTotal = await ctx.db
-              .query("pointTotals")
-              .filter((q) => q.eq(q.field("driverUserId"), driver.userId))
-              .first();
+      drivers.map(async (driver) => {
+        const pointTotal = await ctx.db
+          .query("pointTotals")
+          .filter((q) => q.eq(q.field("driverUserId"), driver.userId))
+          .first();
 
-          return {
-            userId: driver.userId,
-            name: driver.name,
-            email: driver.email,
-            points: pointTotal?.points ?? 0,
-            active: driver.active,
-            suspended: driver.suspended,
-            suspensionEnd: driver.suspensionEnd ?? null,
-            banReason: driver.banReason ?? null,
-          };
-        })
+        return {
+          userId: driver.userId,
+          name: driver.name,
+          email: driver.email,
+          points: pointTotal?.points ?? 0,
+          active: driver.active,
+          suspended: driver.suspended,
+          suspensionEnd: driver.suspensionEnd ?? null,
+          banReason: driver.banReason ?? null,
+        };
+      })
     );
   }
 })
@@ -205,9 +204,9 @@ export const updateDriverPoints = mutation({
     }
 
     const existingTotal = await ctx.db
-        .query("pointTotals")
-        .filter((q) => q.eq(q.field("driverUserId"), args.driverUserId))
-        .first();
+      .query("pointTotals")
+      .filter((q) => q.eq(q.field("driverUserId"), args.driverUserId))
+      .first();
 
     const currentPoints = existingTotal?.points ?? 0;
     const nextPoints = currentPoints + args.pointChange;
@@ -256,12 +255,12 @@ export const addVisibleOrganizationMemberByEmail = mutation({
     const access = getOrgAccess(identity);
 
     return await ctx.runMutation(
-        components.betterAuth.organizations.addMemberByEmail,
-        {
-          slug: args.slug,
-          email: args.email,
-          ...access,
-        }
+      components.betterAuth.organizations.addMemberByEmail,
+      {
+        slug: args.slug,
+        email: args.email,
+        ...access,
+      }
     );
   }
 })
@@ -285,12 +284,12 @@ export const updateVisibleOrganization = mutation({
     const access = getOrgAccess(identity);
 
     await ctx.runMutation(
-        components.betterAuth.organizations.updateVisibleOrganization,
-        {
-          organizationId: args.organizationId,
-          data: args.data,
-          ...access,
-        }
+      components.betterAuth.organizations.updateVisibleOrganization,
+      {
+        organizationId: args.organizationId,
+        data: args.data,
+        ...access,
+      }
     );
   }
 })
@@ -316,6 +315,63 @@ export const getAuditLog = query({
   }
 })
 
+function parseOrg(org: any) {
+  return {
+    ...org,
+    createdAt: org.createdAt ? new Date(org.createdAt).getTime() : null,
+    logo: org.logo === "undefined" ? null : org.logo,
+    metadata: org.metadata === "undefined" ? null : org.metadata,
+    id: org.id as Id<"organization">,
+  };
+
+}
+
+export const getDriverApplications = query({
+  handler: async (ctx) => {
+    const authed = await ctx.auth.getUserIdentity();
+    if (authed == null) return [];
+
+    const apps = await ctx.db.query("driverApplication")
+      .withIndex("by_user_id", q => q.eq("userId", authed.subject as Id<"user">))
+      .collect();
+
+    const { auth } = await authComponent.getAuth(createAuth, ctx);
+    const db = auth.options.database(auth.options);
+
+
+    let newApps: { application: Doc<"driverApplication">, organization: typeof auth.$Infer.Organization }[] = [];
+
+    for (const application of apps) {
+      const organization = await db.findOne({
+        model: "organization",
+        where: [
+          {
+            field: "_id",
+            value: application.orgId,
+          }
+        ],
+      });
+      if (!organization) continue;
+
+      newApps.push({ organization: parseOrg(organization), application });
+    }
+
+    return newApps;
+  }
+})
+
+export const listOrgs = query({
+  handler: async (ctx) => {
+    const { auth } = await authComponent.getAuth(createAuth, ctx);
+    const db = auth.options.database(auth.options);
+    const allOrgs = await db.findMany({
+      model: "organization",
+      where: [],
+    });
+    return allOrgs.map(parseOrg);
+  }
+});
+
 export const getVisibleOrganizationPointChangesBySlug = query({
   args: {
     slug: v.string(),
@@ -331,58 +387,58 @@ export const getVisibleOrganizationPointChangesBySlug = query({
     const access = getOrgAccess(identity);
 
     const drivers = await ctx.runQuery(
-        components.betterAuth.organizations.listVisibleOrganizationDriversBySlug,
-        {
-          slug: args.slug,
-          ...access,
-        }
+      components.betterAuth.organizations.listVisibleOrganizationDriversBySlug,
+      {
+        slug: args.slug,
+        ...access,
+      }
     );
 
     const driverMap = new Map(
-        drivers.map((driver) => [
-          driver.userId,
-          {
-            name: driver.name,
-            email: driver.email,
-          },
-        ])
+      drivers.map((driver) => [
+        driver.userId,
+        {
+          name: driver.name,
+          email: driver.email,
+        },
+      ])
     );
 
     const pointChanges = await ctx.db.query("pointChanges").collect();
 
     const relevantPointChanges = pointChanges.filter((change) =>
-        driverMap.has(change.driverUserId)
+      driverMap.has(change.driverUserId)
     );
 
     const changedByIds = Array.from(
-        new Set(relevantPointChanges.map((change) => change.changedByUserId))
+      new Set(relevantPointChanges.map((change) => change.changedByUserId))
     );
 
     const changedByUsers = await ctx.runQuery(
-        components.betterAuth.organizations.getUserNamesByIds,
-        {
-          userIds: changedByIds,
-        }
+      components.betterAuth.organizations.getUserNamesByIds,
+      {
+        userIds: changedByIds,
+      }
     );
 
     const changedByMap = new Map(
-        changedByUsers.map((user) => [user.userId, user.name])
+      changedByUsers.map((user) => [user.userId, user.name])
     );
 
     return relevantPointChanges
-        .map((change) => {
-          const driver = driverMap.get(change.driverUserId);
+      .map((change) => {
+        const driver = driverMap.get(change.driverUserId);
 
-          return {
-            id: String(change._id),
-            driverName: driver?.name ?? "Unknown User",
-            driverEmail: driver?.email ?? "Unknown Email",
-            changedByName: changedByMap.get(change.changedByUserId) ?? "Unknown User",
-            pointChange: change.pointChange,
-            reason: change.reason,
-            time: change.time,
-          };
-        })
-        .sort((a, b) => b.time - a.time);
+        return {
+          id: String(change._id),
+          driverName: driver?.name ?? "Unknown User",
+          driverEmail: driver?.email ?? "Unknown Email",
+          changedByName: changedByMap.get(change.changedByUserId) ?? "Unknown User",
+          pointChange: change.pointChange,
+          reason: change.reason,
+          time: change.time,
+        };
+      })
+      .sort((a, b) => b.time - a.time);
   }
 });

@@ -1,9 +1,9 @@
 import { OrganizationSidebar } from "@/components/org/OrganizationSidebar";
 
 export default async function RootLayout({
-                                             children,
-                                             params,
-                                         }: Readonly<{
+    children,
+    params,
+}: Readonly<{
     params: Promise<{ slug: string }>;
     children: React.ReactNode;
 }>) {
@@ -11,10 +11,10 @@ export default async function RootLayout({
 
     return (
         <div className="flex flex-1 h-full">
-            <OrganizationSidebar baseUrl={`/sponsor/orgs/${slug}`} />
+            <OrganizationSidebar baseUrl={`/${slug}/settings`} />
             <div className="flex-1">
                 {children}
             </div>
         </div>
     );
-}
+} 

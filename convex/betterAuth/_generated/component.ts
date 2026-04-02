@@ -1542,15 +1542,6 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
         Name
       >;
     };
-    authUsers: {
-      setRoleForUserDocId: FunctionReference<
-        "mutation",
-        "internal",
-        { role: "driver" | "sponsor" | "admin"; userDocId: string },
-        any,
-        Name
-      >;
-    };
     organizations: {
       addMemberByEmail: FunctionReference<
         "mutation",
@@ -1565,6 +1556,22 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
           organizationName: string;
           status: "added" | "already_exists" | "user_not_found";
         },
+        Name
+      >;
+      getOrganizationByName: FunctionReference<
+        "query",
+        "internal",
+        { name: string },
+        {
+          _creationTime: number;
+          _id: string;
+          createdAt: number;
+          logo?: null | string;
+          metadata?: null | string;
+          name: string;
+          pointValue: number;
+          slug: string;
+        } | null,
         Name
       >;
       getOrganizationBySlug: FunctionReference<
@@ -1656,22 +1663,6 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
         }>,
         Name
       >;
-      listVisibleOrganizations: FunctionReference<
-        "query",
-        "internal",
-        { canAccessAll: boolean; currentUserId: string },
-        Array<{
-          _creationTime: number;
-          _id: string;
-          createdAt: number;
-          logo?: null | string;
-          metadata?: null | string;
-          name: string;
-          pointValue: number;
-          slug: string;
-        }>,
-        Name
-      >;
       updateVisibleOrganization: FunctionReference<
         "mutation",
         "internal",
@@ -1682,6 +1673,31 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
           organizationId: string;
         },
         null,
+        Name
+      >;
+    };
+    user: {
+      getUsersFromIds: FunctionReference<
+        "query",
+        "internal",
+        { ids: Array<string> },
+        Array<{
+          _creationTime: number;
+          _id: string;
+          address?: null | string;
+          banExpires?: null | number;
+          banReason?: null | string;
+          banned?: null | boolean;
+          createdAt: number;
+          email: string;
+          emailVerified: boolean;
+          image?: null | string;
+          imageBorderColor?: null | string;
+          name: string;
+          role?: null | string;
+          updatedAt: number;
+          userId?: null | string;
+        }>,
         Name
       >;
     };

@@ -16,16 +16,17 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { authClient } from "@/lib/auth-client";
 
 export function OrganizationsSidebar({
-                                         basePath,
-                                         createAction,
-                                     }: {
+    basePath,
+    createAction,
+}: {
     basePath: string;
     createAction: ReactNode;
 }) {
     const pathname = usePathname();
-    const orgs = useQuery(api.myFunctions.getVisibleOrganizations);
+    const { data: orgs } = authClient.useListOrganizations();
 
     return (
         <Sidebar collapsible="offcanvas" className="top-(--header-height) h-[calc(100svh-var(--header-height))]! left-(--sidebar-width)">
@@ -37,9 +38,9 @@ export function OrganizationsSidebar({
                         <SidebarMenu>
                             {orgs === undefined ? (
                                 <OrganizationsSkeleton />
-                            ) : orgs.map((org) => {
+                            ) : orgs?.map((org) => {
                                 return (
-                                    <SidebarMenuItem key={org._id}>
+                                    <SidebarMenuItem key={org.id}>
                                         <SidebarMenuButton asChild isActive={pathname.includes(org.slug)}>
                                             <Link href={`${basePath}/${org.slug}`}>
                                                 <span>{org.name}</span>
@@ -64,4 +65,4 @@ function OrganizationsSkeleton() {
             ))}
         </div>
     );
-}
+} 
