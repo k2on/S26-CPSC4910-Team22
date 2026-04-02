@@ -2,9 +2,14 @@ import { Input } from "@/components/ui/input"
 import { Button, buttonVariants } from "@/components/ui/button"
 import Link from "next/link"
 import {
+    ShoppingCart,
     ArrowLeft,
     ArrowRight
 }from "lucide-react";
+import { fetchQuery } from "convex/nextjs";
+import { api } from "@/convex/_generated/api";
+import { AddToCartButton } from "@/components/catalog/AddToCartButton";
+import { CatalogHeader } from "@/components/catalog/CatalogHeader";
 
 const mediaTypes = [
     "music", "musicVideo", "audiobook", "tvShow"
@@ -36,7 +41,7 @@ interface iTunesResponse{
     results: iTunesResult[];
 }
 
-const fixMediaType = async (type: string) => {
+const fixMediaType = (type: string) => {
     if(type === "musicVideo"){
         return "Music Video";
     }else if(type === "tvShow"){
@@ -46,7 +51,7 @@ const fixMediaType = async (type: string) => {
     }
 }
 
-const getPrice = async (item: iTunesResult) => {
+const getPrice = (item: iTunesResult) => {
     const price = item.trackPrice || item.collectionPrice || 0;
     const points = Math.abs(Math.round(price * pointsPerDollar));
     if(points == 0){
@@ -56,7 +61,7 @@ const getPrice = async (item: iTunesResult) => {
     }
 }
 
-const getName = async (item: iTunesResult) => {
+const getName = (item: iTunesResult) => {
     if(item.wrapperType == "audiobook"){
         return item.collectionName;
     }else{
@@ -72,11 +77,14 @@ const getId = (item: iTunesResult) => {
     }
 }
 
-export default async function Page({searchParams}: {searchParams: Promise<{[key: string]: string | undefined}>}) {
-    const params = await searchParams;
-    const queryTerm = params.q || "";
-    const mediaType = params.media || "music";
-    const currentPage = Number(params.page) || 0;
+export default async function Page({params, searchParams}: {
+    params: Promise<{ slug: string }>,
+    searchParams: Promise<{[key: string]: string | undefined}>}) {
+    const { slug } = await params;
+    const queryParams = await searchParams;
+    const queryTerm = queryParams.q || "";
+    const mediaType = queryParams.media || "music";
+    const currentPage = Number(queryParams.page) || 0;
     const itemsPerPage = 10;
     const searchLimit = 200;
     const offset = currentPage * itemsPerPage;
@@ -85,9 +93,10 @@ export default async function Page({searchParams}: {searchParams: Promise<{[key:
         media: mediaType,
         limit: searchLimit.toString()
     });
+    const orgData = await fetchQuery(api.myFunctions.getVisibleOrganizationBySlug, { slug });
+    const organizationId = orgData?._id;
 
     const fullResponse = await fetch(`https://itunes.apple.com/search?${fullQuery.toString()}`);
-    //console.log(`https://itunes.apple.com/search?${fullQuery.toString()}`);
     if (!fullResponse.ok){
         console.error("Failed to fetch full search results");
     }
@@ -101,6 +110,7 @@ export default async function Page({searchParams}: {searchParams: Promise<{[key:
 
     return (
         <div className="max-w-lg mx-auto">
+            <CatalogHeader slug={slug}/>
             <form className="flex flex-row">
                 <Input name="q" placeholder="Search the iTunes catalog" defaultValue={queryTerm}/>
                 <Input type="hidden" name="media" value={mediaType} />
@@ -108,7 +118,7 @@ export default async function Page({searchParams}: {searchParams: Promise<{[key:
             </form>
             <div className="flex flex-wrap gap-2 py-2 justify-center">
                 {mediaTypes.map((type) => (
-                    <Link key={type} href={`?q=${queryTerm}&media=${type}&page=0`} className={
+                    <Link key={type} href={`/${slug}/catalog?q=${queryTerm}&media=${type}&page=0`} className={
                         buttonVariants({
                             variant: mediaType === type ? "default" : "outline",
                             size: "sm"
@@ -125,13 +135,23 @@ export default async function Page({searchParams}: {searchParams: Promise<{[key:
                             <div className="flex py-2">
                                 <img src={track.artworkUrl100} alt="Thumbnail" />
                                 <div className="flex flex-col px-2"><strong>{getName(track)}</strong>{track.artistName}<div>Price: {getPrice(track)} Points</div></div>
-                                <div className="flex flex-row justify-end ml-auto">
-                                    <Link href={`/catalog/purchase?id=${getId(track)}`} className={
+                                <div className="flex flex-col justify-top ml-auto">
+                                    <AddToCartButton
+                                        organizationId={organizationId ?? ""}
+                                        trackId={getId(track)}
+                                        mediaType={track.kind || track.wrapperType}
+                                        name={getName(track)}
+                                        artistName={track.artistName}
+                                        price={getPrice(track)}
+                                        artworkUrl={track.artworkUrl100}
+                                    />
+                                    <div className="py-1" />
+                                    <Link href={`/${slug}/catalog/purchase?id=${getId(track)}`} className={
                                         buttonVariants({
                                             variant: "default",
                                             size: "sm"
-                                        })} style={{justifyContent: "right"}}>
-                                        Purchase
+                                        })} style={{justifyContent: "center"}}>
+                                        Buy Now
                                     </Link>
                                 </div>
                             </div>
@@ -149,7 +169,7 @@ export default async function Page({searchParams}: {searchParams: Promise<{[key:
             </div>
             <div className="flex flex-row justify-center">
                 {currentPage > 0 && <div>
-                    <Link href={`?q=${queryTerm}&media=${mediaType}&page=${currentPage-1}`} className={
+                    <Link href={`/${slug}/catalog?q=${queryTerm}&media=${mediaType}&page=${currentPage-1}`} className={
                         buttonVariants({
                             variant: "default",
                             size: "lg"
@@ -158,7 +178,7 @@ export default async function Page({searchParams}: {searchParams: Promise<{[key:
                     </Link>
                 </div>}
                 {endIndex < fullResults.length && <div className="flex flex-row justify-end ml-auto">
-                    <Link href={`?q=${queryTerm}&media=${mediaType}&page=${currentPage+1}`} className={
+                    <Link href={`/${slug}/catalog?q=${queryTerm}&media=${mediaType}&page=${currentPage+1}`} className={
                         buttonVariants({
                             variant: "default",
                             size: "lg"
@@ -168,7 +188,7 @@ export default async function Page({searchParams}: {searchParams: Promise<{[key:
                 </div>}
             </div>
             {(fullResults.length > 0 && queryTerm != "") && <div className="py-2 text-center">
-                Showing {startIndex}-{endIndex} of {fullResults.length} Results
+                Showing {startIndex}-{endIndex} of {fullResults.length} Results 
             </div>}
         </div>
     );

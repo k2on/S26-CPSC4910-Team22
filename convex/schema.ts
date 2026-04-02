@@ -28,5 +28,18 @@ export default defineSchema({
     pointChange: v.number(),
     reason: v.string(),
     time: v.number(),
+  }),
+  cartItem: defineTable({
+    userId: v.string(),
+    organizationId: v.string(),
+    trackId: v.number(),
+    mediaType: v.string(),
+    name: v.string(),
+    artistName: v.string(),
+    price: v.number(),
+    artworkUrl: v.string(),
+    createdAt: v.number(),
   })
+    .index("by_user_org", ["userId", "organizationId"])
+    .index("by_user_org_track", ["userId", "organizationId", "trackId"]),
 });

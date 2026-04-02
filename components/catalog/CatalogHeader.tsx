@@ -1,0 +1,38 @@
+"use client";
+
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import { ShoppingCart } from "lucide-react";
+import { Button } from "@/components/ui/button"
+import Link from "next/link"
+
+export function CatalogHeader({ slug }: { slug?: string}){
+    const org = useQuery(api.myFunctions.getVisibleOrganizationBySlug, slug ? { slug } : "skip");
+    const organizationId = org?._id;
+    const cartItems = useQuery(api.cart.getMyCart, organizationId ? { organizationId } : "skip");
+    const count = cartItems?.length ?? 0;
+
+    return(
+        <div className="flex flex-col items-center border-b pb-4 mb-4 gap-1">
+            {slug && (
+                <div className="flex items-center gap-2 text-lg font-bold">
+                    <span>Welcome to the {org?.name || ""} Catalog!</span>
+                </div>
+            )}
+            <div className="flex flex-row justify-center py-2 items-center">
+                <ShoppingCart className="h-5 w-5" />
+                <div className="px-1" />
+                <span className="font-medium">
+                    {count} {count === 1 ? 'item' : 'items'} in cart
+                    {count > 0 && (
+                        <Link href={`/${slug}/catalog/cart`}>
+                            <Button className="mx-2" size="sm">
+                                View My Cart
+                            </Button>
+                        </Link>
+                    )}
+                </span>
+            </div>
+        </div>
+    )
+}
