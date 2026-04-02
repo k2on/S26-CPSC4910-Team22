@@ -5,6 +5,7 @@ import { OrganizationSidebar, OrganizationSidebarRole } from "@/components/org/O
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { fetchAuthQuery } from "@/lib/auth-server";
 import { api } from "@/convex/_generated/api";
+import { OrgProvider } from "@/components/org/context";
 
 export default async function OrganizationLayout({
     children,
@@ -15,6 +16,7 @@ export default async function OrganizationLayout({
 }) {
     const { slug } = await params;
     const me = await fetchAuthQuery(api.myFunctions.getMe);
+    const org = await fetchAuthQuery(api.myFunctions.getOrg, { organizationSlug: slug });
 
     if (
         !me ||
@@ -23,15 +25,19 @@ export default async function OrganizationLayout({
         notFound();
     }
 
+    if (!org) return <div>Organization not found</div>;
+
     return (
-        <SidebarProvider>
-            <OrganizationSidebar
-                baseUrl={`/${slug}`}
-                role={me.role as OrganizationSidebarRole}
-            />
-            <SidebarInset>
-                {children}
-            </SidebarInset>
-        </SidebarProvider>
+        <OrgProvider org={org}>
+            <SidebarProvider>
+                <OrganizationSidebar
+                    baseUrl={`/${slug}`}
+                    role={me.role as OrganizationSidebarRole}
+                />
+                <SidebarInset>
+                    {children}
+                </SidebarInset>
+            </SidebarProvider>
+        </OrgProvider>
     );
 }
