@@ -251,6 +251,7 @@ export const addPoints = internalMutation({
       pointChange: args.pointChange,
       reason: args.reason,
       time: Date.now(),
+      organizationId: "", // TODO: fixme
     });
 
     // Update or create the point totals
@@ -267,6 +268,7 @@ export const addPoints = internalMutation({
       await ctx.db.insert("pointTotals", {
         driverUserId: args.driverUserId,
         points: args.pointChange,
+        organizationId: "" // TODO: fix me,
       });
     }
   },

@@ -1,19 +1,16 @@
 import { ReactNode } from "react";
 import { notFound } from "next/navigation";
 
-import { OrganizationSidebar, OrganizationSidebarRole } from "@/components/org/OrganizationSidebar";
+import { MainSidebar, MainSidebarRole } from "@/components/MainSidebar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { fetchAuthQuery } from "@/lib/auth-server";
 import { api } from "@/convex/_generated/api";
 
-export default async function OrganizationLayout({
-    children,
-    params,
-}: {
+export default async function MainSidebarLayout({
+                                                    children,
+                                                }: {
     children: ReactNode;
-    params: Promise<{ slug: string }>;
 }) {
-    const { slug } = await params;
     const me = await fetchAuthQuery(api.myFunctions.getMe);
 
     if (
@@ -25,11 +22,8 @@ export default async function OrganizationLayout({
 
     return (
         <SidebarProvider>
-            <OrganizationSidebar
-                baseUrl={`/${slug}`}
-                role={me.role as OrganizationSidebarRole}
-            />
-            <SidebarInset>
+            <MainSidebar role={me.role as MainSidebarRole} />
+            <SidebarInset className="min-w-0">
                 {children}
             </SidebarInset>
         </SidebarProvider>

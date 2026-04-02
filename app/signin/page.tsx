@@ -21,7 +21,7 @@ export default function Page() {
     onSubmit: async ({ value }) => {
       signIn({
         ...value,
-        callbackURL: "/home-page-redirect",
+        callbackURL: "/home",
       });
     },
   });

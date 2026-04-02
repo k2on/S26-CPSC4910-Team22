@@ -20,7 +20,7 @@ interface iTunesResponse{
 const pointsPerDollar = 100; //1 point = 1 cent
 const defaultPrice = 100;
 
-const getPrice = async (item: iTunesResult) => {
+const getPrice = (item: iTunesResult) => {
     const price = item.trackPrice || item.collectionPrice || 0;
     const points = Math.abs(Math.round(price * pointsPerDollar));
     if(points == 0){
@@ -30,7 +30,7 @@ const getPrice = async (item: iTunesResult) => {
     }
 }
 
-const getName = async (item: iTunesResult) => {
+const getName = (item: iTunesResult) => {
     if(item.wrapperType == "audiobook"){
         return item.collectionName;
     }else{
@@ -38,9 +38,13 @@ const getName = async (item: iTunesResult) => {
     }
 }
 
-export default async function Page({searchParams}: {searchParams: Promise<{[key: string]: string | undefined}>}) {
-    const params = await searchParams;
-    const itemId = params.id;
+export default async function Page({params, searchParams}: {
+    params: Promise<{slug: string}>,
+    searchParams: Promise<{[key: string]: string | undefined}>
+}) {
+    const {slug} = await params;
+    const queryParams = await searchParams;
+    const itemId = queryParams.id;
     const itemResponse = await fetch(`https://itunes.apple.com/lookup?id=${itemId}`);
     if (!itemResponse.ok){
         console.error("Failed to fetch item from iTunes");

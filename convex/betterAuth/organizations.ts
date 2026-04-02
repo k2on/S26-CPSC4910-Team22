@@ -11,6 +11,7 @@ const organizationValidator = v.object({
     createdAt: v.number(),
     metadata: v.optional(v.union(v.null(), v.string())),
     pointValue: v.number(),
+    totalMembers: v.optional(v.number()),
 });
 
 const memberValidator = v.object({
@@ -42,6 +43,12 @@ const userNameByIdValidator = v.object({
     name: v.string(),
 });
 
+const organizationSelectionRoleValidator = v.union(
+    v.literal("admin"),
+    v.literal("sponsor"),
+    v.literal("driver")
+);
+
 async function getOrganizationBySlugInternal(
     ctx: Parameters<typeof query>[0] extends never ? never : any,
     slug: string
@@ -63,6 +70,27 @@ async function userHasOrganizationAccess(
         .collect();
 
     return memberships.some((member: { organizationId: string }) => member.organizationId === organizationId);
+}
+
+async function adjustOrganizationMemberCount(
+    ctx: Parameters<typeof mutation>[0] extends never ? never : any,
+    slug: string,
+    change: 1 | -1
+) {
+    const organization = await getOrganizationBySlugInternal(ctx, slug);
+
+    if (!organization) {
+        throw new Error("Organization not found");
+    }
+
+    const currentTotal = organization.totalMembers ?? 0;
+    const nextTotal = Math.max(0, currentTotal + change);
+
+    await ctx.db.patch(organization._id, {
+        totalMembers: nextTotal,
+    });
+
+    return null;
 }
 
 export const listOrganizations = query({
@@ -361,10 +389,72 @@ export const addMemberByEmail = mutation({
             createdAt: Date.now(),
         });
 
+        await adjustOrganizationMemberCount(ctx, args.slug, 1);
+
         return {
             status: "added" as const,
             organizationName: organization.name,
         };
+    },
+});
+
+export const incrementOrganizationMemberCount = mutation({
+    args: {
+        slug: v.string(),
+        currentUserId: v.string(),
+        canAccessAll: v.boolean(),
+    },
+    returns: v.null(),
+    handler: async (ctx, args) => {
+        const organization = await getOrganizationBySlugInternal(ctx, args.slug);
+
+        if (!organization) {
+            throw new Error("Organization not found");
+        }
+
+        if (!args.canAccessAll) {
+            const hasAccess = await userHasOrganizationAccess(
+                ctx,
+                args.currentUserId,
+                String(organization._id)
+            );
+
+            if (!hasAccess) {
+                throw new Error("unauthorized");
+            }
+        }
+
+        return await adjustOrganizationMemberCount(ctx, args.slug, 1);
+    },
+});
+
+export const decrementOrganizationMemberCount = mutation({
+    args: {
+        slug: v.string(),
+        currentUserId: v.string(),
+        canAccessAll: v.boolean(),
+    },
+    returns: v.null(),
+    handler: async (ctx, args) => {
+        const organization = await getOrganizationBySlugInternal(ctx, args.slug);
+
+        if (!organization) {
+            throw new Error("Organization not found");
+        }
+
+        if (!args.canAccessAll) {
+            const hasAccess = await userHasOrganizationAccess(
+                ctx,
+                args.currentUserId,
+                String(organization._id)
+            );
+
+            if (!hasAccess) {
+                throw new Error("unauthorized");
+            }
+        }
+
+        return await adjustOrganizationMemberCount(ctx, args.slug, -1);
     },
 });
 
@@ -422,5 +512,127 @@ export const getUserNamesByIds = query({
         );
 
         return users.filter((user): user is NonNullable<typeof user> => user !== null);
+    },
+});
+
+type OrganizationRole = "admin" | "sponsor" | "driver";
+
+type OrganizationSelectionRow = {
+    name: string;
+    slug: string;
+    totalMembers?: number;
+    inOrganization?: "Yes" | "No";
+    points?: number;
+};
+
+type OrganizationSelectionData = {
+    role: OrganizationRole;
+    rows: OrganizationSelectionRow[];
+};
+
+export const getOrganizationSelectionData = query({
+    args: {
+        authUserId: v.string(),
+        role: organizationSelectionRoleValidator,
+    },
+    handler: async (ctx, args): Promise<OrganizationSelectionData> => {
+        const memberships = await ctx.db
+            .query("member")
+            .withIndex("userId", (q) => q.eq("userId", args.authUserId))
+            .collect();
+
+        const memberOrganizationIds = new Set<string>(
+            memberships.map((membership) => membership.organizationId)
+        );
+
+        if (args.role === "admin") {
+            const organizations = await ctx.db.query("organization").collect();
+
+            return {
+                role: args.role,
+                rows: organizations.map((organization) => ({
+                    name: organization.name,
+                    slug: organization.slug,
+                    totalMembers: organization.totalMembers,
+                    inOrganization: memberOrganizationIds.has(String(organization._id))
+                        ? "Yes"
+                        : "No",
+                })),
+            };
+        }
+
+        const visibleOrganizations = (
+            await Promise.all(
+                memberships.map((membership) =>
+                    ctx.db.get(membership.organizationId as Id<"organization">)
+                )
+            )
+        ).filter(
+            (organization): organization is NonNullable<typeof organization> =>
+                organization !== null
+        );
+
+        return {
+            role: args.role,
+            rows: visibleOrganizations.map((organization) => ({
+                name: organization.name,
+                slug: organization.slug,
+                totalMembers: organization.totalMembers,
+            })),
+        };
+    },
+});
+
+type OrganizationGeneral = {
+    _id: string;
+    name: string;
+    pointValue: number;
+    totalMembers?: number;
+};
+
+export const getOrganizationGeneralBySlug = query({
+    args: {
+        slug: v.string(),
+        userId: v.string(),
+        role: v.union(v.literal("admin"), v.literal("sponsor"), v.literal("driver")),
+    },
+    handler: async (ctx, args): Promise<OrganizationGeneral | null> => {
+        const organization = await ctx.db
+            .query("organization")
+            .withIndex("slug", (q) => q.eq("slug", args.slug))
+            .unique();
+
+        if (!organization) {
+            return null;
+        }
+
+        if (args.role === "admin") {
+            return {
+                _id: String(organization._id),
+                name: organization.name,
+                pointValue: organization.pointValue,
+                totalMembers: organization.totalMembers,
+            };
+        }
+
+        const membership = await ctx.db
+            .query("member")
+            .withIndex("userId", (q) => q.eq("userId", args.userId))
+            .collect();
+
+        const isMember = membership.some(
+            (member) => member.organizationId === String(organization._id)
+        );
+
+        if (!isMember) {
+            return null;
+        }
+
+        return {
+            _id: String(organization._id),
+            name: organization.name,
+            pointValue: organization.pointValue,
+            totalMembers: organization.totalMembers,
+        };
     },
 });

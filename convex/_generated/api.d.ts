@@ -9,6 +9,7 @@
  */
 
 import type * as admin_user from "../admin/user.js";
+import type * as cart from "../cart.js";
 import type * as driver_application from "../driver/application.js";
 import type * as http from "../http.js";
 import type * as myFunctions from "../myFunctions.js";
@@ -22,6 +23,7 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   "admin/user": typeof admin_user;
+  cart: typeof cart;
   "driver/application": typeof driver_application;
   http: typeof http;
   myFunctions: typeof myFunctions;
@@ -138,6 +140,7 @@ export declare const components: {
                   name: string;
                   pointValue: number;
                   slug: string;
+                  totalMembers?: number;
                 };
                 model: "organization";
               }
@@ -361,6 +364,7 @@ export declare const components: {
                     | "createdAt"
                     | "metadata"
                     | "pointValue"
+                    | "totalMembers"
                     | "_id";
                   operator?:
                     | "lt"
@@ -654,6 +658,7 @@ export declare const components: {
                     | "createdAt"
                     | "metadata"
                     | "pointValue"
+                    | "totalMembers"
                     | "_id";
                   operator?:
                     | "lt"
@@ -1082,6 +1087,7 @@ export declare const components: {
                   name?: string;
                   pointValue?: number;
                   slug?: string;
+                  totalMembers?: number;
                 };
                 where?: Array<{
                   connector?: "AND" | "OR";
@@ -1092,6 +1098,7 @@ export declare const components: {
                     | "createdAt"
                     | "metadata"
                     | "pointValue"
+                    | "totalMembers"
                     | "_id";
                   operator?:
                     | "lt"
@@ -1451,6 +1458,7 @@ export declare const components: {
                   name?: string;
                   pointValue?: number;
                   slug?: string;
+                  totalMembers?: number;
                 };
                 where?: Array<{
                   connector?: "AND" | "OR";
@@ -1461,6 +1469,7 @@ export declare const components: {
                     | "createdAt"
                     | "metadata"
                     | "pointValue"
+                    | "totalMembers"
                     | "_id";
                   operator?:
                     | "lt"
@@ -1583,6 +1592,12 @@ export declare const components: {
           status: "added" | "already_exists" | "user_not_found";
         }
       >;
+      decrementOrganizationMemberCount: FunctionReference<
+        "mutation",
+        "internal",
+        { canAccessAll: boolean; currentUserId: string; slug: string },
+        null
+      >;
       getOrganizationByName: FunctionReference<
         "query",
         "internal",
@@ -1596,6 +1611,7 @@ export declare const components: {
           name: string;
           pointValue: number;
           slug: string;
+          totalMembers?: number;
         } | null
       >;
       getOrganizationBySlug: FunctionReference<
@@ -1611,7 +1627,20 @@ export declare const components: {
           name: string;
           pointValue: number;
           slug: string;
+          totalMembers?: number;
         } | null
+      >;
+      getOrganizationGeneralBySlug: FunctionReference<
+        "query",
+        "internal",
+        { role: "admin" | "sponsor" | "driver"; slug: string; userId: string },
+        any
+      >;
+      getOrganizationSelectionData: FunctionReference<
+        "query",
+        "internal",
+        { authUserId: string; role: "admin" | "sponsor" | "driver" },
+        any
       >;
       getUserNamesByIds: FunctionReference<
         "query",
@@ -1632,7 +1661,14 @@ export declare const components: {
           name: string;
           pointValue: number;
           slug: string;
+          totalMembers?: number;
         } | null
+      >;
+      incrementOrganizationMemberCount: FunctionReference<
+        "mutation",
+        "internal",
+        { canAccessAll: boolean; currentUserId: string; slug: string },
+        null
       >;
       listOrganizations: FunctionReference<
         "query",
@@ -1647,6 +1683,7 @@ export declare const components: {
           name: string;
           pointValue: number;
           slug: string;
+          totalMembers?: number;
         }>
       >;
       listVisibleOrganizationDriversBySlug: FunctionReference<

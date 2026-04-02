@@ -26,8 +26,8 @@ import { MoreHorizontal } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
 import { api } from "@/convex/_generated/api";
 import { useMutation } from "@tanstack/react-query";
-import { BetterFetchError } from "better-auth/client";
 import { toast } from "sonner";
+import { useParams } from "next/navigation";
 
 export type DriverRow = {
     userId: string;
@@ -39,6 +39,29 @@ export type DriverRow = {
     suspensionEnd?: number | null;
     banReason?: string | null;
 };
+
+// importing BetterFetchError caused error in this file too
+// started after line "const params = useParams<{ slug: string }>();" was added to DriverActions
+// not sure why
+function getErrorMessage(error: unknown) {
+    if (
+        typeof error === "object" &&
+        error !== null &&
+        "error" in error &&
+        typeof error.error === "object" &&
+        error.error !== null &&
+        "message" in error.error &&
+        typeof error.error.message === "string"
+    ) {
+        return error.error.message;
+    }
+
+    if (error instanceof Error) {
+        return error.message;
+    }
+
+    return "Something went wrong";
+}
 
 export const columns: ColumnDef<DriverRow>[] = [
     {
@@ -103,6 +126,8 @@ export const columns: ColumnDef<DriverRow>[] = [
 ];
 
 function DriverActions({ driver }: { driver: DriverRow }) {
+    const params = useParams<{ slug: string }>();
+
     const [deactivateOpen, setDeactivateOpen] = useState(false);
     const [suspendOpen, setSuspendOpen] = useState(false);
     const [updatePointsOpen, setUpdatePointsOpen] = useState(false);
@@ -146,7 +171,7 @@ function DriverActions({ driver }: { driver: DriverRow }) {
             {
                 loading: "Deactivating user...",
                 success: "User deactivated",
-                error: (err: BetterFetchError) => err.error.message || err.message,
+                error: (error: unknown) => getErrorMessage(error),
             }
         );
 
@@ -163,7 +188,7 @@ function DriverActions({ driver }: { driver: DriverRow }) {
             {
                 loading: "Activating user...",
                 success: "User activated",
-                error: (err: BetterFetchError) => err.error.message || err.message,
+                error: (error: unknown) => getErrorMessage(error),
             }
         );
     }
@@ -199,7 +224,7 @@ function DriverActions({ driver }: { driver: DriverRow }) {
             {
                 loading: "Suspending user...",
                 success: "User suspended",
-                error: (err: BetterFetchError) => err.error.message || err.message,
+                error: (error: unknown) => getErrorMessage(error),
             }
         );
 
@@ -233,19 +258,14 @@ function DriverActions({ driver }: { driver: DriverRow }) {
             () =>
                 updateDriverPoints({
                     driverUserId: driver.userId,
+                    slug: params.slug,
                     pointChange,
                     reason: pointReason.trim() || "Points updated by organization manager",
                 }),
             {
                 loading: "Updating points...",
                 success: "Points updated",
-                error: (err) => {
-                    if (err instanceof Error) {
-                        return err.message;
-                    }
-
-                    return "Failed to update points";
-                },
+                error: (error: unknown) => getErrorMessage(error),
             }
         );
 

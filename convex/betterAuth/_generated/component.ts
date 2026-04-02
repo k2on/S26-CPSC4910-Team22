@@ -105,6 +105,7 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
                   name: string;
                   pointValue: number;
                   slug: string;
+                  totalMembers?: number;
                 };
                 model: "organization";
               }
@@ -329,6 +330,7 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
                     | "createdAt"
                     | "metadata"
                     | "pointValue"
+                    | "totalMembers"
                     | "_id";
                   operator?:
                     | "lt"
@@ -623,6 +625,7 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
                     | "createdAt"
                     | "metadata"
                     | "pointValue"
+                    | "totalMembers"
                     | "_id";
                   operator?:
                     | "lt"
@@ -1054,6 +1057,7 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
                   name?: string;
                   pointValue?: number;
                   slug?: string;
+                  totalMembers?: number;
                 };
                 where?: Array<{
                   connector?: "AND" | "OR";
@@ -1064,6 +1068,7 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
                     | "createdAt"
                     | "metadata"
                     | "pointValue"
+                    | "totalMembers"
                     | "_id";
                   operator?:
                     | "lt"
@@ -1424,6 +1429,7 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
                   name?: string;
                   pointValue?: number;
                   slug?: string;
+                  totalMembers?: number;
                 };
                 where?: Array<{
                   connector?: "AND" | "OR";
@@ -1434,6 +1440,7 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
                     | "createdAt"
                     | "metadata"
                     | "pointValue"
+                    | "totalMembers"
                     | "_id";
                   operator?:
                     | "lt"
@@ -1558,6 +1565,13 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
         },
         Name
       >;
+      decrementOrganizationMemberCount: FunctionReference<
+        "mutation",
+        "internal",
+        { canAccessAll: boolean; currentUserId: string; slug: string },
+        null,
+        Name
+      >;
       getOrganizationByName: FunctionReference<
         "query",
         "internal",
@@ -1571,6 +1585,7 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
           name: string;
           pointValue: number;
           slug: string;
+          totalMembers?: number;
         } | null,
         Name
       >;
@@ -1587,7 +1602,22 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
           name: string;
           pointValue: number;
           slug: string;
+          totalMembers?: number;
         } | null,
+        Name
+      >;
+      getOrganizationGeneralBySlug: FunctionReference<
+        "query",
+        "internal",
+        { role: "admin" | "sponsor" | "driver"; slug: string; userId: string },
+        any,
+        Name
+      >;
+      getOrganizationSelectionData: FunctionReference<
+        "query",
+        "internal",
+        { authUserId: string; role: "admin" | "sponsor" | "driver" },
+        any,
         Name
       >;
       getUserNamesByIds: FunctionReference<
@@ -1610,7 +1640,15 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
           name: string;
           pointValue: number;
           slug: string;
+          totalMembers?: number;
         } | null,
+        Name
+      >;
+      incrementOrganizationMemberCount: FunctionReference<
+        "mutation",
+        "internal",
+        { canAccessAll: boolean; currentUserId: string; slug: string },
+        null,
         Name
       >;
       listOrganizations: FunctionReference<
@@ -1626,6 +1664,7 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
           name: string;
           pointValue: number;
           slug: string;
+          totalMembers?: number;
         }>,
         Name
       >;
