@@ -19,6 +19,16 @@ const visibleOrganizationDriverValidator = v.object({
   banReason: v.optional(v.union(v.null(), v.string())),
 });
 
+const visibleOrganizationPointChangeValidator = v.object({
+  id: v.string(),
+  driverName: v.string(),
+  driverEmail: v.string(),
+  changedByName: v.string(),
+  pointChange: v.number(),
+  reason: v.string(),
+  time: v.number(),
+});
+
 // Write your Convex functions in any file inside this directory (`convex`).
 // See https://docs.convex.dev/functions for more.
 
@@ -305,7 +315,6 @@ export const getAuditLog = query({
   }
 })
 
-
 function parseOrg(org: any) {
   return {
     ...org,
@@ -360,5 +369,76 @@ export const listOrgs = query({
       where: [],
     });
     return allOrgs.map(parseOrg);
+  }
+});
+
+export const getVisibleOrganizationPointChangesBySlug = query({
+  args: {
+    slug: v.string(),
+  },
+  returns: v.array(visibleOrganizationPointChangeValidator),
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+
+    if (!identity || (identity.role !== "admin" && identity.role !== "sponsor")) {
+      return [];
+    }
+
+    const access = getOrgAccess(identity);
+
+    const drivers = await ctx.runQuery(
+      components.betterAuth.organizations.listVisibleOrganizationDriversBySlug,
+      {
+        slug: args.slug,
+        ...access,
+      }
+    );
+
+    const driverMap = new Map(
+      drivers.map((driver) => [
+        driver.userId,
+        {
+          name: driver.name,
+          email: driver.email,
+        },
+      ])
+    );
+
+    const pointChanges = await ctx.db.query("pointChanges").collect();
+
+    const relevantPointChanges = pointChanges.filter((change) =>
+      driverMap.has(change.driverUserId)
+    );
+
+    const changedByIds = Array.from(
+      new Set(relevantPointChanges.map((change) => change.changedByUserId))
+    );
+
+    const changedByUsers = await ctx.runQuery(
+      components.betterAuth.organizations.getUserNamesByIds,
+      {
+        userIds: changedByIds,
+      }
+    );
+
+    const changedByMap = new Map(
+      changedByUsers.map((user) => [user.userId, user.name])
+    );
+
+    return relevantPointChanges
+      .map((change) => {
+        const driver = driverMap.get(change.driverUserId);
+
+        return {
+          id: String(change._id),
+          driverName: driver?.name ?? "Unknown User",
+          driverEmail: driver?.email ?? "Unknown Email",
+          changedByName: changedByMap.get(change.changedByUserId) ?? "Unknown User",
+          pointChange: change.pointChange,
+          reason: change.reason,
+          time: change.time,
+        };
+      })
+      .sort((a, b) => b.time - a.time);
   }
 });

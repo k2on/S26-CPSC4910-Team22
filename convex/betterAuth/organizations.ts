@@ -37,6 +37,11 @@ const driverMemberValidator = v.object({
     banReason: v.optional(v.union(v.null(), v.string())),
 });
 
+const userNameByIdValidator = v.object({
+    userId: v.string(),
+    name: v.string(),
+});
+
 async function getOrganizationBySlugInternal(
     ctx: Parameters<typeof query>[0] extends never ? never : any,
     slug: string
@@ -377,5 +382,32 @@ export const updateVisibleOrganization = mutation({
 
         await ctx.db.patch(args.organizationId as Id<"organization">, args.data);
         return null;
+    },
+});
+
+export const getUserNamesByIds = query({
+    args: {
+        userIds: v.array(v.string()),
+    },
+    returns: v.array(userNameByIdValidator),
+    handler: async (ctx, args) => {
+        const uniqueIds = Array.from(new Set(args.userIds));
+
+        const users = await Promise.all(
+            uniqueIds.map(async (userId) => {
+                const user = await ctx.db.get(userId as Id<"user">);
+
+                if (!user) {
+                    return null;
+                }
+
+                return {
+                    userId,
+                    name: user.name,
+                };
+            })
+        );
+
+        return users.filter((user): user is NonNullable<typeof user> => user !== null);
     },
 });
