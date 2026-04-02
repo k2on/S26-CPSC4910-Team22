@@ -8,6 +8,7 @@
  * @module
  */
 
+import type * as admin_user from "../admin/user.js";
 import type * as driver_application from "../driver/application.js";
 import type * as http from "../http.js";
 import type * as myFunctions from "../myFunctions.js";
@@ -20,6 +21,7 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  "admin/user": typeof admin_user;
   "driver/application": typeof driver_application;
   http: typeof http;
   myFunctions: typeof myFunctions;
@@ -1580,6 +1582,21 @@ export declare const components: {
           organizationName: string;
           status: "added" | "already_exists" | "user_not_found";
         }
+      >;
+      getOrganizationByName: FunctionReference<
+        "query",
+        "internal",
+        { name: string },
+        {
+          _creationTime: number;
+          _id: string;
+          createdAt: number;
+          logo?: null | string;
+          metadata?: null | string;
+          name: string;
+          pointValue: number;
+          slug: string;
+        } | null
       >;
       getOrganizationBySlug: FunctionReference<
         "query",

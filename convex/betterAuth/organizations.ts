@@ -86,6 +86,19 @@ export const getOrganizationBySlug = query({
     },
 });
 
+export const getOrganizationByName = query({
+    args: {
+        name: v.string(),
+    },
+    returns: v.union(organizationValidator, v.null()),
+    handler: async (ctx, args) => {
+        return await ctx.db
+            .query("organization")
+            .withIndex("name", (q: any) => q.eq("name", args.name))
+            .unique();
+    },
+});
+
 // export const listVisibleOrganizations = query({
 //     args: {
 //         currentUserId: v.string(),

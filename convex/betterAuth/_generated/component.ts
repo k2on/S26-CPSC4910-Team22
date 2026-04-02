@@ -1558,6 +1558,22 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
         },
         Name
       >;
+      getOrganizationByName: FunctionReference<
+        "query",
+        "internal",
+        { name: string },
+        {
+          _creationTime: number;
+          _id: string;
+          createdAt: number;
+          logo?: null | string;
+          metadata?: null | string;
+          name: string;
+          pointValue: number;
+          slug: string;
+        } | null,
+        Name
+      >;
       getOrganizationBySlug: FunctionReference<
         "query",
         "internal",
