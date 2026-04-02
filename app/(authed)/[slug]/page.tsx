@@ -1,20 +1,3 @@
-<<<<<<< HEAD
-import { OrganizationGeneral } from "@/components/org/OrganizationGeneral";
-
-export default async function Page({
-                                       params,
-                                   }: {
-    params: Promise<{ slug: string }>;
-}) {
-    const { slug } = await params;
-
-    return (
-        <div className="mx-auto max-w-lg pt-8">
-            <OrganizationGeneral slug={slug} />
-        </div>
-    );
-}
-=======
 import { fetchAuthQuery } from "@/lib/auth-server";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -43,4 +26,3 @@ export default async function OrganizationHome({ params }: { params: Promise<{ s
     </div>
   );
 }
->>>>>>> main

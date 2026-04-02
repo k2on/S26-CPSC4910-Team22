@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import { ReactNode } from "react";
 import { notFound } from "next/navigation";
 
@@ -8,9 +7,9 @@ import { fetchAuthQuery } from "@/lib/auth-server";
 import { api } from "@/convex/_generated/api";
 
 export default async function OrganizationLayout({
-                                                     children,
-                                                     params,
-                                                 }: {
+    children,
+    params,
+}: {
     children: ReactNode;
     params: Promise<{ slug: string }>;
 }) {
@@ -36,23 +35,3 @@ export default async function OrganizationLayout({
         </SidebarProvider>
     );
 }
-=======
-import { fetchAuthQuery } from "@/lib/auth-server";
-import { api } from "@/convex/_generated/api";
-import { OrgProvider } from "@/components/org/context";
-
-export default async function RootLayout({
-  children,
-  params
-}: Readonly<{
-  params: Promise<{ slug: string }>
-  children: React.ReactNode;
-}>) {
-  const { slug } = await params;
-
-  const org = await fetchAuthQuery(api.myFunctions.getOrg, { organizationSlug: slug });
-  if (!org) return <div>Organization not found</div>;
-
-  return <OrgProvider org={org}>{children}</OrgProvider>;
-}
->>>>>>> main

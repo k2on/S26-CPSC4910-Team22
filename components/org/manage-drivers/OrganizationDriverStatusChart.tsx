@@ -97,6 +97,7 @@ export function OrganizationDriverStatusChart({ slug }: Props) {
                                         <TableCell>{row.points}</TableCell>
                                         <TableCell>
                                             {columns[3].cell
+                                                // @ts-ignore
                                                 ? columns[3].cell({
                                                     row: { original: row },
                                                 } as never)
@@ -104,6 +105,7 @@ export function OrganizationDriverStatusChart({ slug }: Props) {
                                         </TableCell>
                                         <TableCell>
                                             {columns[4].cell
+                                                // @ts-ignore
                                                 ? columns[4].cell({
                                                     row: { original: row },
                                                 } as never)
@@ -117,6 +119,7 @@ export function OrganizationDriverStatusChart({ slug }: Props) {
                                         <TableCell>{row.banReason || "—"}</TableCell>
                                         <TableCell className="text-right">
                                             {actionColumn?.cell
+                                                // @ts-ignore
                                                 ? actionColumn.cell({
                                                     row: { original: row },
                                                 } as never)
@@ -131,4 +134,4 @@ export function OrganizationDriverStatusChart({ slug }: Props) {
             </CardContent>
         </Card>
     );
-}
+} 
