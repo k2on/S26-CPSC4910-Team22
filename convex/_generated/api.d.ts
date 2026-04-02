@@ -8,9 +8,12 @@
  * @module
  */
 
+import type * as admin_user from "../admin/user.js";
 import type * as cart from "../cart.js";
+import type * as driver_application from "../driver/application.js";
 import type * as http from "../http.js";
 import type * as myFunctions from "../myFunctions.js";
+import type * as organization_application from "../organization/application.js";
 
 import type {
   ApiFromModules,
@@ -19,9 +22,12 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  "admin/user": typeof admin_user;
   cart: typeof cart;
+  "driver/application": typeof driver_application;
   http: typeof http;
   myFunctions: typeof myFunctions;
+  "organization/application": typeof organization_application;
 }>;
 
 /**
@@ -1571,14 +1577,6 @@ export declare const components: {
         any
       >;
     };
-    authUsers: {
-      setRoleForUserDocId: FunctionReference<
-        "mutation",
-        "internal",
-        { role: "driver" | "sponsor" | "admin"; userDocId: string },
-        any
-      >;
-    };
     organizations: {
       addMemberByEmail: FunctionReference<
         "mutation",
@@ -1599,6 +1597,22 @@ export declare const components: {
         "internal",
         { canAccessAll: boolean; currentUserId: string; slug: string },
         null
+      >;
+      getOrganizationByName: FunctionReference<
+        "query",
+        "internal",
+        { name: string },
+        {
+          _creationTime: number;
+          _id: string;
+          createdAt: number;
+          logo?: null | string;
+          metadata?: null | string;
+          name: string;
+          pointValue: number;
+          slug: string;
+          totalMembers?: number;
+        } | null
       >;
       getOrganizationBySlug: FunctionReference<
         "query",
@@ -1704,22 +1718,6 @@ export declare const components: {
           userId: string;
         }>
       >;
-      listVisibleOrganizations: FunctionReference<
-        "query",
-        "internal",
-        { canAccessAll: boolean; currentUserId: string },
-        Array<{
-          _creationTime: number;
-          _id: string;
-          createdAt: number;
-          logo?: null | string;
-          metadata?: null | string;
-          name: string;
-          pointValue: number;
-          slug: string;
-          totalMembers?: number;
-        }>
-      >;
       updateVisibleOrganization: FunctionReference<
         "mutation",
         "internal",
@@ -1730,6 +1728,30 @@ export declare const components: {
           organizationId: string;
         },
         null
+      >;
+    };
+    user: {
+      getUsersFromIds: FunctionReference<
+        "query",
+        "internal",
+        { ids: Array<string> },
+        Array<{
+          _creationTime: number;
+          _id: string;
+          address?: null | string;
+          banExpires?: null | number;
+          banReason?: null | string;
+          banned?: null | boolean;
+          createdAt: number;
+          email: string;
+          emailVerified: boolean;
+          image?: null | string;
+          imageBorderColor?: null | string;
+          name: string;
+          role?: null | string;
+          updatedAt: number;
+          userId?: null | string;
+        }>
       >;
     };
   };

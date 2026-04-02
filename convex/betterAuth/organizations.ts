@@ -114,36 +114,50 @@ export const getOrganizationBySlug = query({
     },
 });
 
-export const listVisibleOrganizations = query({
+export const getOrganizationByName = query({
     args: {
-        currentUserId: v.string(),
-        canAccessAll: v.boolean(),
+        name: v.string(),
     },
-    returns: v.array(organizationValidator),
+    returns: v.union(organizationValidator, v.null()),
     handler: async (ctx, args) => {
-        if (args.canAccessAll) {
-            return await ctx.db
-                .query("organization")
-                .withIndex("name")
-                .collect();
-        }
-
-        const memberships = await ctx.db
-            .query("member")
-            .withIndex("userId", (q) => q.eq("userId", args.currentUserId))
-            .collect();
-
-        const organizations = await Promise.all(
-            memberships.map((member) =>
-                ctx.db.get(member.organizationId as Id<"organization">)
-            )
-        );
-
-        return organizations
-            .filter((org): org is NonNullable<typeof org> => org !== null)
-            .sort((a, b) => a.name.localeCompare(b.name));
+        return await ctx.db
+            .query("organization")
+            .withIndex("name", (q: any) => q.eq("name", args.name))
+            .unique();
     },
 });
+
+// export const listVisibleOrganizations = query({
+//     args: {
+//         currentUserId: v.string(),
+//         canAccessAll: v.boolean(),
+//     },
+//     returns: v.array(organizationValidator),
+//     handler: async (ctx, args) => {
+//         console.log("WHAT");
+//         if (args.canAccessAll) {
+//             return await ctx.db
+//                 .query("organization")
+//                 .withIndex("name")
+//                 .collect();
+//         }
+//
+//         const memberships = await ctx.db
+//             .query("member")
+//             .withIndex("userId", (q) => q.eq("userId", args.currentUserId))
+//             .collect();
+//
+//         const organizations = await Promise.all(
+//             memberships.map((member) =>
+//                 ctx.db.get(member.organizationId as Id<"organization">)
+//             )
+//         );
+//
+//         return organizations
+//             .filter((org): org is NonNullable<typeof org> => org !== null)
+//             .sort((a, b) => a.name.localeCompare(b.name));
+//     },
+// });
 
 export const getVisibleOrganizationBySlug = query({
     args: {

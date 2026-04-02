@@ -2,9 +2,6 @@ import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 
 export default defineSchema({
-  numbers: defineTable({
-    number: v.number()
-  }),
   aboutPageInfo: defineTable({
     team: v.number(),
     version: v.number(),
@@ -16,6 +13,13 @@ export default defineSchema({
     time: v.number(),
     event: v.string(),
   }),
+  driverApplication: defineTable({
+    userId: v.string(),
+    orgId: v.string(),
+    status: v.union(v.literal("waiting"), v.literal("denied"), v.literal("approved")),
+    decisionBy: v.optional(v.string())
+  }).index("by_user_id", { fields: ["userId"] })
+    .index("by_org_id", { fields: ["orgId"] }),
   pointTotals: defineTable({
     driverUserId: v.string(),
     organizationId: v.string(),

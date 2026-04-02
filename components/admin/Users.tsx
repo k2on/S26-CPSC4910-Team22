@@ -8,6 +8,7 @@ import { authClient } from "@/lib/auth-client";
 import { columns } from "@/components/admin/users/columns";
 import { DataTable } from "@/components/admin/users/data-table";
 import { CreateUserModel } from "@/components/admin/users/CreateUserModel";
+import { BulkUserUploadModal } from "@/components/admin/users/BulkUserUploadModal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -86,6 +87,7 @@ export function AdminUsers() {
                         <SlidersHorizontalIcon />
                         {showFilters ? "Hide Search Options" : "Show Search Options"}
                     </Button>
+                    <BulkUserUploadModal />
                 </div>
             </div>
 
@@ -160,4 +162,4 @@ export function AdminUsers() {
             <DataTable columns={columns} data={filteredUsers} />
         </div>
     );
-}
+} 

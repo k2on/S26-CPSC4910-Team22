@@ -8,7 +8,7 @@ export function StopImpersonating() {
         const { mutate: stopImpersonating } = useMutation({
                 mutationFn: async (input: Parameters<typeof authClient.admin.stopImpersonating>[0]) => authClient.admin.stopImpersonating(input),
                 onSuccess: () => {
-                        window.location.href = "/";
+                        window.location.href = "/admin";
                 }
         });
 
