@@ -659,3 +659,21 @@ export const getVisibleOrganizationBySlugForDriver = query({
     );
   }
 });
+
+export const getMyPoints = query({
+  args: { organizationId: v.string() },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if(!identity) return 0;
+
+    const pointTotal = await ctx.db
+      .query("pointTotals")
+      .filter((q) =>
+        q.and(
+          q.eq(q.field("driverUserId"), identity.subject),
+          q.eq(q.field("organizationId"), args.organizationId)
+        )
+      ).first();
+      return pointTotal?.points ?? 0;
+  },
+});

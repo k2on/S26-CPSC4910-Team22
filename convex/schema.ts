@@ -42,4 +42,9 @@ export default defineSchema({
   })
     .index("by_user_org", ["userId", "organizationId"])
     .index("by_user_org_track", ["userId", "organizationId", "trackId"]),
+  ownedItems: defineTable({
+    userId: v.string(),
+    trackId: v.number(),
+    purchasedAt: v.number(),
+  }).index("by_user_track", ["userId", "trackId"]),
 });
