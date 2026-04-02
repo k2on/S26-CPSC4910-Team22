@@ -7,9 +7,10 @@ import { Button } from "@/components/ui/button"
 import Link from "next/link"
 
 export function CatalogHeader({ slug }: { slug?: string}){
-    const org = useQuery(api.myFunctions.getVisibleOrganizationBySlug, slug ? { slug } : "skip");
+    const org = useQuery(api.myFunctions.getVisibleOrganizationBySlugForDriver, slug ? { slug } : "skip");
     const organizationId = org?._id;
     const cartItems = useQuery(api.cart.getMyCart, organizationId ? { organizationId } : "skip");
+    const isLoading = slug && (org === undefined || (organizationId && cartItems === undefined));
     const count = cartItems?.length ?? 0;
 
     return(
@@ -23,7 +24,7 @@ export function CatalogHeader({ slug }: { slug?: string}){
                 <ShoppingCart className="h-5 w-5" />
                 <div className="px-1" />
                 <span className="font-medium">
-                    {count} {count === 1 ? 'item' : 'items'} in cart
+                    {isLoading ? "Updating cart..." : `${count} ${count === 1 ? 'item' : 'items'} in cart`}
                     {count > 0 && (
                         <Link href={`/${slug}/catalog/cart`}>
                             <Button className="mx-2" size="sm">

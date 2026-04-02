@@ -93,8 +93,8 @@ export default async function Page({params, searchParams}: {
         media: mediaType,
         limit: searchLimit.toString()
     });
-    const orgData = await fetchQuery(api.myFunctions.getVisibleOrganizationBySlug, { slug });
-    const organizationId = orgData?._id;
+    const org = await fetchQuery(api.myFunctions.getVisibleOrganizationBySlugForDriver, {slug});
+    const organizationId = org?._id || org?._id.toString() || "";
 
     const fullResponse = await fetch(`https://itunes.apple.com/search?${fullQuery.toString()}`);
     if (!fullResponse.ok){
@@ -137,7 +137,7 @@ export default async function Page({params, searchParams}: {
                                 <div className="flex flex-col px-2"><strong>{getName(track)}</strong>{track.artistName}<div>Price: {getPrice(track)} Points</div></div>
                                 <div className="flex flex-col justify-top ml-auto">
                                     <AddToCartButton
-                                        organizationId={organizationId ?? ""}
+                                        slug={slug}
                                         trackId={getId(track)}
                                         mediaType={track.kind || track.wrapperType}
                                         name={getName(track)}

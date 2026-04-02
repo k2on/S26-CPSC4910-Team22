@@ -621,3 +621,41 @@ export const getCurrentUserName = query({
     return users[0]?.name ?? null;
   },
 });
+
+//The other function doesn't seem to work right for drivers
+//and I'm afraid of messing with the logic of it 
+//so I'm making this other one for safety
+export const getVisibleOrganizationsForDriver = query({
+  handler: async(ctx) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if(!identity){
+      return [];
+    }
+    const access = getOrgAccess(identity);
+    
+    return await ctx.runQuery(
+      components.betterAuth.organizations.listVisibleOrganizations,
+      access
+    )
+  }
+});
+
+//same reason for this one as above
+export const getVisibleOrganizationBySlugForDriver = query({
+  args: { slug: v.string() },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if(!identity){
+      return null;
+    }
+    const access = getOrgAccess(identity);
+
+    return await ctx.runQuery(
+      components.betterAuth.organizations.getVisibleOrganizationBySlug,
+      {
+        slug: args.slug,
+        ...access,
+      }
+    );
+  }
+});

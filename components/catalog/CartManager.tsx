@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
 
 export function CartManager({ slug }: { slug: string }){
-    const org = useQuery(api.myFunctions.getVisibleOrganizationBySlug, {slug});
+    const org = useQuery(api.myFunctions.getVisibleOrganizationBySlugForDriver, {slug});
     const organizationId = org?._id;
     const cartItems = useQuery(api.cart.getMyCart, organizationId ? { organizationId } : "skip");
     const remove = useMutation(api.cart.removeFromCart);

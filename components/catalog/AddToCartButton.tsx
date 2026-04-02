@@ -5,7 +5,7 @@ import { api } from "@/convex/_generated/api";
 import { Button } from "@/components/ui/button";
 
 interface CartItemProperties {
-    organizationId: string,
+    slug: string,
     trackId: number;
     mediaType: string;
     name: string;
@@ -14,13 +14,19 @@ interface CartItemProperties {
     artworkUrl: string;
 }
 
-export function AddToCartButton({ trackId, mediaType, name, artistName, price, artworkUrl, organizationId }: CartItemProperties) {
-    const cartItems = useQuery(api.cart.getMyCart, { organizationId });
+export function AddToCartButton({ trackId, slug, mediaType, name, artistName, price, artworkUrl }: CartItemProperties) {
+    const org = useQuery(api.myFunctions.getVisibleOrganizationBySlugForDriver, { slug });
+    const organizationId = org?._id ? String(org._id) : undefined;
+    const cartItems = useQuery(api.cart.getMyCart, organizationId ? { organizationId } : "skip");
     const addToCart = useMutation(api.cart.addToCart);
     const removeFromCart = useMutation(api.cart.removeFromCart);
     const isInCart = cartItems?.some((item) => item.trackId === trackId);
 
     const handleToggle = async () => {
+        if(!organizationId){
+            console.error("OrgId not found, can't add to cart");
+            return;
+        }
         if(isInCart){
             await removeFromCart({trackId, organizationId});
         }else{
@@ -35,9 +41,12 @@ export function AddToCartButton({ trackId, mediaType, name, artistName, price, a
             });
         }
     };
+    
+    console.log("Button ID:", organizationId);
 
     return (
         <Button
+            disabled={!organizationId}
             variant={isInCart ? "destructive" : "default"}
             size="sm"
             onClick={handleToggle}
