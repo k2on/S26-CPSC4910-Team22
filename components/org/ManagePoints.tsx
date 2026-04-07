@@ -43,7 +43,7 @@ export function OrganizationPoints({
     const [startDate, setStartDate] = useState("");
     const [endDate, setEndDate] = useState("");
 
-    const pointChanges = useQuery(api.myFunctions.getVisibleOrganizationPointChangesBySlug, { slug });
+    const pointChanges = useQuery(api.myFunctions.getOrganizationPointChangesBySlug, { slug });
     const currentUserName = useQuery(
         api.myFunctions.getCurrentUserName,
         isDriverView ? {} : "skip"

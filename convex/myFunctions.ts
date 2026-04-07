@@ -6,7 +6,7 @@ import { Organization } from "better-auth/plugins";
 import { Doc } from "./_generated/dataModel";
 import { Id } from "./betterAuth/_generated/dataModel";
 import { components } from "./_generated/api";
-import { getOrganizationBySlug } from "./betterAuth/organizations";
+import { getOrganizationPointChangesBySlug as getOrganizationPointChangesBySlugLogistics } from "./functions/logistics/points";
 
 const visibleOrganizationDriverValidator = v.object({
   userId: v.string(),
@@ -717,8 +717,28 @@ export const getMyPoints = query({
 });
 
 
+export const getOrganizationPointChangesBySlug = query({
+  args: {
+    slug: v.string(),
+  },
+  returns: v.array(
+      v.object({
+        id: v.string(),
+        driverName: v.string(),
+        driverEmail: v.string(),
+        changedByName: v.string(),
+        pointChange: v.number(),
+        reason: v.string(),
+        time: v.number(),
+      })
+  ),
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
 
+    if (!identity) {
+      return [];
+    }
 
-
-
-
+    return getOrganizationPointChangesBySlugLogistics(ctx, args.slug);
+  },
+});

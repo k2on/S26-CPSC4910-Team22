@@ -11,6 +11,8 @@
 import type * as admin_user from "../admin/user.js";
 import type * as cart from "../cart.js";
 import type * as driver_application from "../driver/application.js";
+import type * as functions_data_points from "../functions/data/points.js";
+import type * as functions_logistics_points from "../functions/logistics/points.js";
 import type * as http from "../http.js";
 import type * as myFunctions from "../myFunctions.js";
 import type * as organization_application from "../organization/application.js";
@@ -25,6 +27,8 @@ declare const fullApi: ApiFromModules<{
   "admin/user": typeof admin_user;
   cart: typeof cart;
   "driver/application": typeof driver_application;
+  "functions/data/points": typeof functions_data_points;
+  "functions/logistics/points": typeof functions_logistics_points;
   http: typeof http;
   myFunctions: typeof myFunctions;
   "organization/application": typeof organization_application;
@@ -1576,6 +1580,161 @@ export declare const components: {
         },
         any
       >;
+    };
+    functions: {
+      organizationMembers: {
+        addOrganizationMember: FunctionReference<
+          "mutation",
+          "internal",
+          { organizationId: string; role?: string; userId: string },
+          null
+        >;
+        getOrganizationMembersByOrganizationId: FunctionReference<
+          "query",
+          "internal",
+          { organizationId: string },
+          Array<{
+            _creationTime: number;
+            _id: string;
+            createdAt: number;
+            organizationId: string;
+            role: string;
+            userId: string;
+          }>
+        >;
+        getOrganizationMembersBySlug: FunctionReference<
+          "query",
+          "internal",
+          { slug: string },
+          Array<{
+            _creationTime: number;
+            _id: string;
+            createdAt: number;
+            organizationId: string;
+            role: string;
+            userId: string;
+          }>
+        >;
+      };
+      organizations: {
+        getAllOrganizations: FunctionReference<
+          "query",
+          "internal",
+          {},
+          Array<{
+            _creationTime: number;
+            _id: string;
+            createdAt: number;
+            logo?: string | null;
+            metadata?: string | null;
+            name: string;
+            pointValue: number;
+            slug: string;
+            totalMembers?: number;
+          }>
+        >;
+        getOrganizationByName: FunctionReference<
+          "query",
+          "internal",
+          { name: string },
+          null | {
+            _creationTime: number;
+            _id: string;
+            createdAt: number;
+            logo?: string | null;
+            metadata?: string | null;
+            name: string;
+            pointValue: number;
+            slug: string;
+            totalMembers?: number;
+          }
+        >;
+        getOrganizationBySlug: FunctionReference<
+          "query",
+          "internal",
+          { slug: string },
+          null | {
+            _creationTime: number;
+            _id: string;
+            createdAt: number;
+            logo?: string | null;
+            metadata?: string | null;
+            name: string;
+            pointValue: number;
+            slug: string;
+            totalMembers?: number;
+          }
+        >;
+        isUserInOrganization: FunctionReference<
+          "query",
+          "internal",
+          { organizationId: string; userId: string },
+          boolean
+        >;
+        updateOrganization: FunctionReference<
+          "mutation",
+          "internal",
+          {
+            slug: string;
+            updates: {
+              createdAt?: number;
+              logo?: string | null;
+              metadata?: string | null;
+              name?: string;
+              pointValue?: number;
+              slug?: string;
+              totalMembers?: number;
+            };
+          },
+          null
+        >;
+      };
+      user: {
+        getUserByEmail: FunctionReference<
+          "query",
+          "internal",
+          { email: string },
+          null | {
+            _creationTime: number;
+            _id: string;
+            address?: string | null;
+            banExpires?: number | null;
+            banReason?: string | null;
+            banned?: boolean | null;
+            createdAt: number;
+            email: string;
+            emailVerified: boolean;
+            image?: string | null;
+            imageBorderColor?: string | null;
+            name: string;
+            role?: string | null;
+            updatedAt: number;
+            userId?: string | null;
+          }
+        >;
+        getUsersByIds: FunctionReference<
+          "query",
+          "internal",
+          { userIds: Array<string> },
+          Array<{
+            _creationTime: number;
+            _id: string;
+            address?: string | null;
+            banExpires?: number | null;
+            banReason?: string | null;
+            banned?: boolean | null;
+            createdAt: number;
+            email: string;
+            emailVerified: boolean;
+            image?: string | null;
+            imageBorderColor?: string | null;
+            name: string;
+            role?: string | null;
+            updatedAt: number;
+            userId?: string | null;
+          }>
+        >;
+      };
     };
     organizations: {
       addMemberByEmail: FunctionReference<

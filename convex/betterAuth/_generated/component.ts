@@ -1549,6 +1549,171 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
         Name
       >;
     };
+    functions: {
+      organizationMembers: {
+        addOrganizationMember: FunctionReference<
+          "mutation",
+          "internal",
+          { organizationId: string; role?: string; userId: string },
+          null,
+          Name
+        >;
+        getOrganizationMembersByOrganizationId: FunctionReference<
+          "query",
+          "internal",
+          { organizationId: string },
+          Array<{
+            _creationTime: number;
+            _id: string;
+            createdAt: number;
+            organizationId: string;
+            role: string;
+            userId: string;
+          }>,
+          Name
+        >;
+        getOrganizationMembersBySlug: FunctionReference<
+          "query",
+          "internal",
+          { slug: string },
+          Array<{
+            _creationTime: number;
+            _id: string;
+            createdAt: number;
+            organizationId: string;
+            role: string;
+            userId: string;
+          }>,
+          Name
+        >;
+      };
+      organizations: {
+        getAllOrganizations: FunctionReference<
+          "query",
+          "internal",
+          {},
+          Array<{
+            _creationTime: number;
+            _id: string;
+            createdAt: number;
+            logo?: string | null;
+            metadata?: string | null;
+            name: string;
+            pointValue: number;
+            slug: string;
+            totalMembers?: number;
+          }>,
+          Name
+        >;
+        getOrganizationByName: FunctionReference<
+          "query",
+          "internal",
+          { name: string },
+          null | {
+            _creationTime: number;
+            _id: string;
+            createdAt: number;
+            logo?: string | null;
+            metadata?: string | null;
+            name: string;
+            pointValue: number;
+            slug: string;
+            totalMembers?: number;
+          },
+          Name
+        >;
+        getOrganizationBySlug: FunctionReference<
+          "query",
+          "internal",
+          { slug: string },
+          null | {
+            _creationTime: number;
+            _id: string;
+            createdAt: number;
+            logo?: string | null;
+            metadata?: string | null;
+            name: string;
+            pointValue: number;
+            slug: string;
+            totalMembers?: number;
+          },
+          Name
+        >;
+        isUserInOrganization: FunctionReference<
+          "query",
+          "internal",
+          { organizationId: string; userId: string },
+          boolean,
+          Name
+        >;
+        updateOrganization: FunctionReference<
+          "mutation",
+          "internal",
+          {
+            slug: string;
+            updates: {
+              createdAt?: number;
+              logo?: string | null;
+              metadata?: string | null;
+              name?: string;
+              pointValue?: number;
+              slug?: string;
+              totalMembers?: number;
+            };
+          },
+          null,
+          Name
+        >;
+      };
+      user: {
+        getUserByEmail: FunctionReference<
+          "query",
+          "internal",
+          { email: string },
+          null | {
+            _creationTime: number;
+            _id: string;
+            address?: string | null;
+            banExpires?: number | null;
+            banReason?: string | null;
+            banned?: boolean | null;
+            createdAt: number;
+            email: string;
+            emailVerified: boolean;
+            image?: string | null;
+            imageBorderColor?: string | null;
+            name: string;
+            role?: string | null;
+            updatedAt: number;
+            userId?: string | null;
+          },
+          Name
+        >;
+        getUsersByIds: FunctionReference<
+          "query",
+          "internal",
+          { userIds: Array<string> },
+          Array<{
+            _creationTime: number;
+            _id: string;
+            address?: string | null;
+            banExpires?: number | null;
+            banReason?: string | null;
+            banned?: boolean | null;
+            createdAt: number;
+            email: string;
+            emailVerified: boolean;
+            image?: string | null;
+            imageBorderColor?: string | null;
+            name: string;
+            role?: string | null;
+            updatedAt: number;
+            userId?: string | null;
+          }>,
+          Name
+        >;
+      };
+    };
     organizations: {
       addMemberByEmail: FunctionReference<
         "mutation",
