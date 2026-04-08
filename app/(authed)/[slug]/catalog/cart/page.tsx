@@ -9,10 +9,10 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
     
     return(
         <div className="max-w-4xl mx-auto">
-            <Link href={`/${slug}/catalog`} className="flex items-center py-2">
-                <ArrowLeft />Back to Catalog
+            <Link href={`/${slug}/catalog`} className="flex py-2 mx-auto">
+                <div className="flex flex-row mx-auto"><ArrowLeft />Back to Catalog</div>
             </Link>
-            <div className="text-2xl text-bold">Your Cart</div>
+            <div className="text-2xl text-bold text-center">Your Cart</div>
             <CartManager slug={slug} />
         </div>
     );

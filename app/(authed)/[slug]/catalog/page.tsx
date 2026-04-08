@@ -9,6 +9,7 @@ import {
 import { fetchQuery } from "convex/nextjs";
 import { api } from "@/convex/_generated/api";
 import { AddToCartButton } from "@/components/catalog/AddToCartButton";
+import { BuyNowButton } from "@/components/catalog/BuyNowButton";
 import { CatalogHeader } from "@/components/catalog/CatalogHeader";
 
 const mediaTypes = [
@@ -20,7 +21,7 @@ const mediaTypes = [
 ]
 
 const pointsPerDollar = 100; //1 point = 1 cent
-const defaultPrice = 100;
+const defaultPrice = 100;//some things show up with a missing price, thanks iTunes
 
 interface iTunesResult{
     wrapperType: string;
@@ -134,8 +135,8 @@ export default async function Page({params, searchParams}: {
                         <div key={track.trackId || track.collectionId || index}>
                             <div className="flex py-2">
                                 <img src={track.artworkUrl100} alt="Thumbnail" />
-                                <div className="flex flex-col px-2"><strong>{getName(track)}</strong>{track.artistName}<div>Price: {getPrice(track)} Points</div></div>
-                                <div className="flex flex-col justify-top ml-auto">
+                                <div className="flex flex-col px-2 justify-center"><strong>{getName(track)}</strong>{track.artistName}<div>Price: {getPrice(track)} Points</div></div>
+                                <div className="flex flex-col justify-center ml-auto">
                                     <AddToCartButton
                                         slug={slug}
                                         trackId={getId(track)}
@@ -146,13 +147,10 @@ export default async function Page({params, searchParams}: {
                                         artworkUrl={track.artworkUrl100}
                                     />
                                     <div className="py-1" />
-                                    <Link href={`/${slug}/catalog/purchase?id=${getId(track)}`} className={
-                                        buttonVariants({
-                                            variant: "default",
-                                            size: "sm"
-                                        })} style={{justifyContent: "center"}}>
-                                        Buy Now
-                                    </Link>
+                                    <BuyNowButton
+                                        slug={slug}
+                                        trackId={getId(track)}
+                                    />
                                 </div>
                             </div>
                         </div>

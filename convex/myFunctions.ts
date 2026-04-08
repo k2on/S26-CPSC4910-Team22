@@ -678,7 +678,6 @@ export const getCurrentUserName = query({
   },
 });
 
-//same reason for this one as above
 export const getVisibleOrganizationBySlugForDriver = query({
   args: { slug: v.string() },
   handler: async (ctx, args) => {
@@ -715,10 +714,3 @@ export const getMyPoints = query({
     return pointTotal?.points ?? 0;
   },
 });
-
-
-
-
-
-
-

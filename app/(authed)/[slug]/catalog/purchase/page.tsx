@@ -1,3 +1,7 @@
+import { PurchaseButton } from "@/components/catalog/PurchaseButton";
+import { ArrowLeft } from "lucide-react";
+import Link from "next/link";
+
 interface iTunesResult{
     wrapperType: string;
     kind: string;
@@ -54,6 +58,9 @@ export default async function Page({params, searchParams}: {
 
     return (
         <div className="max-w-lg mx-auto py-4">
+            <Link href={`/${slug}/catalog`} className="flex py-2 mx-auto">
+                <div className="flex flex-row mx-auto"><ArrowLeft />Back to Catalog</div>
+            </Link>
             <div className="flex flex-col">
                 <img src={item.artworkUrl100} alt="Thumbnail" className="mx-auto"/>
                 <div className="text-center py-2 flex flex-col">
@@ -61,6 +68,11 @@ export default async function Page({params, searchParams}: {
                     <div className="py-5">
                         Would you like to purchase this item for {getPrice(item)} points?   
                     </div> 
+                    <PurchaseButton
+                        slug={slug}
+                        trackId={Number(itemId)}
+                        price={getPrice(item)}
+                    />
                 </div>
             </div>
         </div>

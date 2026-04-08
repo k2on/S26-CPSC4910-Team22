@@ -50,5 +50,7 @@ export default defineSchema({
     userId: v.string(),
     trackId: v.number(),
     purchasedAt: v.number(),
-  }).index("by_user_track", ["userId", "trackId"]),
+  })
+  .index("by_user_track", ["userId", "trackId"])
+  .index("by_user", ["userId"]),
 });
