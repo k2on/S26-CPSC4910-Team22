@@ -714,3 +714,15 @@ export const getMyPoints = query({
     return pointTotal?.points ?? 0;
   },
 });
+
+export const getMyOwned = query({
+    handler: async (ctx, args) => {
+        const identity = await ctx.auth.getUserIdentity();
+        if (!identity) return [];
+
+        return await ctx.db
+            .query("ownedItems")
+            .withIndex("by_user", (q) => q.eq("userId", identity.subject))
+            .collect();
+    },
+})

@@ -12,9 +12,10 @@ export default async function OrganizationHome({ params }: { params: Promise<{ s
   const isSponsor = (me?.role == "admin" || me?.role == "sponsor");
 
   return (
-    <div className="pt-4 w-2xl mx-auto">
+    <div className="flex flex-col pt-4 w-2xl mx-auto">
 
-      {me?.role == "driver" && <Link href={`${slug}/catelog`}><Button>Catelog</Button></Link>}
+      {me?.role == "driver" && <Link className="mx-auto py-1" href={`${slug}/catalog`}><Button>Catalog</Button></Link>}
+      {me?.role == "driver" && <Link className="mx-auto py-1" href={`${slug}/owned`}><Button>Owned Items</Button></Link>}
 
       {isSponsor && (
         <>
