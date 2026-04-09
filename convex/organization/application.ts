@@ -70,7 +70,8 @@ export const approve = mutation({
 
 export const deny = mutation({
   args: {
-    id: v.id("driverApplication")
+    id: v.id("driverApplication"),
+    comment: v.string(),
   },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
@@ -83,6 +84,7 @@ export const deny = mutation({
     await ctx.db.patch(application._id, {
       status: "denied",
       decisionBy: identity.subject,
+      denyComment: args.comment,
     });
   }
 });
