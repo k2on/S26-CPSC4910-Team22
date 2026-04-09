@@ -832,3 +832,12 @@ export const getOrgPointValue = query({
     return organization.pointValue ?? 0.01;
   }
 });
+
+export const getOrderedAuditLog = query({
+  handler: async (ctx) => {
+    return await ctx.db
+      .query("auditLog")
+      .order("desc")
+      .collect();
+  }
+});

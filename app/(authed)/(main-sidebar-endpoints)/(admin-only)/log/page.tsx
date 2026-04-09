@@ -6,7 +6,7 @@ import { DataTable } from "./data-table";
 import { useQuery } from "convex/react";
 
 export default function Page() {
-  const data = useQuery(api.myFunctions.getAuditLog);
+  const data = useQuery(api.myFunctions.getOrderedAuditLog);
 
   return <div className="pt-4">
     <DataTable columns={columns} data={data || []} />
