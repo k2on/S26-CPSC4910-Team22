@@ -13,7 +13,9 @@ export default defineSchema({
     time: v.number(),
     event: v.string(),//application, pointChange, passwordChange, loginAttempt
     sponsor: v.optional(v.union(v.null(), v.string())),//sponsor org for applications and point changes
-    user: v.string(),
+    user: v.optional(v.union(v.null(), v.string())),//user for everything but failed login attempts
+    email: v.optional(v.union(v.null(), v.string())),//email for login attempts
+    amount: v.optional(v.union(v.null(), v.number())),//amount for point changes
     status: v.optional(v.union(v.null(), v.string())),//accept/reject for application, success/failure for login attempt
     reason: v.optional(v.union(v.null(), v.string())),//reason for application status or point/password change
   })

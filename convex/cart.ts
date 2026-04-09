@@ -112,6 +112,15 @@ export const purchaseCartItems = mutation({
             time: Date.now(),
         });
 
+        await ctx.db.insert("auditLog", {
+            time: Date.now(),
+            event: "pointChange",
+            sponsor: args.organizationId,
+            user: userId,
+            amount: -totalCost,
+            reason: "Catalog Purchase: Cart Item(s)",
+        });
+
         for(const item of args.items){
             const alreadyOwned = await ctx.db
                 .query("ownedItems")
@@ -201,6 +210,15 @@ export const purchaseSingleItem = mutation({
             pointChange: -args.price,
             reason: "Catalog Purchase",
             time: Date.now(),
+        });
+
+        await ctx.db.insert("auditLog", {
+            time: Date.now(),
+            event: "pointChange",
+            sponsor: args.organizationId,
+            user: userId,
+            amount: -args.price,
+            reason: "Catalog Purchase: Single Item",
         });
 
         const alreadyOwned = await ctx.db

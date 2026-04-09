@@ -275,6 +275,17 @@ export const updateDriverPoints = mutation({
       time: Date.now(),
     });
 
+    const plusOrMinus = args.pointChange >= 0 ? "Reward" : "Deduction";
+
+    await ctx.db.insert("auditLog", {
+      time: Date.now(),
+      event: "pointChange",
+      sponsor: organizationId,
+      user: args.driverUserId,
+      amount: args.pointChange,
+      reason: `${plusOrMinus}: ${args.reason}`,
+    });
+
     return {
       points: nextPoints,
     };
