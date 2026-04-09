@@ -112,6 +112,17 @@ export const purchaseCartItems = mutation({
             time: Date.now(),
         });
 
+        await ctx.db.insert("auditLog", {
+            time: Date.now(),
+            event: "pointChange",
+            sponsor: args.organizationId,
+            user: userId,
+            amount: -totalCost,
+            reason: "Catalog Purchase: Cart Item(s)",
+            email: identity.email,
+            pointTotal: currentPoints - totalCost,
+        });
+
         for(const item of args.items){
             const alreadyOwned = await ctx.db
                 .query("ownedItems")
@@ -138,6 +149,95 @@ export const purchaseCartItems = mutation({
         
         for(const cartItem of cartItems){
             await ctx.db.delete(cartItem._id);
+        }
+
+        return { success: true };
+    },
+});
+
+export const isOwned = query({
+    args: { trackId: v.number() },
+    handler: async (ctx, args) => {
+        const identity = await ctx.auth.getUserIdentity();
+        if(!identity){
+            return false;
+        }
+        const existing = await ctx.db
+            .query("ownedItems")
+            .withIndex("by_user_track", (q) =>
+                q.eq("userId", identity.subject).eq("trackId", args.trackId)
+            )
+            .first();
+        return !!existing;
+
+    }
+});
+
+export const purchaseSingleItem = mutation({
+    args: {
+        organizationId: v.string(),
+        trackId: v.number(),
+        price: v.number(),
+    },
+    handler: async (ctx, args) => {
+        const identity = await ctx.auth.getUserIdentity();
+        if(!identity){
+            throw new Error("Unauthorized");
+        }
+        const userId = identity.subject;
+
+        const existingTotal = await ctx.db
+            .query("pointTotals")
+            .filter((q) => 
+                q.and(
+                    q.eq(q.field("driverUserId"), userId),
+                    q.eq(q.field("organizationId"), args.organizationId)
+                )
+            )
+            .first();
+        
+        const currentPoints = existingTotal?.points ?? 0;
+        if(currentPoints < args.price){
+            throw new Error("Insufficient points for purchase");
+        }
+
+        await ctx.db.patch(existingTotal!._id, {
+            points: currentPoints - args.price,
+        });
+
+        await ctx.db.insert("pointChanges", {
+            driverUserId: userId,
+            organizationId: args.organizationId,
+            changedByUserId: userId,
+            pointChange: -args.price,
+            reason: "Catalog Purchase",
+            time: Date.now(),
+        });
+
+        await ctx.db.insert("auditLog", {
+            time: Date.now(),
+            event: "pointChange",
+            sponsor: args.organizationId,
+            user: userId,
+            amount: -args.price,
+            reason: "Catalog Purchase: Single Item",
+            email: identity.email,
+            pointTotal: currentPoints - args.price,
+        });
+
+        const alreadyOwned = await ctx.db
+            .query("ownedItems")
+            .withIndex("by_user_track", (q) =>
+                q.eq("userId", userId).eq("trackId", args.trackId)
+            )
+            .first();
+
+        if(!alreadyOwned){
+            await ctx.db.insert("ownedItems", {
+                userId,
+                trackId: args.trackId,
+                purchasedAt: Date.now(),
+            });
         }
 
         return { success: true };

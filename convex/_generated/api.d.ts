@@ -1598,6 +1598,12 @@ export declare const components: {
         { canAccessAll: boolean; currentUserId: string; slug: string },
         null
       >;
+      getOrganizationById: FunctionReference<
+        "query",
+        "internal",
+        { id: string },
+        any
+      >;
       getOrganizationByName: FunctionReference<
         "query",
         "internal",

@@ -12,11 +12,14 @@ import { Spinner } from "@/components/ui/spinner";
 import { OrganizationLoader } from "./OrganizationLoader";
 import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupText } from "../ui/input-group";
 import { OrganizationError } from "./Error";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Separator } from "@/components/ui/separator";
 
 export default function OrganizationSettings({ slug }: { slug: string }) {
     const organization = useQuery(api.myFunctions.getVisibleOrganizationBySlug, { slug });
+    const catalogSettings = useQuery(api.myFunctions.getCatalogSettings, organization ? { organizationId: organization._id } : "skip");
 
-    if (organization === undefined) {
+    if (organization === undefined || catalogSettings === undefined) {
         return <OrganizationLoader />;
     }
 
@@ -24,11 +27,20 @@ export default function OrganizationSettings({ slug }: { slug: string }) {
         return <OrganizationError error={new Error("Organization not found")} />;
     }
 
-    return <OrganizationSettingsForm organization={organization} />;
+    const loadedSettings = catalogSettings ?? {
+        organizationId: organization._id,
+        hasMusic: true,
+        hasMusicVideos: true,
+        hasAudiobooks: true,
+        hasShows: true,
+    };
+
+    return <OrganizationSettingsForm organization={organization} catalogSettings={loadedSettings} />;
 }
 
 function OrganizationSettingsForm({
                                      organization,
+                                     catalogSettings,
                                  }: {
     organization: {
         _id: string;
@@ -36,26 +48,47 @@ function OrganizationSettingsForm({
         slug: string;
         pointValue: number;
     };
+    catalogSettings: {
+        organizationId: string;
+        hasMusic: boolean;
+        hasMusicVideos: boolean;
+        hasAudiobooks: boolean;
+        hasShows: boolean;
+    };
 }) {
     const [isPending, setIsPending] = useState(false);
     const updateOrganization = useMutation(api.myFunctions.updateVisibleOrganization);
+    const updateCatalogSettings = useMutation(api.myFunctions.updateCatalogSettings);
 
     const form = useForm({
         defaultValues: {
             name: organization.name,
             slug: organization.slug,
             pointValue: organization.pointValue,
+            catalogSettings: {
+                hasMusic: catalogSettings?.hasMusic ?? true,
+                hasMusicVideos: catalogSettings?.hasMusicVideos ?? true,
+                hasAudiobooks: catalogSettings?.hasAudiobooks ?? true,
+                hasShows: catalogSettings?.hasShows ?? true,
+            }
         },
         onSubmit: async ({ value }) => {
             setIsPending(true);
 
             try {
-                const { slug: currentSlug, ...rest } = value;
-                const data = currentSlug === organization.slug ? rest : value;
+                const { name, slug, pointValue, catalogSettings } = value;
 
                 await updateOrganization({
                     organizationId: organization._id,
-                    data,
+                    data: {
+                        name, 
+                        pointValue,
+                        ...(slug !== organization.slug && { slug })
+                    }
+                });
+                await updateCatalogSettings({
+                    organizationId: organization._id,
+                    ...catalogSettings,
                 });
 
                 toast.success("Organization updated");
@@ -163,6 +196,73 @@ function OrganizationSettingsForm({
                     }}
                 />
 
+                <div className="text-lg">Available media types in catalog:</div>
+                <form.Field
+                    name="catalogSettings.hasMusic"
+                    children={(field) => (
+                        <Field className="flex flex-row items-center ml-5">
+                            <div className="flex w-4 h-4 shrink-0 items-center">
+                                <Checkbox
+                                    id={field.name}
+                                    checked={field.state.value}
+                                    onCheckedChange={(checked: boolean | "indeterminate") => field.handleChange(!!checked)}
+                                    disabled={isPending}
+                                />
+                                <div className="flex flex-row px-2"><FieldLabel htmlFor={field.name}>Music</FieldLabel></div>
+                            </div>
+                        </Field>
+                    )}
+                />
+                <form.Field
+                    name="catalogSettings.hasMusicVideos"
+                    children={(field) => (
+                        <Field className="flex flex-row items-center ml-5">
+                            <div className="flex w-4 h-4 shrink-0 items-center">
+                                <Checkbox
+                                    id={field.name}
+                                    checked={field.state.value}
+                                    onCheckedChange={(checked: boolean | "indeterminate") => field.handleChange(!!checked)}
+                                    disabled={isPending}
+                                />
+                                <div className="flex flex-row px-2"><FieldLabel htmlFor={field.name}>Music Videos</FieldLabel></div>
+                            </div>
+                        </Field>
+                    )}
+                />
+                <form.Field
+                    name="catalogSettings.hasAudiobooks"
+                    children={(field) => (
+                        <Field className="flex flex-row items-center ml-5">
+                            <div className="flex w-4 h-4 shrink-0 items-center">
+                                <Checkbox
+                                    id={field.name}
+                                    checked={field.state.value}
+                                    onCheckedChange={(checked: boolean | "indeterminate") => field.handleChange(!!checked)}
+                                    disabled={isPending}
+                                />
+                                <div className="flex flex-row px-2"><FieldLabel htmlFor={field.name}>Audiobooks</FieldLabel></div>
+                            </div>
+                        </Field>
+                    )}
+                />
+                <form.Field
+                    name="catalogSettings.hasShows"
+                    children={(field) => (
+                        <Field className="flex flex-row items-center ml-5">
+                            <div className="flex w-4 h-4 shrink-0 items-center">
+                                <Checkbox
+                                    id={field.name}
+                                    checked={field.state.value}
+                                    onCheckedChange={(checked: boolean | "indeterminate") => field.handleChange(!!checked)}
+                                    disabled={isPending}
+                                />
+                                <div className="flex flex-row px-2"><FieldLabel htmlFor={field.name}>TV Shows</FieldLabel></div>
+                            </div>
+                        </Field>
+                    )}
+                />
+
+                <Separator />
                 <FieldGroup>
                     <Button type="submit" disabled={isPending}>
                         {isPending ? <Spinner /> : "Save"}
