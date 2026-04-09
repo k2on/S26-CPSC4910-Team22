@@ -65,6 +65,15 @@ export const approve = mutation({
       decisionBy: identity.subject,
     });
 
+
+    await ctx.db.insert("auditLog", {
+      time: Date.now(),
+      event: "application",
+      user: application.userId,
+      sponsor: application.orgId,
+      status: "approved",
+      reason: "Application approved",
+    });
   }
 });
 
@@ -83,6 +92,15 @@ export const deny = mutation({
     await ctx.db.patch(application._id, {
       status: "denied",
       decisionBy: identity.subject,
+    });
+
+    await ctx.db.insert("auditLog", {
+      time: Date.now(),
+      event: "application",
+      user: application.userId,
+      sponsor: application.orgId,
+      status: "denied",
+      reason: "Application denied",
     });
   }
 });

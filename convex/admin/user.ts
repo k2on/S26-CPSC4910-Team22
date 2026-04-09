@@ -232,6 +232,15 @@ export const upsertDriverApplication = internalMutation({
         orgId: args.orgId,
         status: args.status,
       });
+
+      await ctx.db.insert("auditLog", {
+        time: Date.now(),
+        event: "application",
+        user: args.userId,
+        sponsor: args.orgId,
+        status: args.status,
+        reason: "Bulk import"
+      });
     }
   },
 });
