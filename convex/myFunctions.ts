@@ -785,3 +785,34 @@ export const updateCatalogSettings = mutation({
     }
   }
 });
+
+export const logPasswordChange = mutation({
+  handler: async (ctx) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Unauthorized");
+
+    await ctx.db.insert("auditLog", {
+      time: Date.now(),
+      event: "passwordChange",
+      user: identity.subject,
+      reason: "Authorized password change",
+    });
+  }
+});
+
+export const logLoginAttempt = mutation({
+  args: {
+    email: v.string(),
+    status: v.string(),
+    userId: v.optional(v.union(v.null(), v.string())),
+  },
+  handler: async (ctx, args) => {
+    await ctx.db.insert("auditLog", {
+      time: Date.now(),
+      event: "loginAttempt",
+      email: args.email,
+      status: args.status,
+      user: args.userId ?? null,
+    });
+  }
+});

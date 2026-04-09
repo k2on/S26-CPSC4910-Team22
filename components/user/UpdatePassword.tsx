@@ -10,6 +10,8 @@ import { parseFieldErrors } from "@/utils/parseFieldErrors";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { useMutation as useConvexMutation } from "convex/react";
+import { api } from "@/convex/_generated/api"
 
 export function UserUpdatePassword() {
     const form = useForm({
@@ -22,11 +24,13 @@ export function UserUpdatePassword() {
         },
     });
 
+    const updateAuditLog = useConvexMutation(api.myFunctions.logPasswordChange);
 
     const { isPending, mutate } = useMutation({
         mutationFn: async (input: Parameters<typeof authClient.changePassword>[0]) => authClient.changePassword(input),
         onSuccess: () => {
             toast.success("Password updated");
+            updateAuditLog({});
         },
         onError: (error: BetterFetchError) => {
             if (error.error.code == "VALIDATION_ERROR") {
