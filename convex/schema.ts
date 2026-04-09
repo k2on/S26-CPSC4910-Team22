@@ -28,7 +28,8 @@ export default defineSchema({
     userId: v.string(),
     orgId: v.string(),
     status: v.union(v.literal("waiting"), v.literal("denied"), v.literal("approved")),
-    decisionBy: v.optional(v.string())
+    decisionBy: v.optional(v.string()),
+    denyComment: v.optional(v.string()),
   }).index("by_user_id", { fields: ["userId"] })
     .index("by_org_id", { fields: ["orgId"] }),
   pointTotals: defineTable({
