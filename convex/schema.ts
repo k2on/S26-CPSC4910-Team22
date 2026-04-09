@@ -11,8 +11,13 @@ export default defineSchema({
   }),
   auditLog: defineTable({
     time: v.number(),
-    event: v.string(),
-  }),
+    event: v.string(),//application, pointChange, passwordChange, loginAttempt
+    sponsor: v.optional(v.union(v.null(), v.string())),//sponsor org for applications and point changes
+    user: v.string(),
+    status: v.optional(v.union(v.null(), v.string())),//accept/reject for application, success/failure for login attempt
+    reason: v.optional(v.union(v.null(), v.string())),//reason for application status or point/password change
+  })
+  .index("by_time", ["time"]),
   driverApplication: defineTable({
     userId: v.string(),
     orgId: v.string(),
@@ -53,4 +58,12 @@ export default defineSchema({
   })
   .index("by_user_track", ["userId", "trackId"])
   .index("by_user", ["userId"]),
+  orgCatalogSettings: defineTable({
+    organizationId: v.string(),
+    hasMusic: v.boolean(),
+    hasMusicVideos: v.boolean(),
+    hasAudiobooks: v.boolean(),
+    hasShows: v.boolean(),
+  })
+  .index("by_organization", ["organizationId"]),
 });

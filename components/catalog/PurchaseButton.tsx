@@ -31,7 +31,7 @@ export function PurchaseButton({ slug, trackId, price }: ButtonParams) {
                 price
             });
             router.push(`/${slug}/catalog`);
-            toast.success("Purchase successful!");
+            toast.success("Purchase successful!", {position: "top-right"});
         } catch (err){
             console.error("Failed to purchase item", err);
             toast.error("Failed to purchase item :(")

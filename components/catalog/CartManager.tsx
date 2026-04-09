@@ -29,7 +29,7 @@ export function CartManager({ slug }: { slug: string }){
                 })),
             });
             router.push(`/${slug}/catalog`);
-            toast.success("Purchase successful!");
+            toast.success("Purchase successful!", {position: "top-right"});
         } catch (err){
             console.error("Failed to purchase cart items", err);
             toast.error("Failed to purchase item :(")

@@ -726,3 +726,51 @@ export const getMyOwned = query({
             .collect();
     },
 })
+
+export const getCatalogSettings = query({
+    args: { organizationId: v.string() },
+    handler: async (ctx, args) => {
+      const existingSettings = await ctx.db.query("orgCatalogSettings")
+        .withIndex("by_organization", (q) => q.eq("organizationId", args.organizationId))
+        .first();
+      return existingSettings;
+    }
+});
+
+export const updateCatalogSettings = mutation({
+  args: {
+      organizationId: v.string(),
+      hasMusic: v.boolean(),
+      hasMusicVideos: v.boolean(),
+      hasAudiobooks: v.boolean(),
+      hasShows: v.boolean(),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Unauthorized");
+
+    const existingSettings = await ctx.db
+    .query("orgCatalogSettings")
+    .withIndex("by_organization", (q) => q.eq("organizationId", args.organizationId))
+    .first();
+
+    if (existingSettings) {
+      await ctx.db.patch(existingSettings._id, {
+        hasMusic: args.hasMusic,
+        hasMusicVideos: args.hasMusicVideos,
+        hasAudiobooks: args.hasAudiobooks,
+        hasShows: args.hasShows,
+      });
+      return existingSettings._id;
+    } else {
+      const newId = await ctx.db.insert("orgCatalogSettings", {
+        organizationId: args.organizationId,
+        hasMusic: args.hasMusic,
+        hasMusicVideos: args.hasMusicVideos,
+        hasAudiobooks: args.hasAudiobooks,
+        hasShows: args.hasShows,
+      });
+      return newId;
+    }
+  }
+});
