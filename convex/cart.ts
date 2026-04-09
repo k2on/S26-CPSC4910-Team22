@@ -119,6 +119,8 @@ export const purchaseCartItems = mutation({
             user: userId,
             amount: -totalCost,
             reason: "Catalog Purchase: Cart Item(s)",
+            email: identity.email,
+            pointTotal: currentPoints - totalCost,
         });
 
         for(const item of args.items){
@@ -219,6 +221,8 @@ export const purchaseSingleItem = mutation({
             user: userId,
             amount: -args.price,
             reason: "Catalog Purchase: Single Item",
+            email: identity.email,
+            pointTotal: currentPoints - args.price,
         });
 
         const alreadyOwned = await ctx.db

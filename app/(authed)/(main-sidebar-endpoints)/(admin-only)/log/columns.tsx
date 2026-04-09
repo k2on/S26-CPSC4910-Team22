@@ -71,11 +71,15 @@ export const columns: ColumnDef<Doc<"auditLog">>[] = [
   },
   {
     accessorKey: "amount",
-    header: "Point Amount",
+    header: "Point Change",
     cell: ({ row }) => {
       const amount = row.getValue("amount") as string
       return amount || "--";
     }
+  },
+  {
+    accessorKey: "pointTotal",
+    header: "New Total",
   },
   {
     accessorKey: "status",

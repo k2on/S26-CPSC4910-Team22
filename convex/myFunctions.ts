@@ -289,6 +289,7 @@ export const updateDriverPoints = mutation({
       enactor: identity.subject,
       enactorEmail: identity.email || "Unknown Email",
       email: userEmail,
+      pointTotal: nextPoints,
     });
 
     return {
@@ -814,7 +815,7 @@ export const logLoginAttempt = mutation({
     userId: v.optional(v.union(v.null(), v.string())),
   },
   handler: async (ctx, args) => {
-    const reason = (args.status === "success") ? "Successful Login" : "Failed Login";
+    const reason = (args.status === "success") ? "Successful Login" : "Invalid Credentials";
 
     await ctx.db.insert("auditLog", {
       time: Date.now(),
