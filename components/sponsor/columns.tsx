@@ -24,11 +24,12 @@ export const columns: ColumnDef<FunctionReturnType<typeof api.organization.appli
                         const deny = useMutation(api.organization.application.approve);
 
                         const id = row.original.application._id;
+                        const email = row.original.driver.email;
 
                         return (
                                 <div className="flex flex-row gap-2 justify-end">
-                                        <Button onClick={() => approve({ id })}>Approve</Button>
-                                        <Button onClick={() => deny({ id })}>Deny</Button>
+                                        <Button onClick={() => approve({ id, email })}>Approve</Button>
+                                        <Button onClick={() => deny({ id, email })}>Deny</Button>
                                 </div>
                         )
                 }

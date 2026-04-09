@@ -3,6 +3,8 @@
 import { Doc } from "@/convex/_generated/dataModel"
 import { ColumnDef } from "@tanstack/react-table"
 import { api } from "@/convex/_generated/api"
+import { run } from "node:test"
+import { useQuery } from "convex/react"
 
 export const fixEventTitle = (title: string) => {
     switch(title){
@@ -37,23 +39,34 @@ export const columns: ColumnDef<Doc<"auditLog">>[] = [
     }
   },
   {
-    accessorKey: "sponsor",
-    header: "Sponsor",
+    accessorKey: "sponsorName",
+    header: "Sponsor Org",
     cell: ({ row }) => {
-      const sponsorName = row.getValue("sponsor") as string//TODO: get org name by id (looks better, rubric says username so probably required)
-      return sponsorName || "--";
+      return row.getValue("sponsorName");
     }
   },
-  {
-    accessorKey: "user",
-    header: "User ID",
-  },
+  // {
+  //   accessorKey: "user",
+  //   header: "User ID",
+  // },
   {
     accessorKey: "email",
     header: "User Email",
     cell: ({ row }) => {
       const userEmail = row.getValue("email") as string
-      return userEmail || "--";//TODO: store user email for other events (not part of rubric but looks better)
+      return userEmail || "--";
+    }
+  },
+  // {
+  //   accessorKey: "enactor",
+  //   header: "Enactor ID",
+  // },
+  {
+    accessorKey: "enactorEmail",
+    header: "Enactor Email",
+    cell: ({ row }) => {
+      const enactorEmail = row.getValue("enactorEmail") as string
+      return enactorEmail || "--";
     }
   },
   {
@@ -71,7 +84,8 @@ export const columns: ColumnDef<Doc<"auditLog">>[] = [
       const status = row.getValue("status") as string
       return status || "--";
     }
-  },{
+  },
+  {
     accessorKey: "reason",
     header: "Reason",
     cell: ({ row }) => {
@@ -79,4 +93,5 @@ export const columns: ColumnDef<Doc<"auditLog">>[] = [
       return reason || "--";
     }
   },
+  
 ]

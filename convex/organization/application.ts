@@ -40,7 +40,8 @@ export const list = query({
 
 export const approve = mutation({
   args: {
-    id: v.id("driverApplication")
+    id: v.id("driverApplication"),
+    email: v.string(),//can't seem to grab user email inside mutation for audit log, so I'm adding it as an arg
   },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
@@ -70,16 +71,20 @@ export const approve = mutation({
       time: Date.now(),
       event: "application",
       user: application.userId,
+      email: args.email,
       sponsor: application.orgId,
       status: "approved",
       reason: "Application approved",
+      enactor: identity.subject,
+      enactorEmail: identity.email || "Unknown Email",
     });
   }
 });
 
 export const deny = mutation({
   args: {
-    id: v.id("driverApplication")
+    id: v.id("driverApplication"),
+    email: v.string(),
   },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
@@ -98,9 +103,12 @@ export const deny = mutation({
       time: Date.now(),
       event: "application",
       user: application.userId,
+      email: args.email,
       sponsor: application.orgId,
       status: "denied",
       reason: "Application denied",
+      enactor: identity.subject,
+      enactorEmail: identity.email || "Unknown Email",
     });
   }
 });

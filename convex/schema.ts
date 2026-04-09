@@ -18,6 +18,10 @@ export default defineSchema({
     amount: v.optional(v.union(v.null(), v.number())),//amount for point changes
     status: v.optional(v.union(v.null(), v.string())),//waiting/accepted/rejected for application, success/failure for login attempt
     reason: v.optional(v.union(v.null(), v.string())),//reason for application status or point/password change
+    enactor: v.optional(v.union(v.null(), v.string())),//sponsor/admin for point changes and application verdicts
+    enactorEmail: v.optional(v.union(v.null(), v.string())),//email of the enactor
+    fee: v.optional(v.union(v.null(), v.number())),//actual money price of catalog items for invoices
+    pointTotal: v.optional(v.union(v.null(), v.number())),//point total at time of point change
   })
   .index("by_time", ["time"]),
   driverApplication: defineTable({

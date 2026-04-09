@@ -276,6 +276,8 @@ export const updateDriverPoints = mutation({
     });
 
     const plusOrMinus = args.pointChange >= 0 ? "Reward" : "Deduction";
+    const user = await ctx.runQuery(api.myFunctions.getUserById, { userId: args.driverUserId });
+    const userEmail = user?.email || "Unknown Email";
 
     await ctx.db.insert("auditLog", {
       time: Date.now(),
@@ -284,6 +286,9 @@ export const updateDriverPoints = mutation({
       user: args.driverUserId,
       amount: args.pointChange,
       reason: `${plusOrMinus}: ${args.reason}`,
+      enactor: identity.subject,
+      enactorEmail: identity.email || "Unknown Email",
+      email: userEmail,
     });
 
     return {
@@ -790,12 +795,14 @@ export const logPasswordChange = mutation({
   handler: async (ctx) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) throw new Error("Unauthorized");
+    const userEmail = identity.email ?? "Unknown Email";
 
     await ctx.db.insert("auditLog", {
       time: Date.now(),
       event: "passwordChange",
       user: identity.subject,
       reason: "Authorized password change",
+      email: userEmail,
     });
   }
 });
@@ -807,12 +814,15 @@ export const logLoginAttempt = mutation({
     userId: v.optional(v.union(v.null(), v.string())),
   },
   handler: async (ctx, args) => {
+    const reason = (args.status === "success") ? "Successful Login" : "Failed Login";
+
     await ctx.db.insert("auditLog", {
       time: Date.now(),
       event: "loginAttempt",
       email: args.email,
       status: args.status,
       user: args.userId ?? null,
+      reason: reason,
     });
   }
 });
@@ -833,11 +843,38 @@ export const getOrgPointValue = query({
   }
 });
 
-export const getOrderedAuditLog = query({
+export const getFullOrderedAuditLog = query({
   handler: async (ctx) => {
-    return await ctx.db
+    const logs = await ctx.db
       .query("auditLog")
       .order("desc")
       .collect();
+
+    return await Promise.all(
+      logs.map(async (log) => {
+        const org = log.sponsor ? await ctx.runQuery(components.betterAuth.organizations.getOrganizationById, { id: log.sponsor }) : null;
+        return { 
+            ...log, 
+            sponsorName: org?.name ?? "--",
+        };
+      })
+    );
   }
 });
+
+export const getUserById = query({
+  args: { userId: v.string() },
+  handler: async (ctx, args) => {
+    const user = await ctx.runQuery(components.betterAuth.user.getUsersFromIds, { ids: [args.userId] });
+    return user ? user[0] : null;
+  }
+});
+
+export const getOrgNameById = query({
+  args: { orgId: v.string() },
+  handler: async (ctx, args) => {
+    const org = await ctx.runQuery(components.betterAuth.organizations.getOrganizationById, { id: args.orgId });
+    const sponsorName = org?.name ?? "Unknown Org"
+    return sponsorName;
+  }
+})
