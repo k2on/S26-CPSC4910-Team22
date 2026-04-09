@@ -3,8 +3,7 @@
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api"
 import { useState, useEffect } from "react";
-import { Button } from "../ui/button";
-import { router } from "better-auth/api";
+import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 
