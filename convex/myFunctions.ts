@@ -816,3 +816,19 @@ export const logLoginAttempt = mutation({
     });
   }
 });
+
+export const getOrgPointValue = query({
+  args: {
+    slug: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const organization = await ctx.runQuery(
+      components.betterAuth.organizations.getOrganizationBySlug,
+      { slug: args.slug }
+    );
+    if (!organization) {
+      throw new Error("Organization not found");
+    }
+    return organization.pointValue ?? 0.01;
+  }
+});

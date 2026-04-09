@@ -6,7 +6,6 @@ import { Input } from "@/components/ui/input"
 import { Button, buttonVariants } from "@/components/ui/button"
 import Link from "next/link"
 import {
-    ShoppingCart,
     ArrowLeft,
     ArrowRight
 }from "lucide-react";
@@ -23,7 +22,6 @@ import { CatalogHeader } from "@/components/catalog/CatalogHeader";
 //     //"all" is excluded so the other excluded categories don't show up and cause issues
 // ]
 
-const pointsPerDollar = 100; //1 point = 1 cent
 const defaultPrice = 100;//some things show up with a missing price, thanks iTunes
 
 interface iTunesResult{
@@ -63,9 +61,10 @@ const fixMediaType = (type: string) => {
     }
 }
 
-const getPrice = (item: iTunesResult) => {
+const getPrice = (item: iTunesResult, pointValue: number) => {
     const price = item.trackPrice || item.collectionPrice || 0;
-    const points = Math.abs(Math.round(price * pointsPerDollar));
+    const workingPointValue = pointValue > 0 ? pointValue : 0.01;
+    const points = Math.abs(Math.round(price / workingPointValue));
     if(points == 0){
         return defaultPrice;
     }else{
@@ -115,13 +114,14 @@ export function CatalogManager({slug, results, isDriver, totalResults}: {
     isDriver: boolean,
     totalResults: number,
     }) {
+    const pointValue = useQuery(api.myFunctions.getOrgPointValue, {slug});
     const searchParams = useSearchParams();
     const queryTerm = searchParams.get("q") || "";
     const currentPage = Number(searchParams.get("page")) || 0;
     const org = useQuery(api.myFunctions.getVisibleOrganizationBySlugForDriver, {slug});
     const catalogSettings = useQuery(api.myFunctions.getCatalogSettings, org?._id ? { organizationId: org._id } : "skip");
-
-    if(catalogSettings === undefined){
+    
+    if(catalogSettings === undefined || pointValue === undefined){
         return <div className="max-w-lg mx-auto text-center py-10">Loading Catalog...</div>
     }
 
@@ -159,7 +159,7 @@ export function CatalogManager({slug, results, isDriver, totalResults}: {
                         <div key={track.trackId || track.collectionId || index}>
                             <div className="flex py-2">
                                 <img src={track.artworkUrl100} alt="Thumbnail" />
-                                <div className="flex flex-col px-2 justify-center"><strong>{getName(track)}</strong>{track.artistName}<div>Price: {getPrice(track)} Points</div></div>
+                                <div className="flex flex-col px-2 justify-center"><strong>{getName(track)}</strong>{track.artistName}<div>Price: {getPrice(track, pointValue)} Points</div></div>
                                 <div className="flex flex-col justify-center ml-auto">
                                     {isDriver && (<AddToCartButton
                                         slug={slug}
@@ -167,7 +167,7 @@ export function CatalogManager({slug, results, isDriver, totalResults}: {
                                         mediaType={track.kind || track.wrapperType}
                                         name={getName(track)}
                                         artistName={track.artistName}
-                                        price={getPrice(track)}
+                                        price={getPrice(track, pointValue)}
                                         artworkUrl={track.artworkUrl100}
                                     />)}
                                     <div className="py-1" />
