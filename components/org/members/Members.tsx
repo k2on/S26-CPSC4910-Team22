@@ -23,7 +23,7 @@ type Member = Auth["$Infer"]["Member"];
 export function OrganizationMembers({ slug }: { slug: string }) {
         const organization = useQuery(api.myFunctions.getVisibleOrganizationBySlug, { slug });
         const members = useQuery(api.myFunctions.getVisibleOrganizationMembersBySlug, { slug });
-        const addMemberByEmail = useMutation(api.myFunctions.addVisibleOrganizationMemberByEmail);
+        const addMemberByEmail = useMutation(api.myFunctions.addOrganizationMemberByEmailBySlug);
 
         const [open, setOpen] = useState(false);
         const [email, setEmail] = useState("");

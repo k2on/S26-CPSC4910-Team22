@@ -1558,6 +1558,16 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
           null,
           Name
         >;
+        addOrganizationMemberByEmailBySlug: FunctionReference<
+          "mutation",
+          "internal",
+          { email: string; slug: string },
+          {
+            organizationName: string;
+            status: "added" | "already_exists" | "user_not_found";
+          },
+          Name
+        >;
         getOrganizationMembersByOrganizationId: FunctionReference<
           "query",
           "internal",
@@ -1584,6 +1594,13 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
             role: string;
             userId: string;
           }>,
+          Name
+        >;
+        removeOrganizationMemberByUserIdAndSlug: FunctionReference<
+          "mutation",
+          "internal",
+          { slug: string; userId: string },
+          null,
           Name
         >;
       };

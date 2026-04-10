@@ -4,6 +4,8 @@ import {
     getOrganizationMembersByOrganizationIdInternal,
     getOrganizationMembersBySlugInternal,
     addOrganizationMemberInternal,
+    addOrganizationMemberByEmailBySlugInternal,
+    removeOrganizationMemberByUserIdAndSlugInternal,
 } from "./internal/organizationMembers";
 
 export const getOrganizationMembersByOrganizationId = query({
@@ -57,6 +59,43 @@ export const addOrganizationMember = mutation({
             args.organizationId,
             args.userId,
             args.role ?? "driver"
+        );
+    },
+});
+
+export const addOrganizationMemberByEmailBySlug = mutation({
+    args: {
+        slug: v.string(),
+        email: v.string(),
+    },
+    returns: v.object({
+        status: v.union(
+            v.literal("added"),
+            v.literal("already_exists"),
+            v.literal("user_not_found")
+        ),
+        organizationName: v.string(),
+    }),
+    handler: async (ctx, args) => {
+        return addOrganizationMemberByEmailBySlugInternal(
+            ctx,
+            args.slug,
+            args.email
+        );
+    },
+});
+
+export const removeOrganizationMemberByUserIdAndSlug = mutation({
+    args: {
+        slug: v.string(),
+        userId: v.string(),
+    },
+    returns: v.null(),
+    handler: async (ctx, args) => {
+        return removeOrganizationMemberByUserIdAndSlugInternal(
+            ctx,
+            args.slug,
+            args.userId
         );
     },
 });

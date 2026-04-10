@@ -7,7 +7,7 @@ import { Doc } from "./_generated/dataModel";
 import { Id } from "./betterAuth/_generated/dataModel";
 import { components } from "./_generated/api";
 import { getOrganizationPointChangesBySlug as getOrganizationPointChangesBySlugLogistics } from "./functions/logistics/points";
-import { getOrganizationDriverStatusBySlug as getOrganizationDriverStatusBySlugLogistics } from "./functions/logistics/organizationDrivers";
+import { getOrganizationDriverStatusBySlug as getOrganizationDriverStatusBySlugLogistics } from "./functions/logistics/organizationMembers";
 
 const visibleOrganizationDriverValidator = v.object({
   userId: v.string(),
@@ -768,5 +768,58 @@ export const getOrganizationDriverStatusBySlug = query({
     }
 
     return getOrganizationDriverStatusBySlugLogistics(ctx, args.slug);
+  }
+});
+
+export const addOrganizationMemberByEmailBySlug = mutation({
+  args: {
+    slug: v.string(),
+    email: v.string(),
+  },
+  returns: v.object({
+    status: v.union(
+        v.literal("added"),
+        v.literal("already_exists"),
+        v.literal("user_not_found")
+    ),
+    organizationName: v.string(),
+  }),
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+
+    if (!identity || (identity.role !== "admin" && identity.role !== "sponsor")) {
+      throw new Error("unauthorized");
+    }
+
+    return await ctx.runMutation(
+        components.betterAuth.functions.organizationMembers.addOrganizationMemberByEmailBySlug,
+        {
+          slug: args.slug,
+          email: args.email,
+        }
+    );
+  }
+});
+
+export const removeOrganizationMemberByUserIdAndSlug = mutation({
+  args: {
+    slug: v.string(),
+    userId: v.string(),
+  },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+
+    if (!identity || (identity.role !== "admin" && identity.role !== "sponsor")) {
+      throw new Error("unauthorized");
+    }
+
+    return await ctx.runMutation(
+        components.betterAuth.functions.organizationMembers.removeOrganizationMemberByUserIdAndSlug,
+        {
+          slug: args.slug,
+          userId: args.userId,
+        }
+    );
   }
 });

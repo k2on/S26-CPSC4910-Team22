@@ -57,6 +57,26 @@ export async function updateOrganizationInternal(
     return null;
 }
 
+export async function adjustOrganizationMemberCountInternal(
+    ctx: MutationCtx,
+    slug: string,
+    amount: number
+) {
+    const organization = await getOrganizationBySlugInternal(ctx, slug);
+
+    if (!organization) {
+        throw new Error("Organization not found");
+    }
+
+    const currentTotalMembers = organization.totalMembers ?? 0;
+
+    await ctx.db.patch(organization._id, {
+        totalMembers: currentTotalMembers + amount,
+    });
+
+    return null;
+}
+
 export async function getAllOrganizationsInternal(
     ctx: QueryCtx | MutationCtx
 ) {

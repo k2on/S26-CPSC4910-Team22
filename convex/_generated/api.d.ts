@@ -12,7 +12,7 @@ import type * as admin_user from "../admin/user.js";
 import type * as cart from "../cart.js";
 import type * as driver_application from "../driver/application.js";
 import type * as functions_data_points from "../functions/data/points.js";
-import type * as functions_logistics_organizationDrivers from "../functions/logistics/organizationDrivers.js";
+import type * as functions_logistics_organizationMembers from "../functions/logistics/organizationMembers.js";
 import type * as functions_logistics_points from "../functions/logistics/points.js";
 import type * as http from "../http.js";
 import type * as myFunctions from "../myFunctions.js";
@@ -29,7 +29,7 @@ declare const fullApi: ApiFromModules<{
   cart: typeof cart;
   "driver/application": typeof driver_application;
   "functions/data/points": typeof functions_data_points;
-  "functions/logistics/organizationDrivers": typeof functions_logistics_organizationDrivers;
+  "functions/logistics/organizationMembers": typeof functions_logistics_organizationMembers;
   "functions/logistics/points": typeof functions_logistics_points;
   http: typeof http;
   myFunctions: typeof myFunctions;
@@ -1591,6 +1591,15 @@ export declare const components: {
           { organizationId: string; role?: string; userId: string },
           null
         >;
+        addOrganizationMemberByEmailBySlug: FunctionReference<
+          "mutation",
+          "internal",
+          { email: string; slug: string },
+          {
+            organizationName: string;
+            status: "added" | "already_exists" | "user_not_found";
+          }
+        >;
         getOrganizationMembersByOrganizationId: FunctionReference<
           "query",
           "internal",
@@ -1616,6 +1625,12 @@ export declare const components: {
             role: string;
             userId: string;
           }>
+        >;
+        removeOrganizationMemberByUserIdAndSlug: FunctionReference<
+          "mutation",
+          "internal",
+          { slug: string; userId: string },
+          null
         >;
       };
       organizations: {
