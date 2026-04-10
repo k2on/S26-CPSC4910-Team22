@@ -6,9 +6,10 @@ import {
 import {
     getOrganizationDriverStatusBySlug as getOrganizationDriverStatusBySlugLogistics
 } from "./functions/logistics/organizationMembers";
+import { getOrganizationMembersTableBySlug as getOrganizationMembersTableBySlugLogistics } from "./functions/logistics/organizationMembers";
 import {components} from "./_generated/api";
 
-// only outputs driver's point changes when called by driver
+// only outputs own point changes when called by driver
 export const getOrganizationPointChangesBySlug = query({
     args: {
         slug: v.string(),
@@ -113,4 +114,59 @@ export const removeOrganizationMemberByUserIdAndSlug = mutation({
             }
         );
     }
+});
+
+export const getOrganizationNameBySlug = query({
+    args: {
+        slug: v.string(),
+    },
+    returns: v.union(v.null(), v.string()),
+    handler: async (ctx, args) => {
+        const identity = await ctx.auth.getUserIdentity();
+
+        if (!identity) {
+            return null;
+        }
+
+        return await ctx.runQuery(
+            components.betterAuth.functions.organizations.getOrganizationNameBySlug,
+            {
+                slug: args.slug,
+            }
+        );
+    },
+});
+
+export const getOrganizationMembersTableBySlug = query({
+    args: {
+        slug: v.string(),
+    },
+    returns: v.array(
+        v.object({
+            id: v.string(),
+            organizationId: v.string(),
+            role: v.union(
+                v.literal("admin"),
+                v.literal("member"),
+                v.literal("owner")
+            ),
+            createdAt: v.number(),
+            userId: v.string(),
+            user: v.object({
+                id: v.string(),
+                email: v.string(),
+                name: v.string(),
+                image: v.optional(v.string()),
+            }),
+        })
+    ),
+    handler: async (ctx, args) => {
+        const identity = await ctx.auth.getUserIdentity();
+
+        if (!identity) {
+            return [];
+        }
+
+        return getOrganizationMembersTableBySlugLogistics(ctx, args.slug);
+    },
 });
