@@ -8,6 +8,7 @@ import {
 } from "./functions/logistics/organizationMembers";
 import {components} from "./_generated/api";
 
+// only outputs driver's point changes when called by driver
 export const getOrganizationPointChangesBySlug = query({
     args: {
         slug: v.string(),

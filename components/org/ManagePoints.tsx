@@ -44,10 +44,6 @@ export function OrganizationPoints({
     const [endDate, setEndDate] = useState("");
 
     const pointChanges = useQuery(api.appFunctions.getOrganizationPointChangesBySlug, { slug });
-    const currentUserName = useQuery(
-        api.myFunctions.getCurrentUserName,
-        isDriverView ? {} : "skip"
-    );
 
     const tableData = useMemo<DriverPointChangeRow[]>(() => {
         const history = pointChanges ?? [];
@@ -55,20 +51,11 @@ export function OrganizationPoints({
         const normalizedDriverNameSearch = driverNameSearch.trim().toLowerCase();
         const normalizedDriverEmailSearch = driverEmailSearch.trim().toLowerCase();
         const normalizedChangedBySearch = changedBySearch.trim().toLowerCase();
-        const normalizedCurrentUserName = (currentUserName ?? "").trim().toLowerCase();
 
         const startTime = startDate ? new Date(`${startDate}T00:00:00`).getTime() : null;
         const endTime = endDate ? new Date(`${endDate}T23:59:59.999`).getTime() : null;
 
         return history.filter((row) => {
-            if (
-                isDriverView &&
-                normalizedCurrentUserName.length > 0 &&
-                row.driverName.trim().toLowerCase() !== normalizedCurrentUserName
-            ) {
-                return false;
-            }
-
             const matchesDriverName =
                 isDriverView ||
                 normalizedDriverNameSearch.length === 0 ||
@@ -102,7 +89,6 @@ export function OrganizationPoints({
         startDate,
         endDate,
         isDriverView,
-        currentUserName,
     ]);
 
     const summary = useMemo(() => {
@@ -173,7 +159,7 @@ export function OrganizationPoints({
         URL.revokeObjectURL(url);
     }
 
-    if (pointChanges === undefined || (isDriverView && currentUserName === undefined)) {
+    if (pointChanges === undefined) {
         return (
             <Card>
                 <CardHeader>
