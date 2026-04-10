@@ -20,13 +20,14 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
+import {getOrganizationDriverStatusBySlug} from "@/convex/myFunctions";
 
 type Props = {
     slug: string;
 };
 
 export function OrganizationDriverStatusChart({ slug }: Props) {
-    const drivers = useQuery(api.myFunctions.getVisibleOrganizationDriversBySlug, { slug });
+    const drivers = useQuery(api.myFunctions.getOrganizationDriverStatusBySlug, { slug });
 
     const summary = useMemo(() => {
         const rows = drivers ?? [];

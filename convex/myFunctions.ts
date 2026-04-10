@@ -7,6 +7,7 @@ import { Doc } from "./_generated/dataModel";
 import { Id } from "./betterAuth/_generated/dataModel";
 import { components } from "./_generated/api";
 import { getOrganizationPointChangesBySlug as getOrganizationPointChangesBySlugLogistics } from "./functions/logistics/points";
+import { getOrganizationDriverStatusBySlug as getOrganizationDriverStatusBySlugLogistics } from "./functions/logistics/organizationDrivers";
 
 const visibleOrganizationDriverValidator = v.object({
   userId: v.string(),
@@ -716,7 +717,7 @@ export const getMyPoints = query({
   },
 });
 
-
+// pattern starts here
 export const getOrganizationPointChangesBySlug = query({
   args: {
     slug: v.string(),
@@ -741,4 +742,31 @@ export const getOrganizationPointChangesBySlug = query({
 
     return getOrganizationPointChangesBySlugLogistics(ctx, args.slug);
   },
+});
+
+export const getOrganizationDriverStatusBySlug = query({
+  args: {
+    slug: v.string(),
+  },
+  returns: v.array(
+      v.object({
+        userId: v.string(),
+        name: v.string(),
+        email: v.string(),
+        points: v.number(),
+        active: v.boolean(),
+        suspended: v.boolean(),
+        suspensionEnd: v.union(v.number(), v.null()),
+        banReason: v.union(v.string(), v.null()),
+      })
+  ),
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+
+    if (!identity || (identity.role !== "admin" && identity.role !== "sponsor")) {
+      return [];
+    }
+
+    return getOrganizationDriverStatusBySlugLogistics(ctx, args.slug);
+  }
 });

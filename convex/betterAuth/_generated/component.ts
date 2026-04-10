@@ -1666,6 +1666,29 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
         >;
       };
       user: {
+        getOrganizationDriversBySlug: FunctionReference<
+          "query",
+          "internal",
+          { slug: string },
+          Array<{
+            _creationTime: number;
+            _id: string;
+            address?: string | null;
+            banExpires?: number | null;
+            banReason?: string | null;
+            banned?: boolean | null;
+            createdAt: number;
+            email: string;
+            emailVerified: boolean;
+            image?: string | null;
+            imageBorderColor?: string | null;
+            name: string;
+            role?: string | null;
+            updatedAt: number;
+            userId?: string | null;
+          }>,
+          Name
+        >;
         getUserByEmail: FunctionReference<
           "query",
           "internal",

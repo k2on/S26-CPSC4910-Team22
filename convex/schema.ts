@@ -19,12 +19,14 @@ export default defineSchema({
     status: v.union(v.literal("waiting"), v.literal("denied"), v.literal("approved")),
     decisionBy: v.optional(v.string())
   }).index("by_user_id", { fields: ["userId"] })
-    .index("by_org_id", { fields: ["orgId"] }),
+      .index("by_org_id", { fields: ["orgId"] }),
   pointTotals: defineTable({
     driverUserId: v.string(),
     organizationId: v.string(),
     points: v.number(),
-  }),
+  })
+      .index("organizationId", ["organizationId"])
+      .index("driverUserId", ["driverUserId"]),
   pointChanges: defineTable({
     driverUserId: v.string(),
     organizationId: v.string(),
@@ -44,8 +46,8 @@ export default defineSchema({
     artworkUrl: v.string(),
     createdAt: v.number(),
   })
-    .index("by_user_org", ["userId", "organizationId"])
-    .index("by_user_org_track", ["userId", "organizationId", "trackId"]),
+      .index("by_user_org", ["userId", "organizationId"])
+      .index("by_user_org_track", ["userId", "organizationId", "trackId"]),
   ownedItems: defineTable({
     userId: v.string(),
     trackId: v.number(),

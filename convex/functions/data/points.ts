@@ -16,6 +16,16 @@ export async function getPointTotalByDriverAndOrganizationId(
     );
 }
 
+export async function getPointTotalsByOrganizationId(
+    ctx: QueryCtx | MutationCtx,
+    organizationId: string
+) {
+    return ctx.db
+        .query("pointTotals")
+        .withIndex("organizationId", (q) => q.eq("organizationId", organizationId))
+        .collect();
+}
+
 export async function createPointTotal(
     ctx: MutationCtx,
     driverUserId: string,
