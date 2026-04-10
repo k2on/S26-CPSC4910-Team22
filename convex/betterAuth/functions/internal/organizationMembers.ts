@@ -115,8 +115,6 @@ export async function removeOrganizationMemberByUserIdAndSlugInternal(
         (member) => String(member.userId) === userId
     );
 
-    console.log("looking for userId: ", userId);
-
     if (!existingMember) {
         throw new Error("Member not found");
     }

@@ -9,6 +9,7 @@
  */
 
 import type * as admin_user from "../admin/user.js";
+import type * as appFunctions from "../appFunctions.js";
 import type * as cart from "../cart.js";
 import type * as driver_application from "../driver/application.js";
 import type * as functions_data_points from "../functions/data/points.js";
@@ -26,6 +27,7 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   "admin/user": typeof admin_user;
+  appFunctions: typeof appFunctions;
   cart: typeof cart;
   "driver/application": typeof driver_application;
   "functions/data/points": typeof functions_data_points;

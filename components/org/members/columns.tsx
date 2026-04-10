@@ -171,7 +171,7 @@ function DeleteMember({ member }: { member: Member }) {
         const queryClient = useQueryClient();
         const params = useParams<{ slug: string }>();
         const removeOrganizationMemberByUserIdAndSlug = useConvexMutation(
-            api.myFunctions.removeOrganizationMemberByUserIdAndSlug
+            api.appFunctions.removeOrganizationMemberByUserIdAndSlug
         );
 
         return (
