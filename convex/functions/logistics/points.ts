@@ -1,10 +1,13 @@
 import type { QueryCtx } from "../../_generated/server";
 import { components } from "../../_generated/api";
 import { getPointChangesByOrganizationId } from "../data/points";
+import type { UserIdentity } from "convex/server";
+import { filterPointChangesByIdentity } from "./filters"
 
 export async function getOrganizationPointChangesBySlug(
     ctx: QueryCtx,
-    slug: string
+    slug: string,
+    identity: UserIdentity
 ) {
     const organization = await ctx.runQuery(
         components.betterAuth.functions.organizations.getOrganizationBySlug,
@@ -46,10 +49,15 @@ export async function getOrganizationPointChangesBySlug(
         driverUserIds.has(String(change.driverUserId))
     );
 
+    const filteredPointChanges = await filterPointChangesByIdentity(
+        relevantPointChanges,
+        identity
+    );
+
     const allRelevantUserIds = Array.from(
         new Set([
-            ...Array.from(driverUserIds),
-            ...relevantPointChanges.map((change) => String(change.changedByUserId)),
+            ...filteredPointChanges.map((change) => String(change.driverUserId)),
+            ...filteredPointChanges.map((change) => String(change.changedByUserId)),
         ])
     );
 
@@ -71,11 +79,12 @@ export async function getOrganizationPointChangesBySlug(
         ])
     );
 
-    return relevantPointChanges
+    return filteredPointChanges
         .map((change) => ({
             id: String(change._id),
             driverName: userMap.get(String(change.driverUserId))?.name ?? "Unknown User",
-            driverEmail: userMap.get(String(change.driverUserId))?.email ?? "Unknown Email",
+            driverEmail:
+                userMap.get(String(change.driverUserId))?.email ?? "Unknown Email",
             changedByName:
                 userMap.get(String(change.changedByUserId))?.name ?? "Unknown User",
             pointChange: change.pointChange,

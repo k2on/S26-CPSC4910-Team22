@@ -13,6 +13,7 @@ import type * as appFunctions from "../appFunctions.js";
 import type * as cart from "../cart.js";
 import type * as driver_application from "../driver/application.js";
 import type * as functions_data_points from "../functions/data/points.js";
+import type * as functions_logistics_filters from "../functions/logistics/filters.js";
 import type * as functions_logistics_organizationMembers from "../functions/logistics/organizationMembers.js";
 import type * as functions_logistics_points from "../functions/logistics/points.js";
 import type * as http from "../http.js";
@@ -31,6 +32,7 @@ declare const fullApi: ApiFromModules<{
   cart: typeof cart;
   "driver/application": typeof driver_application;
   "functions/data/points": typeof functions_data_points;
+  "functions/logistics/filters": typeof functions_logistics_filters;
   "functions/logistics/organizationMembers": typeof functions_logistics_organizationMembers;
   "functions/logistics/points": typeof functions_logistics_points;
   http: typeof http;

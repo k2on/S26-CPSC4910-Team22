@@ -30,7 +30,7 @@ export const getOrganizationPointChangesBySlug = query({
             return [];
         }
 
-        return getOrganizationPointChangesBySlugLogistics(ctx, args.slug);
+        return getOrganizationPointChangesBySlugLogistics(ctx, args.slug, identity);
     },
 });
 
