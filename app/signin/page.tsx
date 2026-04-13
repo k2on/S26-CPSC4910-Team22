@@ -11,8 +11,12 @@ import { BetterFetchError } from "better-auth/client";
 import { parseFieldErrors } from "@/utils/parseFieldErrors";
 import { useForm } from "@tanstack/react-form";
 import { Spinner } from "@/components/ui/spinner";
+import { useMutation as useConvexMutation } from "convex/react";
+import { api } from "@/convex/_generated/api"
 
 export default function Page() {
+  const updateAuditLog = useConvexMutation(api.myFunctions.logLoginAttempt);
+
   const form = useForm({
     defaultValues: {
       email: "",
@@ -29,7 +33,18 @@ export default function Page() {
   const { isPending, mutate: signIn, error } = useMutation({
     mutationFn: async (input: Parameters<typeof authClient.signIn.email>[0]) =>
       authClient.signIn.email(input),
+    onSuccess: (response) => {
+      updateAuditLog({
+        email: form.state.values.email,
+        status: "success",
+        userId: response.user?.id
+      });
+    },
     onError: (error: BetterFetchError) => {
+      updateAuditLog({
+        email: form.state.values.email,
+        status: "failure",
+      });
       switch (error.error.code) {
         case "VALIDATION_ERROR":
           form.setErrorMap({

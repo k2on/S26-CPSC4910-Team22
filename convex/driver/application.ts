@@ -14,6 +14,16 @@ export const apply = mutation({
       orgId: args.organizationId,
       status: 'waiting',
       userId: me.subject,
-    })
+    });
+
+    await ctx.db.insert("auditLog", {
+      time: Date.now(),
+      event: "application",
+      user: me.subject,
+      email: me.email,
+      sponsor: args.organizationId,
+      status: "waiting",
+      reason: "New application"
+    });
   }
 });

@@ -217,6 +217,7 @@ export const upsertDriverApplication = internalMutation({
     status: v.union(v.literal("waiting"), v.literal("denied"), v.literal("approved")),
   },
   handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
     // Check if application already exists
     const existing = await ctx.db
       .query("driverApplication")
@@ -231,6 +232,17 @@ export const upsertDriverApplication = internalMutation({
         userId: args.userId,
         orgId: args.orgId,
         status: args.status,
+      });
+
+      await ctx.db.insert("auditLog", {
+        time: Date.now(),
+        event: "application",
+        user: args.userId,
+        sponsor: args.orgId,
+        status: args.status,
+        reason: "Bulk import",
+        enactor: identity?.subject || null,
+        enactorEmail: identity?.email || null,
       });
     }
   },

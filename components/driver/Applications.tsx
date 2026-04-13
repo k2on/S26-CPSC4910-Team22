@@ -43,6 +43,7 @@ export function Applications() {
                                                         <TableRow>
                                                                 <TableHead>Company</TableHead>
                                                                 <TableHead>Status</TableHead>
+                                                                <TableHead>Comment</TableHead>
                                                                 <TableHead>Created At</TableHead>
                                                         </TableRow>
                                                 </TableHeader>
@@ -50,6 +51,7 @@ export function Applications() {
                                                         {data?.map(({ application, organization }) => <TableRow key={application._id}>
                                                                 <TableCell>{organization.name}</TableCell>
                                                                 <TableCell>{application.status}</TableCell>
+                                                                <TableCell>{application.denyComment}</TableCell>
                                                                 <TableCell>{new Date(application._creationTime).toLocaleString()}</TableCell>
                                                         </TableRow>
                                                         )}

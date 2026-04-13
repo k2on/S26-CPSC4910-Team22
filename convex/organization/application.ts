@@ -40,7 +40,8 @@ export const list = query({
 
 export const approve = mutation({
   args: {
-    id: v.id("driverApplication")
+    id: v.id("driverApplication"),
+    email: v.string(),//can't seem to grab user email inside mutation for audit log, so I'm adding it as an arg
   },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
@@ -65,12 +66,26 @@ export const approve = mutation({
       decisionBy: identity.subject,
     });
 
+
+    await ctx.db.insert("auditLog", {
+      time: Date.now(),
+      event: "application",
+      user: application.userId,
+      email: args.email,
+      sponsor: application.orgId,
+      status: "approved",
+      reason: "Application approved",
+      enactor: identity.subject,
+      enactorEmail: identity.email || "Unknown Email",
+    });
   }
 });
 
 export const deny = mutation({
   args: {
-    id: v.id("driverApplication")
+    id: v.id("driverApplication"),
+    email: v.string(),
+    comment: v.string(),
   },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
@@ -83,6 +98,19 @@ export const deny = mutation({
     await ctx.db.patch(application._id, {
       status: "denied",
       decisionBy: identity.subject,
+      denyComment: args.comment,
+    });
+
+    await ctx.db.insert("auditLog", {
+      time: Date.now(),
+      event: "application",
+      user: application.userId,
+      email: args.email,
+      sponsor: application.orgId,
+      status: "denied",
+      reason: "Application denied",
+      enactor: identity.subject,
+      enactorEmail: identity.email || "Unknown Email",
     });
   }
 });
