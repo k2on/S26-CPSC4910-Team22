@@ -1,4 +1,4 @@
-import { v } from "convex/values";
+import {v} from "convex/values";
 import {mutation, query} from "./_generated/server";
 import {
     getOrganizationPointChangesBySlug as getOrganizationPointChangesBySlugLogistics
@@ -6,7 +6,13 @@ import {
 import {
     getOrganizationDriverStatusBySlug as getOrganizationDriverStatusBySlugLogistics
 } from "./functions/logistics/organizationMembers";
-import { getOrganizationMembersTableBySlug as getOrganizationMembersTableBySlugLogistics } from "./functions/logistics/organizationMembers";
+import {
+    getOrganizationMembersTableBySlug as getOrganizationMembersTableBySlugLogistics
+} from "./functions/logistics/organizationMembers";
+import {
+    getPointTransferRequestsBySlug as getPointTransferRequestsBySlugLogistics,
+    createPointTransferRequest as createPointTransferRequestLogistics
+} from "./functions/logistics/points";
 import {components} from "./_generated/api";
 
 // only outputs own point changes when called by driver
@@ -189,5 +195,73 @@ export const getOrganizationMembersTableBySlug = query({
         }
 
         return getOrganizationMembersTableBySlugLogistics(ctx, args.slug);
+    },
+});
+
+export const getPointTransferRequestsBySlug = query({
+    args: {
+        slug: v.string(),
+    },
+    returns: v.object({
+        incomingRequests: v.array(
+            v.object({
+                requestingUserName: v.string(),
+                pointsRequested: v.number(),
+                reason: v.string(),
+                status: v.string(),
+            })
+        ),
+        outgoingRequests: v.array(
+            v.object({
+                requestedUserName: v.string(),
+                pointsRequested: v.number(),
+                reason: v.string(),
+                status: v.string(),
+            })
+        ),
+    }),
+    handler: async (ctx, args) => {
+        const identity = await ctx.auth.getUserIdentity();
+
+        if (!identity) {
+            return {
+                incomingRequests: [],
+                outgoingRequests: [],
+            };
+        }
+
+        return getPointTransferRequestsBySlugLogistics(ctx, args.slug, identity);
+    },
+});
+
+export const createPointTransferRequest = mutation({
+    args: {
+        slug: v.string(),
+        points: v.number(),
+        email: v.string(),
+        reason: v.string(),
+    },
+    returns: v.object({
+        result: v.union(v.literal("success"), v.literal("failed")),
+        message: v.string(),
+    }),
+    handler: async (ctx, args) => {
+        const identity = await ctx.auth.getUserIdentity();
+
+        if (!identity) {
+            return {
+                result: "failed",
+                message: "Unauthorized",
+            } as const;
+        }
+
+        return createPointTransferRequestLogistics(
+            ctx,
+            args.slug,
+            args.points,
+            args.email,
+            args.reason,
+            identity
+        );
     },
 });

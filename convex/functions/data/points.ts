@@ -26,6 +26,51 @@ export async function getPointTotalsByOrganizationId(
         .collect();
 }
 
+export async function getPointTransferRequestsByRequestingUserId(
+    ctx: QueryCtx | MutationCtx,
+    requestingUserId: string
+) {
+    return ctx.db
+        .query("pointTransferRequests")
+        .withIndex("requestingUserId", (q) =>
+            q.eq("requestingUserId", requestingUserId)
+        )
+        .collect();
+}
+
+export async function getPointTransferRequestsByRequestedUserId(
+    ctx: QueryCtx | MutationCtx,
+    requestedUserId: string
+) {
+    return ctx.db
+        .query("pointTransferRequests")
+        .withIndex("requestedUserId", (q) =>
+            q.eq("requestedUserId", requestedUserId)
+        )
+        .collect();
+}
+
+export async function createPointTransferRequest(
+    ctx: MutationCtx,
+    requestingUserId: string,
+    requestedUserId: string,
+    organizationId: string,
+    pointsRequested: number,
+    reason: string,
+    status: string
+) {
+    await ctx.db.insert("pointTransferRequests", {
+        requestingUserId,
+        requestedUserId,
+        organizationId,
+        pointsRequested,
+        reason,
+        status,
+    });
+
+    return null;
+}
+
 export async function createPointTotal(
     ctx: MutationCtx,
     driverUserId: string,

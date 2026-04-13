@@ -47,6 +47,22 @@ export default defineSchema({
     reason: v.string(),
     time: v.number(),
   }),
+  pointTransferRequests: defineTable({
+    requestingUserId: v.string(),
+    requestedUserId: v.string(),
+    organizationId: v.string(),
+    pointsRequested: v.number(),
+    reason: v.string(),
+    status: v.string(),
+  })
+      .index("organizationId", ["organizationId"])
+      .index("requestedUserId", ["requestedUserId"])
+      .index("requestingUserId", ["requestingUserId"])
+      .index("requestingUserId_requestedUserId_organizationId", [
+        "requestingUserId",
+        "requestedUserId",
+        "organizationId",
+      ]),
   cartItem: defineTable({
     userId: v.string(),
     organizationId: v.string(),
