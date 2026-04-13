@@ -7,11 +7,10 @@ import { Trash2 } from "lucide-react";
 import { useState } from "react";
 
 export function CartManager({ slug }: { slug: string }){
-    const org = useQuery(api.myFunctions.getVisibleOrganizationBySlugForDriver, {slug});
-    const organizationId = org?._id || "";
+    const organizationId = useQuery(api.appFunctions.getOrganizationIdBySlug, {slug});
     const cartItems = useQuery(api.cart.getMyCart, organizationId ? { organizationId } : "skip");
     const remove = useMutation(api.cart.removeFromCart);
-    const userPoints = useQuery(api.myFunctions.getMyPoints, { organizationId });
+    const userPoints = useQuery(api.myFunctions.getMyPoints, organizationId ? { organizationId } : "skip");
     const isLoading = cartItems === undefined || userPoints === undefined;
     const [isPurchasing, setIsPurchasing] = useState(false);
     const purchase = useMutation(api.cart.purchaseCartItems);

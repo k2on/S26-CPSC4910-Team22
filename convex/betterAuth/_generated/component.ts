@@ -1656,6 +1656,13 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
           },
           Name
         >;
+        getOrganizationIdBySlug: FunctionReference<
+          "query",
+          "internal",
+          { slug: string },
+          null | string,
+          Name
+        >;
         getOrganizationNameBySlug: FunctionReference<
           "query",
           "internal",

@@ -2,6 +2,7 @@ import { query, mutation } from "../_generated/server";
 import { v } from "convex/values";
 import {
     getOrganizationBySlugInternal,
+    getOrganizationIdBySlugInternal,
     getOrganizationNameBySlugInternal,
     getOrganizationByNameInternal,
     isUserInOrganizationInternal,
@@ -29,6 +30,16 @@ export const getOrganizationBySlug = query({
     ),
     handler: async (ctx, args) => {
         return getOrganizationBySlugInternal(ctx, args.slug);
+    },
+});
+
+export const getOrganizationIdBySlug = query({
+    args: {
+        slug: v.string(),
+    },
+    returns: v.union(v.null(), v.string()),
+    handler: async (ctx, args) => {
+        return getOrganizationIdBySlugInternal(ctx, args.slug);
     },
 });
 

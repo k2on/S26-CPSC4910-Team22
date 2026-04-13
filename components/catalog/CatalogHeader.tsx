@@ -7,17 +7,17 @@ import { Button } from "@/components/ui/button"
 import Link from "next/link"
 
 export function CatalogHeader({ slug }: { slug?: string}){
-    const org = useQuery(api.myFunctions.getVisibleOrganizationBySlugForDriver, slug ? { slug } : "skip");
-    const organizationId = org?._id;
+    const orgName = useQuery(api.appFunctions.getOrganizationNameBySlug, slug ? { slug } : "skip");
+    const organizationId = useQuery(api.appFunctions.getOrganizationIdBySlug, slug ? { slug } : "skip");
     const cartItems = useQuery(api.cart.getMyCart, organizationId ? { organizationId } : "skip");
-    const isLoading = slug && (org === undefined || (organizationId && cartItems === undefined));
+    const isLoading = slug && (orgName === undefined || (organizationId && cartItems === undefined));
     const count = cartItems?.length ?? 0;
 
     return(
         <div className="flex flex-col items-center border-b pb-4 mb-4 gap-1">
             {slug && (
                 <div className="flex items-center gap-2 text-lg font-bold">
-                    <span>Welcome to the {org?.name || ""} Catalog!</span>
+                    <span>Welcome to the {orgName || ""} Catalog!</span>
                 </div>
             )}
             <div className="flex flex-row justify-center py-2 items-center">

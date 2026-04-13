@@ -10,6 +10,19 @@ export async function getOrganizationBySlugInternal(
         .unique();
 }
 
+export async function getOrganizationIdBySlugInternal(
+    ctx: QueryCtx | MutationCtx,
+    slug: string
+) {
+    const organization = await getOrganizationBySlugInternal(ctx, slug);
+
+    if (!organization) {
+        return null;
+    }
+
+    return String(organization._id);
+}
+
 export async function getOrganizationNameBySlugInternal(
     ctx: QueryCtx | MutationCtx,
     slug: string
@@ -95,3 +108,4 @@ export async function getAllOrganizationsInternal(
 ) {
     return ctx.db.query("organization").collect();
 }
+

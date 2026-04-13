@@ -93,8 +93,7 @@ export default async function Page({params, searchParams}: {
         media: mediaType,
         limit: searchLimit.toString()
     });
-    const org = await fetchQuery(api.myFunctions.getVisibleOrganizationBySlugForDriver, {slug});
-    const organizationId = org?._id || org?._id.toString() || "";
+    const organizationId = await fetchQuery(api.appFunctions.getOrganizationIdBySlug, {slug});
 
     const fullResponse = await fetch(`https://itunes.apple.com/search?${fullQuery.toString()}`);
     if (!fullResponse.ok){

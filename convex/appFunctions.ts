@@ -116,6 +116,27 @@ export const removeOrganizationMemberByUserIdAndSlug = mutation({
     }
 });
 
+export const getOrganizationIdBySlug = query({
+    args: {
+        slug: v.string(),
+    },
+    returns: v.union(v.null(), v.string()),
+    handler: async (ctx, args) => {
+        const identity = await ctx.auth.getUserIdentity();
+
+        if (!identity) {
+            return null;
+        }
+
+        return await ctx.runQuery(
+            components.betterAuth.functions.organizations.getOrganizationIdBySlug,
+            {
+                slug: args.slug,
+            }
+        );
+    },
+});
+
 export const getOrganizationNameBySlug = query({
     args: {
         slug: v.string(),

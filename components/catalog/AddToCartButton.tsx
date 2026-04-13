@@ -15,8 +15,7 @@ interface CartItemProperties {
 }
 
 export function AddToCartButton({ trackId, slug, mediaType, name, artistName, price, artworkUrl }: CartItemProperties) {
-    const org = useQuery(api.myFunctions.getVisibleOrganizationBySlugForDriver, { slug });
-    const organizationId = org?._id ? String(org._id) : undefined;
+    const organizationId = useQuery(api.appFunctions.getOrganizationIdBySlug, { slug });
     const cartItems = useQuery(api.cart.getMyCart, organizationId ? { organizationId } : "skip");
     const addToCart = useMutation(api.cart.addToCart);
     const removeFromCart = useMutation(api.cart.removeFromCart);

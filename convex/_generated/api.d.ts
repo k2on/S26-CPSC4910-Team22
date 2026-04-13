@@ -1686,6 +1686,12 @@ export declare const components: {
             totalMembers?: number;
           }
         >;
+        getOrganizationIdBySlug: FunctionReference<
+          "query",
+          "internal",
+          { slug: string },
+          null | string
+        >;
         getOrganizationNameBySlug: FunctionReference<
           "query",
           "internal",
