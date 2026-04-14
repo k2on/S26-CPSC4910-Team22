@@ -1,4 +1,5 @@
 import type { QueryCtx, MutationCtx } from "../../_generated/server";
+import type { Id } from "../../_generated/dataModel";
 
 export async function getPointTotalByDriverAndOrganizationId(
     ctx: QueryCtx | MutationCtx,
@@ -85,6 +86,26 @@ export async function createPointTotal(
     return null;
 }
 
+export async function ensurePointTotalExists(
+    ctx: MutationCtx,
+    driverUserId: string,
+    organizationId: string
+) {
+    const pointTotal = await getPointTotalByDriverAndOrganizationId(
+        ctx,
+        driverUserId,
+        organizationId
+    );
+
+    if (pointTotal) {
+        return pointTotal;
+    }
+
+    await createPointTotal(ctx, driverUserId, organizationId);
+
+    return getPointTotalByDriverAndOrganizationId(ctx, driverUserId, organizationId);
+}
+
 export async function setPointTotal(
     ctx: MutationCtx,
     driverUserId: string,
@@ -136,4 +157,32 @@ export async function getPointChangesByOrganizationId(
     const pointChanges = await ctx.db.query("pointChanges").collect();
 
     return pointChanges.filter((row) => row.organizationId === organizationId);
+}
+
+export async function getPointTransferRequestById(
+    ctx: QueryCtx | MutationCtx,
+    transferRequestId: string
+) {
+    return ctx.db.get(transferRequestId as Id<"pointTransferRequests">);
+}
+
+export async function updatePointTransferRequestStatus(
+    ctx: MutationCtx,
+    transferRequestId: string,
+    status: string
+) {
+    const pointTransferRequest = await getPointTransferRequestById(
+        ctx,
+        transferRequestId
+    );
+
+    if (!pointTransferRequest) {
+        throw new Error("Point transfer request not found");
+    }
+
+    await ctx.db.patch(pointTransferRequest._id, {
+        status,
+    });
+
+    return null;
 }

@@ -1,17 +1,16 @@
 import {v} from "convex/values";
 import {mutation, query} from "./_generated/server";
 import {
-    getOrganizationPointChangesBySlug as getOrganizationPointChangesBySlugLogistics
-} from "./functions/logistics/points";
-import {
     getOrganizationDriverStatusBySlug as getOrganizationDriverStatusBySlugLogistics
 } from "./functions/logistics/organizationMembers";
 import {
     getOrganizationMembersTableBySlug as getOrganizationMembersTableBySlugLogistics
 } from "./functions/logistics/organizationMembers";
 import {
+    getOrganizationPointChangesBySlug as getOrganizationPointChangesBySlugLogistics,
     getPointTransferRequestsBySlug as getPointTransferRequestsBySlugLogistics,
-    createPointTransferRequest as createPointTransferRequestLogistics
+    createPointTransferRequest as createPointTransferRequestLogistics,
+    updatePointTransferRequest as updatePointTransferRequestLogistics,
 } from "./functions/logistics/points";
 import {components} from "./_generated/api";
 
@@ -205,6 +204,7 @@ export const getPointTransferRequestsBySlug = query({
     returns: v.object({
         incomingRequests: v.array(
             v.object({
+                id: v.string(),
                 requestingUserName: v.string(),
                 pointsRequested: v.number(),
                 reason: v.string(),
@@ -213,6 +213,7 @@ export const getPointTransferRequestsBySlug = query({
         ),
         outgoingRequests: v.array(
             v.object({
+                id: v.string(),
                 requestedUserName: v.string(),
                 pointsRequested: v.number(),
                 reason: v.string(),
@@ -262,6 +263,35 @@ export const createPointTransferRequest = mutation({
             args.email,
             args.reason,
             identity
+        );
+    },
+});
+
+export const UpdatePointTransferRequest = mutation({
+    args: {
+        transferRequestId: v.string(),
+        updateType: v.union(
+            v.literal("approve"),
+            v.literal("deny"),
+            v.literal("cancel")
+        ),
+    },
+    returns: v.object({
+        result: v.string(),
+    }),
+    handler: async (ctx, args) => {
+        const identity = await ctx.auth.getUserIdentity();
+
+        if (!identity) {
+            return {
+                result: "unauthorized",
+            };
+        }
+
+        return updatePointTransferRequestLogistics(
+            ctx,
+            args.transferRequestId,
+            args.updateType
         );
     },
 });

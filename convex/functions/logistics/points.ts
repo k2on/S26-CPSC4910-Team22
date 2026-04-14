@@ -5,6 +5,12 @@ import {
     getPointTransferRequestsByRequestedUserId,
     getPointTransferRequestsByRequestingUserId,
     createPointTransferRequest as createPointTransferRequestData,
+    getPointTotalByDriverAndOrganizationId,
+    ensurePointTotalExists,
+    setPointTotal,
+    createPointChange,
+    getPointTransferRequestById,
+    updatePointTransferRequestStatus,
 } from "../data/points";
 import type { UserIdentity } from "convex/server";
 import { filterPointChangesByIdentity } from "./filters";
@@ -145,6 +151,7 @@ export async function getPointTransferRequestsBySlug(
 
     return {
         incomingRequests: incomingRows.map((row) => ({
+            id: String(row._id),
             requestingUserName:
                 userMap.get(String(row.requestingUserId)) ?? "Unknown User",
             pointsRequested: row.pointsRequested,
@@ -152,6 +159,7 @@ export async function getPointTransferRequestsBySlug(
             status: row.status,
         })),
         outgoingRequests: outgoingRows.map((row) => ({
+            id: String(row._id),
             requestedUserName:
                 userMap.get(String(row.requestedUserId)) ?? "Unknown User",
             pointsRequested: row.pointsRequested,
@@ -229,4 +237,110 @@ export async function createPointTransferRequest(
         result: "success" as const,
         message: "Transfer request sent successfully",
     };
+}
+
+export async function updatePoints(
+    ctx: MutationCtx,
+    driverUserId: string,
+    organizationId: string,
+    changedByUserId: string,
+    pointChange: number,
+    reason: string
+) {
+    const existingPointTotal = await ensurePointTotalExists(
+        ctx,
+        driverUserId,
+        organizationId
+    );
+
+    if (!existingPointTotal) {
+        throw new Error("Unable to initialize point total");
+    }
+
+    const updatedPointTotal = existingPointTotal.points + pointChange;
+
+    if (updatedPointTotal < 0) {
+        return {
+            result: "not enough points" as const,
+        };
+    }
+
+    await createPointChange(
+        ctx,
+        driverUserId,
+        organizationId,
+        changedByUserId,
+        pointChange,
+        reason,
+        Date.now()
+    );
+
+    await setPointTotal(
+        ctx,
+        driverUserId,
+        organizationId,
+        updatedPointTotal
+    );
+
+    return {
+        result: "success" as const,
+    };
+}
+
+export async function updatePointTransferRequest(
+    ctx: MutationCtx,
+    transferRequestId: string,
+    updateType: "approve" | "deny" | "cancel"
+) {
+    const transferRequest = await getPointTransferRequestById(ctx, transferRequestId);
+
+    if (!transferRequest) {
+        throw new Error("Point transfer request not found");
+    }
+
+    if (updateType === "deny") {
+        await updatePointTransferRequestStatus(ctx, transferRequestId, "denied");
+
+        return {
+            result: "transfer request was denied",
+        } as const;
+    }
+
+    if (updateType === "cancel") {
+        await updatePointTransferRequestStatus(ctx, transferRequestId, "cancelled");
+
+        return {
+            result: "transfer request has been cancelled",
+        } as const;
+    }
+
+    const outgoingTransferResult = await updatePoints(
+        ctx,
+        transferRequest.requestedUserId,
+        transferRequest.organizationId,
+        transferRequest.requestingUserId,
+        transferRequest.pointsRequested * -1,
+        `Outgoing Transfer - ${transferRequest.reason}`
+    );
+
+    if (outgoingTransferResult.result === "not enough points") {
+        return {
+            result: "You do not have enough points to fulfill this request",
+        } as const;
+    }
+
+    await updatePoints(
+        ctx,
+        transferRequest.requestingUserId,
+        transferRequest.organizationId,
+        transferRequest.requestedUserId,
+        transferRequest.pointsRequested,
+        `Incoming Transfer - ${transferRequest.reason}`
+    );
+
+    await updatePointTransferRequestStatus(ctx, transferRequestId, "approved");
+
+    return {
+        result: "success",
+    } as const;
 }
