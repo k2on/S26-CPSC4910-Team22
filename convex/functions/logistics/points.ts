@@ -201,7 +201,7 @@ export async function createPointTransferRequest(
     if (!requestedUser) {
         return {
             result: "failed" as const,
-            message: `${email} does not belong to any users in ${organization.name}`,
+            message: `${email} does not belong to any drivers in ${organization.name}`,
         };
     }
 
@@ -219,7 +219,7 @@ export async function createPointTransferRequest(
     if (!isRequestedUserInOrganization) {
         return {
             result: "failed" as const,
-            message: `${email} does not belong to any users in ${organization.name}`,
+            message: `${email} does not belong to any drivers in ${organization.name}`,
         };
     }
 
@@ -302,7 +302,7 @@ export async function updatePointTransferRequest(
         await updatePointTransferRequestStatus(ctx, transferRequestId, "denied");
 
         return {
-            result: "transfer request was denied",
+            result: "Transfer request has been denied",
         } as const;
     }
 
@@ -310,7 +310,7 @@ export async function updatePointTransferRequest(
         await updatePointTransferRequestStatus(ctx, transferRequestId, "cancelled");
 
         return {
-            result: "transfer request has been cancelled",
+            result: "Transfer request has been cancelled",
         } as const;
     }
 
@@ -341,6 +341,6 @@ export async function updatePointTransferRequest(
     await updatePointTransferRequestStatus(ctx, transferRequestId, "approved");
 
     return {
-        result: "success",
+        result: "Points have been successfully transferred",
     } as const;
 }
