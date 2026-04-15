@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
+import { components } from "./_generated/api";
 
 export const addToCart = mutation({
     args: {
@@ -123,6 +124,27 @@ export const purchaseCartItems = mutation({
             pointTotal: currentPoints - totalCost,
         });
 
+        const organization = await ctx.runQuery(components.betterAuth.organizations.getOrganizationById, { id: args.organizationId });
+        const pointRate = organization?.pointValue || 0.01;
+        const moneyAmount = totalCost * pointRate;
+        const lastFee = await ctx.db
+            .query("sponsorFees")
+            .withIndex("by_organization", (q) =>
+                q.eq("organizationId", args.organizationId)
+            )
+            .order("desc")
+            .first();
+        const lastTotal = lastFee?.totalDue ?? 0;
+
+        await ctx.db.insert("sponsorFees", {
+            time: Date.now(),
+            organizationId: args.organizationId,
+            feeAmount: moneyAmount,
+            totalDue: lastTotal + moneyAmount,
+            user: identity.id,
+            userEmail: identity.email,
+        });
+
         for(const item of args.items){
             const alreadyOwned = await ctx.db
                 .query("ownedItems")
@@ -223,6 +245,27 @@ export const purchaseSingleItem = mutation({
             reason: "Catalog Purchase: Single Item",
             email: identity.email,
             pointTotal: currentPoints - args.price,
+        });
+
+        const organization = await ctx.runQuery(components.betterAuth.organizations.getOrganizationById, { id: args.organizationId });
+        const pointRate = organization?.pointValue || 0.01;
+        const moneyAmount = args.price * pointRate;
+        const lastFee = await ctx.db
+            .query("sponsorFees")
+            .withIndex("by_organization", (q) =>
+                q.eq("organizationId", args.organizationId)
+            )
+            .order("desc")
+            .first();
+        const lastTotal = lastFee?.totalDue ?? 0;
+
+        await ctx.db.insert("sponsorFees", {
+            time: Date.now(),
+            organizationId: args.organizationId,
+            feeAmount: moneyAmount,
+            totalDue: lastTotal + moneyAmount,
+            user: identity.id,
+            userEmail: identity.email,
         });
 
         const alreadyOwned = await ctx.db

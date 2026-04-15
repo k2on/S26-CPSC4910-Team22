@@ -91,4 +91,13 @@ export default defineSchema({
     hasShows: v.boolean(),
   })
   .index("by_organization", ["organizationId"]),
+  sponsorFees: defineTable({
+    organizationId: v.optional(v.union(v.null(), v.string())),
+    feeAmount: v.optional(v.union(v.null(), v.number())),
+    totalDue: v.optional(v.union(v.null(), v.number())),
+    user: v.optional(v.union(v.null(), v.string())),
+    time: v.optional(v.union(v.null(), v.number())),
+    userEmail: v.optional(v.union(v.null(), v.string())),
+  })
+  .index("by_organization", ["organizationId"]),
 });

@@ -845,12 +845,19 @@ export const getOrgPointValue = query({
 });
 
 export const getFullOrderedAuditLog = query({
-  handler: async (ctx) => {
-    const logs = await ctx.db
-      .query("auditLog")
-      .order("desc")
-      .collect();
+  args:{
+    from: v.optional(v.number()),
+    to: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    const logQuery = (args.from !== undefined && args.to !== undefined) 
+      ? ctx.db.query("auditLog")
+        .withIndex("by_time", (q) =>
+          q.gte("time", args.from!).lte("time", args.to!)
+        ).order("desc")
+      : ctx.db.query("auditLog").order("desc");
 
+    const logs = await logQuery.collect();
     return await Promise.all(
       logs.map(async (log) => {
         const org = log.sponsor ? await ctx.runQuery(components.betterAuth.organizations.getOrganizationById, { id: log.sponsor }) : null;
