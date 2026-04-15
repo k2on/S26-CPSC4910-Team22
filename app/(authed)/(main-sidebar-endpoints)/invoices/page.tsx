@@ -15,6 +15,8 @@ import {
     SelectTrigger,
     SelectValue
 } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { Download } from "lucide-react";
 
 export default function FeesPage() {
     const me = useQuery(api.myFunctions.getMe);
@@ -37,6 +39,31 @@ export default function FeesPage() {
         to: date?.to ? endOfDay(date.to).getTime() : undefined,
         organizationId: selectedOrg,
     });
+
+    const downloadCSV = (data: any[]) => {
+        if(data.length === 0) return;
+
+        const headers = ["Time", "Purchased By", "Fee", "Organization Total Balance", "Organization"];
+
+        const csvRows = data.map(fee => [
+            new Date(fee.time).toLocaleString().replace(/,/g, ""),
+            fee.userEmail || "--",
+            typeof fee.feeAmount === 'number' ? fee.feeAmount.toFixed(2) : "0.00",
+            typeof fee.totalDue === 'number' ? fee.totalDue.toFixed(2) : "0.00",
+            fee.organizationName || "--",
+        ].join(","));
+
+        const csvContent = [headers.join(","), ...csvRows].join("\n");
+        const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;"});
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.setAttribute("href", url);
+        link.setAttribute("download", `invoices-${new Date().toISOString().split('T')[0]}.csv`);
+        link.style.visibility = "hidden";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
 
     return(
         <div className="p-8 space-y-4">
@@ -62,6 +89,13 @@ export default function FeesPage() {
                         </SelectContent>
                     </Select>
                     <DatePickerWithRange date={date} setDate={setDate} />
+                    <Button
+                        variant="outline"
+                        onClick={() => downloadCSV(data || [])}
+                        disabled={!data || data.length === 0}
+                    >
+                        <Download />Download CSV
+                    </Button>
                 </div>
             </div>
             <div className="pt-4">
