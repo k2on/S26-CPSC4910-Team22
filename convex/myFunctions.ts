@@ -77,24 +77,22 @@ function getOrgAccess(identity: { subject: string; role?: string | null }) {
   };
 }
 
-// export const getVisibleOrganizations = query({
-//   handler: async (ctx) => {
-//     const identity = await ctx.auth.getUserIdentity();
-//
-//     if (!identity || (identity.role !== "admin" && identity.role !== "sponsor")) {
-//       console.log("ID", identity);
-//       return [];
-//     }
-//     console.log("after???");
-//
-//     const access = getOrgAccess(identity);
-//
-//     return await ctx.runQuery(
-//       components.betterAuth.organizations.listVisibleOrganizations,
-//       access
-//     );
-//   }
-// })
+export const getVisibleOrganizations = query({
+  handler: async (ctx) => {
+    const identity = await ctx.auth.getUserIdentity();
+
+    if (!identity || (identity.role !== "admin" && identity.role !== "sponsor")) {
+      return [];
+    }
+
+    const access = getOrgAccess(identity);
+
+    return await ctx.runQuery(
+      components.betterAuth.organizations.listVisibleOrganizations,
+      access
+    );
+  }
+})
 
 export const getVisibleOrganizationBySlug = query({
   args: {
@@ -848,14 +846,19 @@ export const getFullOrderedAuditLog = query({
   args:{
     from: v.optional(v.number()),
     to: v.optional(v.number()),
+    sponsorId: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const logQuery = (args.from !== undefined && args.to !== undefined) 
+    let logQuery = (args.from !== undefined && args.to !== undefined) 
       ? ctx.db.query("auditLog")
         .withIndex("by_time", (q) =>
           q.gte("time", args.from!).lte("time", args.to!)
         ).order("desc")
       : ctx.db.query("auditLog").order("desc");
+
+    if(args.sponsorId && args.sponsorId !== "all"){
+      logQuery = logQuery.filter(q => q.eq(q.field("sponsor"), args.sponsorId));
+    }
 
     const logs = await logQuery.collect();
     return await Promise.all(

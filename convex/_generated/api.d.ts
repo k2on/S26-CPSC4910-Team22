@@ -1938,6 +1938,22 @@ export declare const components: {
           userId: string;
         }>
       >;
+      listVisibleOrganizations: FunctionReference<
+        "query",
+        "internal",
+        { canAccessAll: boolean; currentUserId: string },
+        Array<{
+          _creationTime: number;
+          _id: string;
+          createdAt: number;
+          logo?: null | string;
+          metadata?: null | string;
+          name: string;
+          pointValue: number;
+          slug: string;
+          totalMembers?: number;
+        }>
+      >;
       updateVisibleOrganization: FunctionReference<
         "mutation",
         "internal",
