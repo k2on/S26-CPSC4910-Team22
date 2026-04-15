@@ -856,12 +856,23 @@ export const getFullOrderedAuditLog = query({
           q.gte("time", args.from!).lte("time", args.to!)
         ).order("desc")
       : ctx.db.query("auditLog").order("desc");
+    
+    const identity = await ctx.auth.getUserIdentity();
+    if(args.type === "all"){
+      if(identity?.role !== "admin"){
+        logQuery = logQuery.filter((q) => 
+          q.or(
+            q.eq(q.field("event"), "pointChange"),
+            q.eq(q.field("event"), "application")
+          )
+        );
+      }
+    }else{
+      logQuery = logQuery.filter((q) => q.eq(q.field("event"), args.type));
+    }
 
     if(args.sponsorId && args.sponsorId !== "all"){
       logQuery = logQuery.filter(q => q.eq(q.field("sponsor"), args.sponsorId));
-    }
-    if(args.type && args.type !== "all"){
-      logQuery = logQuery.filter(q => q.eq(q.field("event"), args.type));
     }
 
     const logs = await logQuery.collect();

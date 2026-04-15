@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { api } from "@/convex/_generated/api";
 import { columns } from "./columns";
 import { DataTable } from "./data-table";
@@ -15,20 +15,32 @@ import {
   SelectTrigger,
   SelectValue
 } from "@/components/ui/select";
-
-const EVENT_TYPES = [
-  { value: "pointChange", label: "Point Change" },
-  { value: "loginAttempt", label: "Login Attempt" },
-  { value: "passwordChange", label: "Password Change" },
-  { value: "application", label: "Application" },
-];
+import { fetchAuthQuery } from "@/lib/auth-server";
 
 export default function Page() {
+  const organizations = useQuery(api.myFunctions.getVisibleOrganizations);
+  const me = useQuery(api.myFunctions.getMe);
+  const EVENT_TYPES = (me?.role == "admin") ? 
+  [ 
+    { value: "pointChange", label: "Point Change" },
+    { value: "loginAttempt", label: "Login Attempt" },
+    { value: "passwordChange", label: "Password Change" },
+    { value: "application", label: "Application" },
+  ] : 
+  [
+    { value: "pointChange", label: "Point Change" },
+    { value: "application", label: "Application" },
+  ];
   const [date, setDate] = useState<DateRange | undefined>({
     from: addDays(new Date(), -30),
     to: new Date(),
   });
   const [selectedOrg, setSelectedOrg] = useState<string>("all");
+  useEffect(() => {
+    if(me && me.role !== "admin" && organizations && organizations.length > 0){
+      setSelectedOrg(organizations[0]._id);
+    }
+  }, [me, organizations]);
   const [selectedType, setSelectedType] = useState<string>("all");
   const data = useQuery(api.myFunctions.getFullOrderedAuditLog, {
     from: date?.from ? startOfDay(date.from).getTime() : undefined,
@@ -36,7 +48,6 @@ export default function Page() {
     sponsorId: selectedOrg,
     type: selectedType,
   });
-  const organizations = useQuery(api.myFunctions.getVisibleOrganizations);
 
   return(
     <div className="p-8 space-y-4">
@@ -47,7 +58,9 @@ export default function Page() {
             <SelectValue placeholder="Select Organization" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Organizations</SelectItem>
+            {me?.role === "admin" && ( 
+              <SelectItem value="all">All Organizations</SelectItem>
+            )}
             {organizations?.map((org) => (
               <SelectItem key={org._id} value={org._id}>
                 {org.name}

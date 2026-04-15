@@ -53,7 +53,7 @@ const LINKS = [
         label: "System Log",
         href: "/log",
         icon: ScrollText,
-        roles: ["admin"],
+        roles: ["admin", "sponsor"],
     },
     {
         label: "About",
