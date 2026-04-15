@@ -15,6 +15,8 @@ import {
   SelectTrigger,
   SelectValue
 } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { Download } from "lucide-react";
 
 export default function Page() {
   const organizations = useQuery(api.myFunctions.getVisibleOrganizations);
@@ -49,6 +51,34 @@ export default function Page() {
     type: selectedType,
     sortBy: sortBy,
   });
+
+  const downloadCSV = (data: any[]) => {
+    if(data.length === 0) return;
+
+    const headers = ["Time", "Event", "Sponsor Org", "User Email", "Enactor Email", "Point Change", "New Total", "Status", "Reason"];
+    const csvRows = data.map(log => [
+      new Date(log.time).toLocaleString().replace(/,/g, ""),
+      log.event,
+      log.sponsorName || "--",
+      log.email || "--",
+      log.enactorEmail || "--",
+      log.amount || "0",
+      log.pointTotal || "0",
+      log.status || "--",
+      `"${(log.reason || "").replace(/"/g, '""')}"`,
+    ].join(","));
+
+    const csvContent = [headers.join(","), ...csvRows].join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;"});
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `audit-log-${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   return(
     <div className="p-8 space-y-4">
@@ -93,6 +123,13 @@ export default function Page() {
           </SelectContent>
         </Select>
         <DatePickerWithRange date={date} setDate={setDate} />
+        <Button
+          variant="outline"
+          onClick={() => downloadCSV(data || [])}
+          disabled={!data || data.length === 0}
+        >
+          <Download />Download CSV
+        </Button>
       </div>
       <div className="pt-4">
         <DataTable columns={columns} data={data || []} />
