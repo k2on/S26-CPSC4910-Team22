@@ -847,6 +847,7 @@ export const getFullOrderedAuditLog = query({
     from: v.optional(v.number()),
     to: v.optional(v.number()),
     sponsorId: v.optional(v.string()),
+    type: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     let logQuery = (args.from !== undefined && args.to !== undefined) 
@@ -858,6 +859,9 @@ export const getFullOrderedAuditLog = query({
 
     if(args.sponsorId && args.sponsorId !== "all"){
       logQuery = logQuery.filter(q => q.eq(q.field("sponsor"), args.sponsorId));
+    }
+    if(args.type && args.type !== "all"){
+      logQuery = logQuery.filter(q => q.eq(q.field("event"), args.type));
     }
 
     const logs = await logQuery.collect();

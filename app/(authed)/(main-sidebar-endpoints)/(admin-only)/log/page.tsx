@@ -16,16 +16,25 @@ import {
   SelectValue
 } from "@/components/ui/select";
 
+const EVENT_TYPES = [
+  { value: "pointChange", label: "Point Change" },
+  { value: "loginAttempt", label: "Login Attempt" },
+  { value: "passwordChange", label: "Password Change" },
+  { value: "application", label: "Application" },
+];
+
 export default function Page() {
   const [date, setDate] = useState<DateRange | undefined>({
     from: addDays(new Date(), -30),
     to: new Date(),
   });
   const [selectedOrg, setSelectedOrg] = useState<string>("all");
+  const [selectedType, setSelectedType] = useState<string>("all");
   const data = useQuery(api.myFunctions.getFullOrderedAuditLog, {
     from: date?.from ? startOfDay(date.from).getTime() : undefined,
     to: date?.to ? endOfDay(date.to).getTime() : undefined,
     sponsorId: selectedOrg,
+    type: selectedType,
   });
   const organizations = useQuery(api.myFunctions.getVisibleOrganizations);
 
@@ -42,6 +51,19 @@ export default function Page() {
             {organizations?.map((org) => (
               <SelectItem key={org._id} value={org._id}>
                 {org.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Select value={selectedType} onValueChange={setSelectedType}>
+          <SelectTrigger className="w-[200px]">
+            <SelectValue placeholder="Select Event Type" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Events</SelectItem>
+            {EVENT_TYPES.map((type) => (
+              <SelectItem key={type.value} value={type.value}>
+                {type.label}
               </SelectItem>
             ))}
           </SelectContent>
