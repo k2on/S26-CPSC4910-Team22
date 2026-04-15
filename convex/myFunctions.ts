@@ -888,6 +888,43 @@ export const getFullOrderedAuditLog = query({
   }
 });
 
+export const getSponsorFees = query({
+  args:{
+    from: v.optional(v.number()),
+    to: v.optional(v.number()),
+    organizationId: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    
+    let feeQuery = (args.from !== undefined && args.to !== undefined)
+      ? ctx.db.query("sponsorFees")
+        .withIndex("by_time", (q) =>
+          q.gte("time", args.from!).lte("time", args.to!)
+        ).order("desc")
+      : ctx.db.query("sponsorFees").order("desc");
+
+    if(args.organizationId && args.organizationId !== "all"){
+      feeQuery = feeQuery.filter((q) => 
+        q.eq(q.field("organizationId"), args.organizationId)
+      );
+    }
+    const fees = await feeQuery.collect();
+
+    return await Promise.all(
+      fees.map(async (fee) => {
+        const org = fee.organizationId
+          ? await ctx.runQuery(components.betterAuth.organizations.getOrganizationById, { id: fee.organizationId })
+          : null;
+
+          return {
+            ...fee,
+            organizationName: org?.name ?? "--",
+          };
+      })
+    );
+  },
+});
+
 export const getUserById = query({
   args: { userId: v.string() },
   handler: async (ctx, args) => {

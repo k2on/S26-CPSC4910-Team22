@@ -99,5 +99,6 @@ export default defineSchema({
     time: v.optional(v.union(v.null(), v.number())),
     userEmail: v.optional(v.union(v.null(), v.string())),
   })
-  .index("by_organization", ["organizationId"]),
+  .index("by_organization", ["organizationId"])
+  .index("by_time", ["time"]),
 });

@@ -2,9 +2,6 @@
 
 import { Doc } from "@/convex/_generated/dataModel"
 import { ColumnDef } from "@tanstack/react-table"
-import { api } from "@/convex/_generated/api"
-import { run } from "node:test"
-import { useQuery } from "convex/react"
 
 export const fixEventTitle = (title: string) => {
     switch(title){
