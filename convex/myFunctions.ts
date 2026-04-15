@@ -848,14 +848,27 @@ export const getFullOrderedAuditLog = query({
     to: v.optional(v.number()),
     sponsorId: v.optional(v.string()),
     type: v.optional(v.string()),
+    sortBy: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    let logQuery = (args.from !== undefined && args.to !== undefined) 
-      ? ctx.db.query("auditLog")
-        .withIndex("by_time", (q) =>
-          q.gte("time", args.from!).lte("time", args.to!)
-        ).order("desc")
-      : ctx.db.query("auditLog").order("desc");
+    let logQuery;
+
+    if(args.sortBy === "sponsor"){
+      logQuery = ctx.db.query("auditLog").withIndex("by_sponsor_time").order("desc");
+    }else if(args.sortBy === "user"){
+      logQuery = ctx.db.query("auditLog").withIndex("by_user_time").order("desc");
+    }else{
+      logQuery = ctx.db.query("auditLog").withIndex("by_time").order("desc");
+    }
+
+    if(args.from !== undefined && args.to !== undefined){
+      logQuery = logQuery.filter(q => 
+        q.and(
+          q.gte(q.field("time"), args.from!),
+          q.lte(q.field("time"), args.to!)
+        )
+      );
+    }
     
     const identity = await ctx.auth.getUserIdentity();
     if(args.type === "all"){
@@ -867,7 +880,7 @@ export const getFullOrderedAuditLog = query({
           )
         );
       }
-    }else{
+    }else if (args.type){
       logQuery = logQuery.filter((q) => q.eq(q.field("event"), args.type));
     }
 

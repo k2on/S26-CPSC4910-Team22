@@ -15,7 +15,6 @@ import {
   SelectTrigger,
   SelectValue
 } from "@/components/ui/select";
-import { fetchAuthQuery } from "@/lib/auth-server";
 
 export default function Page() {
   const organizations = useQuery(api.myFunctions.getVisibleOrganizations);
@@ -42,11 +41,13 @@ export default function Page() {
     }
   }, [me, organizations]);
   const [selectedType, setSelectedType] = useState<string>("all");
+  const [sortBy, setSortBy] = useState<string>("time");
   const data = useQuery(api.myFunctions.getFullOrderedAuditLog, {
     from: date?.from ? startOfDay(date.from).getTime() : undefined,
     to: date?.to ? endOfDay(date.to).getTime() : undefined,
     sponsorId: selectedOrg,
     type: selectedType,
+    sortBy: sortBy,
   });
 
   return(
@@ -79,6 +80,16 @@ export default function Page() {
                 {type.label}
               </SelectItem>
             ))}
+          </SelectContent>
+        </Select>
+        <Select value={sortBy} onValueChange={setSortBy}>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Sort By" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="time">By Time</SelectItem>
+            <SelectItem value="sponsor">By Sponsor</SelectItem>
+            <SelectItem value="user">By User</SelectItem>
           </SelectContent>
         </Select>
         <DatePickerWithRange date={date} setDate={setDate} />
