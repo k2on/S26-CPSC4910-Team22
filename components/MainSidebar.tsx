@@ -20,6 +20,7 @@ import {
     UserRoundIcon,
     UsersRound,
     Info,
+    Banknote
 } from "lucide-react";
 
 export type MainSidebarRole = "admin" | "sponsor" | "driver";
@@ -53,7 +54,13 @@ const LINKS = [
         label: "System Log",
         href: "/log",
         icon: ScrollText,
-        roles: ["admin"],
+        roles: ["admin", "sponsor"],
+    },
+    {
+        label: "Invoices",
+        href: "/invoices",
+        icon: Banknote,
+        roles: ["admin", "sponsor"],
     },
     {
         label: "About",

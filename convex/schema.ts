@@ -23,7 +23,9 @@ export default defineSchema({
     fee: v.optional(v.union(v.null(), v.number())),//actual money price of catalog items for invoices
     pointTotal: v.optional(v.union(v.null(), v.number())),//point total at time of point change
   })
-  .index("by_time", ["time"]),
+  .index("by_time", ["time"])
+  .index("by_sponsor_time", ["sponsor", "time"])
+  .index("by_user_time", ["user", "time"]),
   driverApplication: defineTable({
     userId: v.string(),
     orgId: v.string(),
@@ -91,4 +93,14 @@ export default defineSchema({
     hasShows: v.boolean(),
   })
   .index("by_organization", ["organizationId"]),
+  sponsorFees: defineTable({
+    organizationId: v.optional(v.union(v.null(), v.string())),
+    feeAmount: v.optional(v.union(v.null(), v.number())),
+    totalDue: v.optional(v.union(v.null(), v.number())),
+    user: v.optional(v.union(v.null(), v.string())),
+    time: v.optional(v.union(v.null(), v.number())),
+    userEmail: v.optional(v.union(v.null(), v.string())),
+  })
+  .index("by_organization", ["organizationId"])
+  .index("by_time", ["time"]),
 });

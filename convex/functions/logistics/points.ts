@@ -1,5 +1,5 @@
 import type { QueryCtx, MutationCtx } from "../../_generated/server";
-import { components } from "../../_generated/api";
+import { api, components } from "../../_generated/api";
 import {
     getPointChangesByOrganizationId,
     getPointTransferRequestsByRequestedUserId,
@@ -281,6 +281,24 @@ export async function updatePoints(
         organizationId,
         updatedPointTotal
     );
+
+    const giver = await ctx.runQuery(api.myFunctions.getUserById, { userId: changedByUserId });
+    const giverEmail = giver?.email ?? "Unknown Email";
+    const receiver = await ctx.runQuery(api.myFunctions.getUserById, { userId: driverUserId });
+    const receiverEmail = receiver?.email ?? "Unknown Email";
+
+    await ctx.db.insert("auditLog", {
+        time: Date.now(),
+        sponsor: organizationId,
+        event: "pointChange",
+        user: driverUserId,
+        amount: pointChange,
+        reason: reason,
+        enactor: changedByUserId,
+        enactorEmail: giverEmail || "Unknown Email",
+        email: receiverEmail || "Unknown Email",
+        pointTotal: updatedPointTotal,
+    });
 
     return {
         result: "success" as const,

@@ -77,24 +77,22 @@ function getOrgAccess(identity: { subject: string; role?: string | null }) {
   };
 }
 
-// export const getVisibleOrganizations = query({
-//   handler: async (ctx) => {
-//     const identity = await ctx.auth.getUserIdentity();
-//
-//     if (!identity || (identity.role !== "admin" && identity.role !== "sponsor")) {
-//       console.log("ID", identity);
-//       return [];
-//     }
-//     console.log("after???");
-//
-//     const access = getOrgAccess(identity);
-//
-//     return await ctx.runQuery(
-//       components.betterAuth.organizations.listVisibleOrganizations,
-//       access
-//     );
-//   }
-// })
+export const getVisibleOrganizations = query({
+  handler: async (ctx) => {
+    const identity = await ctx.auth.getUserIdentity();
+
+    if (!identity || (identity.role !== "admin" && identity.role !== "sponsor")) {
+      return [];
+    }
+
+    const access = getOrgAccess(identity);
+
+    return await ctx.runQuery(
+      components.betterAuth.organizations.listVisibleOrganizations,
+      access
+    );
+  }
+})
 
 export const getVisibleOrganizationBySlug = query({
   args: {
@@ -845,12 +843,52 @@ export const getOrgPointValue = query({
 });
 
 export const getFullOrderedAuditLog = query({
-  handler: async (ctx) => {
-    const logs = await ctx.db
-      .query("auditLog")
-      .order("desc")
-      .collect();
+  args:{
+    from: v.optional(v.number()),
+    to: v.optional(v.number()),
+    sponsorId: v.optional(v.string()),
+    type: v.optional(v.string()),
+    sortBy: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    let logQuery;
 
+    if(args.sortBy === "sponsor"){
+      logQuery = ctx.db.query("auditLog").withIndex("by_sponsor_time").order("desc");
+    }else if(args.sortBy === "user"){
+      logQuery = ctx.db.query("auditLog").withIndex("by_user_time").order("desc");
+    }else{
+      logQuery = ctx.db.query("auditLog").withIndex("by_time").order("desc");
+    }
+
+    if(args.from !== undefined && args.to !== undefined){
+      logQuery = logQuery.filter(q => 
+        q.and(
+          q.gte(q.field("time"), args.from!),
+          q.lte(q.field("time"), args.to!)
+        )
+      );
+    }
+    
+    const identity = await ctx.auth.getUserIdentity();
+    if(args.type === "all"){
+      if(identity?.role !== "admin"){
+        logQuery = logQuery.filter((q) => 
+          q.or(
+            q.eq(q.field("event"), "pointChange"),
+            q.eq(q.field("event"), "application")
+          )
+        );
+      }
+    }else if (args.type){
+      logQuery = logQuery.filter((q) => q.eq(q.field("event"), args.type));
+    }
+
+    if(args.sponsorId && args.sponsorId !== "all"){
+      logQuery = logQuery.filter(q => q.eq(q.field("sponsor"), args.sponsorId));
+    }
+
+    const logs = await logQuery.collect();
     return await Promise.all(
       logs.map(async (log) => {
         const org = log.sponsor ? await ctx.runQuery(components.betterAuth.organizations.getOrganizationById, { id: log.sponsor }) : null;
@@ -861,6 +899,43 @@ export const getFullOrderedAuditLog = query({
       })
     );
   }
+});
+
+export const getSponsorFees = query({
+  args:{
+    from: v.optional(v.number()),
+    to: v.optional(v.number()),
+    organizationId: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    
+    let feeQuery = (args.from !== undefined && args.to !== undefined)
+      ? ctx.db.query("sponsorFees")
+        .withIndex("by_time", (q) =>
+          q.gte("time", args.from!).lte("time", args.to!)
+        ).order("desc")
+      : ctx.db.query("sponsorFees").order("desc");
+
+    if(args.organizationId && args.organizationId !== "all"){
+      feeQuery = feeQuery.filter((q) => 
+        q.eq(q.field("organizationId"), args.organizationId)
+      );
+    }
+    const fees = await feeQuery.collect();
+
+    return await Promise.all(
+      fees.map(async (fee) => {
+        const org = fee.organizationId
+          ? await ctx.runQuery(components.betterAuth.organizations.getOrganizationById, { id: fee.organizationId })
+          : null;
+
+          return {
+            ...fee,
+            organizationName: org?.name ?? "--",
+          };
+      })
+    );
+  },
 });
 
 export const getUserById = query({
