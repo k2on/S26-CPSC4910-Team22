@@ -2,7 +2,6 @@
 
 import { useMemo, useState } from "react";
 import { useMutation, useQuery } from "convex/react";
-import type { createAuth } from "@/convex/betterAuth/auth";
 import { api } from "@/convex/_generated/api";
 import { DataTable } from "./data-table";
 import { columns } from "./columns";
@@ -17,26 +16,25 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 
-type Auth = ReturnType<typeof createAuth>;
-type Member = Auth["$Infer"]["Member"];
-
 export function OrganizationMembers({ slug }: { slug: string }) {
-        const organization = useQuery(api.myFunctions.getVisibleOrganizationBySlug, { slug });
-        const members = useQuery(api.myFunctions.getVisibleOrganizationMembersBySlug, { slug });
-        const addMemberByEmail = useMutation(api.myFunctions.addVisibleOrganizationMemberByEmail);
+        const organizationName = useQuery(api.appFunctions.getOrganizationNameBySlug, { slug });
+        const members = useQuery(api.appFunctions.getOrganizationMembersTableBySlug, { slug });
+        const addMemberByEmail = useMutation(api.appFunctions.addOrganizationMemberByEmailBySlug);
 
         const [open, setOpen] = useState(false);
         const [email, setEmail] = useState("");
         const [message, setMessage] = useState("");
         const [isSubmitting, setIsSubmitting] = useState(false);
 
-        const tableData = useMemo<Member[]>(() => {
-                if (!members) return [];
+        const tableData = useMemo(() => {
+                if (!members) {
+                        return [];
+                }
 
                 return members.map((member) => ({
                         ...member,
                         createdAt: new Date(member.createdAt),
-                })) as Member[];
+                }));
         }, [members]);
 
         async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -87,7 +85,8 @@ export function OrganizationMembers({ slug }: { slug: string }) {
                                             <DialogHeader>
                                                     <DialogTitle>Add Member</DialogTitle>
                                                     <DialogDescription>
-                                                            Enter the email of the user you want to add to {organization?.name ?? "this organization"}.
+                                                            Enter the email of the user you want to add to{" "}
+                                                            {organizationName ?? "this organization"}.
                                                     </DialogDescription>
                                             </DialogHeader>
 

@@ -59,6 +59,26 @@ async function getOrganizationBySlugInternal(
         .unique();
 }
 
+//I hope I'm doing this right,
+//I've been scared to touch the auth stuff directly
+//but I need org info by id for audit logging
+export async function getOrganizationByIdInternal(
+    ctx: Parameters<typeof query>[0] extends never ? never : any,
+    id: string
+) {
+   return await ctx.db
+    .query("organization")
+    .filter((q: any) => q.eq(q.field("_id"), id))
+    .unique();
+}
+
+export const getOrganizationById = query({
+    args: { id: v.string() },
+    handler: async (ctx, args) => {
+        return await getOrganizationByIdInternal(ctx, args.id);
+    },
+});
+
 async function userHasOrganizationAccess(
     ctx: Parameters<typeof query>[0] extends never ? never : any,
     userId: string,
@@ -127,37 +147,36 @@ export const getOrganizationByName = query({
     },
 });
 
-// export const listVisibleOrganizations = query({
-//     args: {
-//         currentUserId: v.string(),
-//         canAccessAll: v.boolean(),
-//     },
-//     returns: v.array(organizationValidator),
-//     handler: async (ctx, args) => {
-//         console.log("WHAT");
-//         if (args.canAccessAll) {
-//             return await ctx.db
-//                 .query("organization")
-//                 .withIndex("name")
-//                 .collect();
-//         }
-//
-//         const memberships = await ctx.db
-//             .query("member")
-//             .withIndex("userId", (q) => q.eq("userId", args.currentUserId))
-//             .collect();
-//
-//         const organizations = await Promise.all(
-//             memberships.map((member) =>
-//                 ctx.db.get(member.organizationId as Id<"organization">)
-//             )
-//         );
-//
-//         return organizations
-//             .filter((org): org is NonNullable<typeof org> => org !== null)
-//             .sort((a, b) => a.name.localeCompare(b.name));
-//     },
-// });
+export const listVisibleOrganizations = query({
+    args: {
+        currentUserId: v.string(),
+        canAccessAll: v.boolean(),
+    },
+    returns: v.array(organizationValidator),
+    handler: async (ctx, args) => {
+        if (args.canAccessAll) {
+            return await ctx.db
+                .query("organization")
+                .withIndex("name")
+                .collect();
+        }
+
+        const memberships = await ctx.db
+            .query("member")
+            .withIndex("userId", (q) => q.eq("userId", args.currentUserId))
+            .collect();
+
+        const organizations = await Promise.all(
+            memberships.map((member) =>
+                ctx.db.get(member.organizationId as Id<"organization">)
+            )
+        );
+
+        return organizations
+            .filter((org): org is NonNullable<typeof org> => org !== null)
+            .sort((a, b) => a.name.localeCompare(b.name));
+    },
+});
 
 export const getVisibleOrganizationBySlug = query({
     args: {

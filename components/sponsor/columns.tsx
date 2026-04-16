@@ -27,12 +27,13 @@ export const columns: ColumnDef<FunctionReturnType<typeof api.organization.appli
                         const deny = useMutation(api.organization.application.deny);
 
                         const id = row.original.application._id;
+                        const email = row.original.driver.email;
 
                         const [comment, setComment] = useState("");
 
                         return (
                                 <div className="flex flex-row gap-2 justify-end">
-                                        <Button onClick={() => approve({ id })}>Approve</Button>
+                                        <Button onClick={() => approve({ id, email })}>Approve</Button>
                                         <Dialog>
                                                 <DialogTrigger>
                                                         <Button>Deny</Button>
@@ -43,7 +44,7 @@ export const columns: ColumnDef<FunctionReturnType<typeof api.organization.appli
                                                                 <DialogDescription>Deny Application</DialogDescription>
                                                         </DialogHeader>
                                                         <Input value={comment} onChange={(e) => setComment(e.target.value)} placeholder="Deny Reason" />
-                                                        <Button onClick={() => deny({ id, comment })}>Deny</Button>
+                                                        <Button onClick={() => deny({ id, comment, email })}>Deny</Button>
                                                 </DialogContent>
                                         </Dialog>
                                 </div>

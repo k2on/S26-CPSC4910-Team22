@@ -12,8 +12,13 @@ import type * as admin_bulk_import from "../admin/bulk/import.js";
 import type * as admin_bulk_parse from "../admin/bulk/parse.js";
 import type * as admin_bulk_types from "../admin/bulk/types.js";
 import type * as admin_user from "../admin/user.js";
+import type * as appFunctions from "../appFunctions.js";
 import type * as cart from "../cart.js";
 import type * as driver_application from "../driver/application.js";
+import type * as functions_data_points from "../functions/data/points.js";
+import type * as functions_logistics_filters from "../functions/logistics/filters.js";
+import type * as functions_logistics_organizationMembers from "../functions/logistics/organizationMembers.js";
+import type * as functions_logistics_points from "../functions/logistics/points.js";
 import type * as http from "../http.js";
 import type * as myFunctions from "../myFunctions.js";
 import type * as organization_application from "../organization/application.js";
@@ -29,8 +34,13 @@ declare const fullApi: ApiFromModules<{
   "admin/bulk/parse": typeof admin_bulk_parse;
   "admin/bulk/types": typeof admin_bulk_types;
   "admin/user": typeof admin_user;
+  appFunctions: typeof appFunctions;
   cart: typeof cart;
   "driver/application": typeof driver_application;
+  "functions/data/points": typeof functions_data_points;
+  "functions/logistics/filters": typeof functions_logistics_filters;
+  "functions/logistics/organizationMembers": typeof functions_logistics_organizationMembers;
+  "functions/logistics/points": typeof functions_logistics_points;
   http: typeof http;
   myFunctions: typeof myFunctions;
   "organization/application": typeof organization_application;
@@ -1624,6 +1634,210 @@ export declare const components: {
         }
       >;
     };
+    functions: {
+      organizationMembers: {
+        addOrganizationMember: FunctionReference<
+          "mutation",
+          "internal",
+          { organizationId: string; role?: string; userId: string },
+          null
+        >;
+        addOrganizationMemberByEmailBySlug: FunctionReference<
+          "mutation",
+          "internal",
+          { email: string; slug: string },
+          {
+            organizationName: string;
+            status: "added" | "already_exists" | "user_not_found";
+          }
+        >;
+        getOrganizationMembersByOrganizationId: FunctionReference<
+          "query",
+          "internal",
+          { organizationId: string },
+          Array<{
+            _creationTime: number;
+            _id: string;
+            createdAt: number;
+            organizationId: string;
+            role: string;
+            userId: string;
+          }>
+        >;
+        getOrganizationMembersBySlug: FunctionReference<
+          "query",
+          "internal",
+          { slug: string },
+          Array<{
+            _creationTime: number;
+            _id: string;
+            createdAt: number;
+            organizationId: string;
+            role: string;
+            userId: string;
+          }>
+        >;
+        removeOrganizationMemberByUserIdAndSlug: FunctionReference<
+          "mutation",
+          "internal",
+          { slug: string; userId: string },
+          null
+        >;
+      };
+      organizations: {
+        getAllOrganizations: FunctionReference<
+          "query",
+          "internal",
+          {},
+          Array<{
+            _creationTime: number;
+            _id: string;
+            createdAt: number;
+            logo?: string | null;
+            metadata?: string | null;
+            name: string;
+            pointValue: number;
+            slug: string;
+            totalMembers?: number;
+          }>
+        >;
+        getOrganizationByName: FunctionReference<
+          "query",
+          "internal",
+          { name: string },
+          null | {
+            _creationTime: number;
+            _id: string;
+            createdAt: number;
+            logo?: string | null;
+            metadata?: string | null;
+            name: string;
+            pointValue: number;
+            slug: string;
+            totalMembers?: number;
+          }
+        >;
+        getOrganizationBySlug: FunctionReference<
+          "query",
+          "internal",
+          { slug: string },
+          null | {
+            _creationTime: number;
+            _id: string;
+            createdAt: number;
+            logo?: string | null;
+            metadata?: string | null;
+            name: string;
+            pointValue: number;
+            slug: string;
+            totalMembers?: number;
+          }
+        >;
+        getOrganizationIdBySlug: FunctionReference<
+          "query",
+          "internal",
+          { slug: string },
+          null | string
+        >;
+        getOrganizationNameBySlug: FunctionReference<
+          "query",
+          "internal",
+          { slug: string },
+          null | string
+        >;
+        isUserInOrganization: FunctionReference<
+          "query",
+          "internal",
+          { organizationId: string; userId: string },
+          boolean
+        >;
+        updateOrganization: FunctionReference<
+          "mutation",
+          "internal",
+          {
+            slug: string;
+            updates: {
+              createdAt?: number;
+              logo?: string | null;
+              metadata?: string | null;
+              name?: string;
+              pointValue?: number;
+              slug?: string;
+              totalMembers?: number;
+            };
+          },
+          null
+        >;
+      };
+      user: {
+        getOrganizationDriversBySlug: FunctionReference<
+          "query",
+          "internal",
+          { slug: string },
+          Array<{
+            _creationTime: number;
+            _id: string;
+            address?: string | null;
+            banExpires?: number | null;
+            banReason?: string | null;
+            banned?: boolean | null;
+            createdAt: number;
+            email: string;
+            emailVerified: boolean;
+            image?: string | null;
+            imageBorderColor?: string | null;
+            name: string;
+            role?: string | null;
+            updatedAt: number;
+            userId?: string | null;
+          }>
+        >;
+        getUserByEmail: FunctionReference<
+          "query",
+          "internal",
+          { email: string },
+          null | {
+            _creationTime: number;
+            _id: string;
+            address?: string | null;
+            banExpires?: number | null;
+            banReason?: string | null;
+            banned?: boolean | null;
+            createdAt: number;
+            email: string;
+            emailVerified: boolean;
+            image?: string | null;
+            imageBorderColor?: string | null;
+            name: string;
+            role?: string | null;
+            updatedAt: number;
+            userId?: string | null;
+          }
+        >;
+        getUsersByIds: FunctionReference<
+          "query",
+          "internal",
+          { userIds: Array<string> },
+          Array<{
+            _creationTime: number;
+            _id: string;
+            address?: string | null;
+            banExpires?: number | null;
+            banReason?: string | null;
+            banned?: boolean | null;
+            createdAt: number;
+            email: string;
+            emailVerified: boolean;
+            image?: string | null;
+            imageBorderColor?: string | null;
+            name: string;
+            role?: string | null;
+            updatedAt: number;
+            userId?: string | null;
+          }>
+        >;
+      };
+    };
     organizations: {
       addMemberByEmail: FunctionReference<
         "mutation",
@@ -1644,6 +1858,12 @@ export declare const components: {
         "internal",
         { canAccessAll: boolean; currentUserId: string; slug: string },
         null
+      >;
+      getOrganizationById: FunctionReference<
+        "query",
+        "internal",
+        { id: string },
+        any
       >;
       getOrganizationByName: FunctionReference<
         "query",
@@ -1763,6 +1983,22 @@ export declare const components: {
             name: string;
           };
           userId: string;
+        }>
+      >;
+      listVisibleOrganizations: FunctionReference<
+        "query",
+        "internal",
+        { canAccessAll: boolean; currentUserId: string },
+        Array<{
+          _creationTime: number;
+          _id: string;
+          createdAt: number;
+          logo?: null | string;
+          metadata?: null | string;
+          name: string;
+          pointValue: number;
+          slug: string;
+          totalMembers?: number;
         }>
       >;
       updateVisibleOrganization: FunctionReference<

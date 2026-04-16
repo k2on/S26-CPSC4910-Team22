@@ -6,7 +6,6 @@ import { Organization } from "better-auth/plugins";
 import { Doc } from "./_generated/dataModel";
 import { Id } from "./betterAuth/_generated/dataModel";
 import { components } from "./_generated/api";
-import { getOrganizationBySlug } from "./betterAuth/organizations";
 
 const visibleOrganizationDriverValidator = v.object({
   userId: v.string(),
@@ -78,24 +77,22 @@ function getOrgAccess(identity: { subject: string; role?: string | null }) {
   };
 }
 
-// export const getVisibleOrganizations = query({
-//   handler: async (ctx) => {
-//     const identity = await ctx.auth.getUserIdentity();
-//
-//     if (!identity || (identity.role !== "admin" && identity.role !== "sponsor")) {
-//       console.log("ID", identity);
-//       return [];
-//     }
-//     console.log("after???");
-//
-//     const access = getOrgAccess(identity);
-//
-//     return await ctx.runQuery(
-//       components.betterAuth.organizations.listVisibleOrganizations,
-//       access
-//     );
-//   }
-// })
+export const getVisibleOrganizations = query({
+  handler: async (ctx) => {
+    const identity = await ctx.auth.getUserIdentity();
+
+    if (!identity || (identity.role !== "admin" && identity.role !== "sponsor")) {
+      return [];
+    }
+
+    const access = getOrgAccess(identity);
+
+    return await ctx.runQuery(
+      components.betterAuth.organizations.listVisibleOrganizations,
+      access
+    );
+  }
+})
 
 export const getVisibleOrganizationBySlug = query({
   args: {
@@ -273,6 +270,23 @@ export const updateDriverPoints = mutation({
       pointChange: args.pointChange,
       reason: args.reason,
       time: Date.now(),
+    });
+
+    const plusOrMinus = args.pointChange >= 0 ? "Reward" : "Deduction";
+    const user = await ctx.runQuery(api.myFunctions.getUserById, { userId: args.driverUserId });
+    const userEmail = user?.email || "Unknown Email";
+
+    await ctx.db.insert("auditLog", {
+      time: Date.now(),
+      event: "pointChange",
+      sponsor: organizationId,
+      user: args.driverUserId,
+      amount: args.pointChange,
+      reason: `${plusOrMinus}: ${args.reason}`,
+      enactor: identity.subject,
+      enactorEmail: identity.email || "Unknown Email",
+      email: userEmail,
+      pointTotal: nextPoints,
     });
 
     return {
@@ -716,9 +730,227 @@ export const getMyPoints = query({
   },
 });
 
+export const getMyOwned = query({
+    handler: async (ctx, args) => {
+        const identity = await ctx.auth.getUserIdentity();
+        if (!identity) return [];
 
+        return await ctx.db
+            .query("ownedItems")
+            .withIndex("by_user", (q) => q.eq("userId", identity.subject))
+            .collect();
+    },
+})
 
+export const getCatalogSettings = query({
+    args: { organizationId: v.string() },
+    handler: async (ctx, args) => {
+      const existingSettings = await ctx.db.query("orgCatalogSettings")
+        .withIndex("by_organization", (q) => q.eq("organizationId", args.organizationId))
+        .first();
+      return existingSettings;
+    }
+});
 
+export const updateCatalogSettings = mutation({
+  args: {
+      organizationId: v.string(),
+      hasMusic: v.boolean(),
+      hasMusicVideos: v.boolean(),
+      hasAudiobooks: v.boolean(),
+      hasShows: v.boolean(),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Unauthorized");
 
+    const existingSettings = await ctx.db
+    .query("orgCatalogSettings")
+    .withIndex("by_organization", (q) => q.eq("organizationId", args.organizationId))
+    .first();
 
+    if (existingSettings) {
+      await ctx.db.patch(existingSettings._id, {
+        hasMusic: args.hasMusic,
+        hasMusicVideos: args.hasMusicVideos,
+        hasAudiobooks: args.hasAudiobooks,
+        hasShows: args.hasShows,
+      });
+      return existingSettings._id;
+    } else {
+      const newId = await ctx.db.insert("orgCatalogSettings", {
+        organizationId: args.organizationId,
+        hasMusic: args.hasMusic,
+        hasMusicVideos: args.hasMusicVideos,
+        hasAudiobooks: args.hasAudiobooks,
+        hasShows: args.hasShows,
+      });
+      return newId;
+    }
+  }
+});
 
+export const logPasswordChange = mutation({
+  handler: async (ctx) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Unauthorized");
+    const userEmail = identity.email ?? "Unknown Email";
+
+    await ctx.db.insert("auditLog", {
+      time: Date.now(),
+      event: "passwordChange",
+      user: identity.subject,
+      reason: "Authorized password change",
+      email: userEmail,
+    });
+  }
+});
+
+export const logLoginAttempt = mutation({
+  args: {
+    email: v.string(),
+    status: v.string(),
+    userId: v.optional(v.union(v.null(), v.string())),
+  },
+  handler: async (ctx, args) => {
+    const reason = (args.status === "success") ? "Successful Login" : "Invalid Credentials";
+
+    await ctx.db.insert("auditLog", {
+      time: Date.now(),
+      event: "loginAttempt",
+      email: args.email,
+      status: args.status,
+      user: args.userId ?? null,
+      reason: reason,
+    });
+  }
+});
+
+export const getOrgPointValue = query({
+  args: {
+    slug: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const organization = await ctx.runQuery(
+      components.betterAuth.organizations.getOrganizationBySlug,
+      { slug: args.slug }
+    );
+    if (!organization) {
+      throw new Error("Organization not found");
+    }
+    return organization.pointValue ?? 0.01;
+  }
+});
+
+export const getFullOrderedAuditLog = query({
+  args:{
+    from: v.optional(v.number()),
+    to: v.optional(v.number()),
+    sponsorId: v.optional(v.string()),
+    type: v.optional(v.string()),
+    sortBy: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    let logQuery;
+
+    if(args.sortBy === "sponsor"){
+      logQuery = ctx.db.query("auditLog").withIndex("by_sponsor_time").order("desc");
+    }else if(args.sortBy === "user"){
+      logQuery = ctx.db.query("auditLog").withIndex("by_user_time").order("desc");
+    }else{
+      logQuery = ctx.db.query("auditLog").withIndex("by_time").order("desc");
+    }
+
+    if(args.from !== undefined && args.to !== undefined){
+      logQuery = logQuery.filter(q => 
+        q.and(
+          q.gte(q.field("time"), args.from!),
+          q.lte(q.field("time"), args.to!)
+        )
+      );
+    }
+    
+    const identity = await ctx.auth.getUserIdentity();
+    if(args.type === "all"){
+      if(identity?.role !== "admin"){
+        logQuery = logQuery.filter((q) => 
+          q.or(
+            q.eq(q.field("event"), "pointChange"),
+            q.eq(q.field("event"), "application")
+          )
+        );
+      }
+    }else if (args.type){
+      logQuery = logQuery.filter((q) => q.eq(q.field("event"), args.type));
+    }
+
+    if(args.sponsorId && args.sponsorId !== "all"){
+      logQuery = logQuery.filter(q => q.eq(q.field("sponsor"), args.sponsorId));
+    }
+
+    const logs = await logQuery.collect();
+    return await Promise.all(
+      logs.map(async (log) => {
+        const org = log.sponsor ? await ctx.runQuery(components.betterAuth.organizations.getOrganizationById, { id: log.sponsor }) : null;
+        return {
+            ...log,
+            sponsorName: org?.name ?? "--",
+        };
+      })
+    );
+  }
+});
+
+export const getSponsorFees = query({
+  args:{
+    from: v.optional(v.number()),
+    to: v.optional(v.number()),
+    organizationId: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    
+    let feeQuery = (args.from !== undefined && args.to !== undefined)
+      ? ctx.db.query("sponsorFees")
+        .withIndex("by_time", (q) =>
+          q.gte("time", args.from!).lte("time", args.to!)
+        ).order("desc")
+      : ctx.db.query("sponsorFees").order("desc");
+
+    if(args.organizationId && args.organizationId !== "all"){
+      feeQuery = feeQuery.filter((q) => 
+        q.eq(q.field("organizationId"), args.organizationId)
+      );
+    }
+    const fees = await feeQuery.collect();
+
+    return await Promise.all(
+      fees.map(async (fee) => {
+        const org = fee.organizationId
+          ? await ctx.runQuery(components.betterAuth.organizations.getOrganizationById, { id: fee.organizationId })
+          : null;
+
+          return {
+            ...fee,
+            organizationName: org?.name ?? "--",
+          };
+      })
+    );
+  },
+});
+
+export const getUserById = query({
+  args: { userId: v.string() },
+  handler: async (ctx, args) => {
+    const user = await ctx.runQuery(components.betterAuth.user.getUsersFromIds, { ids: [args.userId] });
+    return user ? user[0] : null;
+  }
+});
+
+export const getOrgNameById = query({
+  args: { orgId: v.string() },
+  handler: async (ctx, args) => {
+    const org = await ctx.runQuery(components.betterAuth.organizations.getOrganizationById, { id: args.orgId });
+    const sponsorName = org?.name ?? "Unknown Org"
+    return sponsorName;
+  }
+})

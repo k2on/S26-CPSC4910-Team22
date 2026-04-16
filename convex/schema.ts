@@ -11,8 +11,21 @@ export default defineSchema({
   }),
   auditLog: defineTable({
     time: v.number(),
-    event: v.string(),
-  }),
+    event: v.string(),//application, pointChange, passwordChange, loginAttempt
+    sponsor: v.optional(v.union(v.null(), v.string())),//sponsor org for applications and point changes
+    user: v.optional(v.union(v.null(), v.string())),//user for everything but failed login attempts
+    email: v.optional(v.union(v.null(), v.string())),//email for login attempts
+    amount: v.optional(v.union(v.null(), v.number())),//amount for point changes
+    status: v.optional(v.union(v.null(), v.string())),//waiting/accepted/rejected for application, success/failure for login attempt
+    reason: v.optional(v.union(v.null(), v.string())),//reason for application status or point/password change
+    enactor: v.optional(v.union(v.null(), v.string())),//sponsor/admin for point changes and application verdicts
+    enactorEmail: v.optional(v.union(v.null(), v.string())),//email of the enactor
+    fee: v.optional(v.union(v.null(), v.number())),//actual money price of catalog items for invoices
+    pointTotal: v.optional(v.union(v.null(), v.number())),//point total at time of point change
+  })
+  .index("by_time", ["time"])
+  .index("by_sponsor_time", ["sponsor", "time"])
+  .index("by_user_time", ["user", "time"]),
   driverApplication: defineTable({
     userId: v.string(),
     orgId: v.string(),
@@ -20,12 +33,14 @@ export default defineSchema({
     decisionBy: v.optional(v.string()),
     denyComment: v.optional(v.string()),
   }).index("by_user_id", { fields: ["userId"] })
-    .index("by_org_id", { fields: ["orgId"] }),
+      .index("by_org_id", { fields: ["orgId"] }),
   pointTotals: defineTable({
     driverUserId: v.string(),
     organizationId: v.string(),
     points: v.number(),
-  }),
+  })
+      .index("organizationId", ["organizationId"])
+      .index("driverUserId", ["driverUserId"]),
   pointChanges: defineTable({
     driverUserId: v.string(),
     organizationId: v.string(),
@@ -34,6 +49,22 @@ export default defineSchema({
     reason: v.string(),
     time: v.number(),
   }),
+  pointTransferRequests: defineTable({
+    requestingUserId: v.string(),
+    requestedUserId: v.string(),
+    organizationId: v.string(),
+    pointsRequested: v.number(),
+    reason: v.string(),
+    status: v.string(),
+  })
+      .index("organizationId", ["organizationId"])
+      .index("requestedUserId", ["requestedUserId"])
+      .index("requestingUserId", ["requestingUserId"])
+      .index("requestingUserId_requestedUserId_organizationId", [
+        "requestingUserId",
+        "requestedUserId",
+        "organizationId",
+      ]),
   cartItem: defineTable({
     userId: v.string(),
     organizationId: v.string(),
@@ -45,11 +76,31 @@ export default defineSchema({
     artworkUrl: v.string(),
     createdAt: v.number(),
   })
-    .index("by_user_org", ["userId", "organizationId"])
-    .index("by_user_org_track", ["userId", "organizationId", "trackId"]),
+      .index("by_user_org", ["userId", "organizationId"])
+      .index("by_user_org_track", ["userId", "organizationId", "trackId"]),
   ownedItems: defineTable({
     userId: v.string(),
     trackId: v.number(),
     purchasedAt: v.number(),
-  }).index("by_user_track", ["userId", "trackId"]),
+  })
+  .index("by_user_track", ["userId", "trackId"])
+  .index("by_user", ["userId"]),
+  orgCatalogSettings: defineTable({
+    organizationId: v.string(),
+    hasMusic: v.boolean(),
+    hasMusicVideos: v.boolean(),
+    hasAudiobooks: v.boolean(),
+    hasShows: v.boolean(),
+  })
+  .index("by_organization", ["organizationId"]),
+  sponsorFees: defineTable({
+    organizationId: v.optional(v.union(v.null(), v.string())),
+    feeAmount: v.optional(v.union(v.null(), v.number())),
+    totalDue: v.optional(v.union(v.null(), v.number())),
+    user: v.optional(v.union(v.null(), v.string())),
+    time: v.optional(v.union(v.null(), v.number())),
+    userEmail: v.optional(v.union(v.null(), v.string())),
+  })
+  .index("by_organization", ["organizationId"])
+  .index("by_time", ["time"]),
 });

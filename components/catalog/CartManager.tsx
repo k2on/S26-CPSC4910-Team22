@@ -5,13 +5,15 @@ import { api } from "@/convex/_generated/api"
 import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 export function CartManager({ slug }: { slug: string }){
-    const org = useQuery(api.myFunctions.getVisibleOrganizationBySlugForDriver, {slug});
-    const organizationId = org?._id || "";
+    const router = useRouter();
+    const organizationId = useQuery(api.appFunctions.getOrganizationIdBySlug, {slug});
     const cartItems = useQuery(api.cart.getMyCart, organizationId ? { organizationId } : "skip");
     const remove = useMutation(api.cart.removeFromCart);
-    const userPoints = useQuery(api.myFunctions.getMyPoints, { organizationId });
+    const userPoints = useQuery(api.myFunctions.getMyPoints, organizationId ? { organizationId } : "skip");
     const isLoading = cartItems === undefined || userPoints === undefined;
     const [isPurchasing, setIsPurchasing] = useState(false);
     const purchase = useMutation(api.cart.purchaseCartItems);
@@ -25,15 +27,20 @@ export function CartManager({ slug }: { slug: string }){
                     price: item.price,
                 })),
             });
+            router.push(`/${slug}/catalog`);
+            toast.success("Purchase successful!", {position: "top-right"});
         } catch (err){
             console.error("Failed to purchase cart items", err);
+            toast.error("Failed to purchase item :(")
+        } finally {
+            setIsPurchasing(false);
         }
     }
     if(cartItems === undefined || !organizationId){
-      return (<div>Loading Cart...</div>);
+      return (<div className="text-center">Loading Cart...</div>);
     }
     if(cartItems.length === 0){
-        return <div>No Items in Cart</div>
+        return <div className="text-center">No Items in Cart</div>
     }
     if(isLoading){
         return <div>Loading point balance...</div>
@@ -47,7 +54,7 @@ export function CartManager({ slug }: { slug: string }){
                 {cartItems.map((item) => (
                     <div className="flex flex-row" key={item._id}>
                         <img src={item.artworkUrl}></img>
-                        <div className="flex flex-col">
+                        <div className="flex flex-col justify-center px-2">
                             <div className="text-lg font-bold">{item.name}</div>
                             <div className="text-lg">{item.artistName}</div>
                             <div className="text-lg">{item.price.toLocaleString()} Points</div>

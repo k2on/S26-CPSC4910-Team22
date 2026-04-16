@@ -26,7 +26,7 @@ type Props = {
 };
 
 export function OrganizationDriverStatusChart({ slug }: Props) {
-    const drivers = useQuery(api.myFunctions.getVisibleOrganizationDriversBySlug, { slug });
+    const drivers = useQuery(api.appFunctions.getOrganizationDriverStatusBySlug, { slug });
 
     const summary = useMemo(() => {
         const rows = drivers ?? [];

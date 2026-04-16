@@ -170,34 +170,22 @@ function UpdateMemberRole({ member }: { member: Member }) {
 function DeleteMember({ member }: { member: Member }) {
         const queryClient = useQueryClient();
         const params = useParams<{ slug: string }>();
-        const decrementOrganizationMemberCount = useConvexMutation(api.myFunctions.decrementOrganizationMemberCount);
-
-        const { mutateAsync: removeMember } = useMutation({
-                mutationFn: (input: Parameters<typeof authClient.organization.removeMember>[0]) =>
-                    authClient.organization.removeMember(input),
-                onSuccess() {
-                        queryClient.invalidateQueries({
-                                queryKey: ["orgs", member.organizationId]
-                        });
-                },
-        });
+        const removeOrganizationMemberByUserIdAndSlug = useConvexMutation(
+            api.appFunctions.removeOrganizationMemberByUserIdAndSlug
+        );
 
         return (
             <DropdownMenuItem
                 onClick={() =>
                     toast.promise(
                         async () => {
-                                await removeMember({
-                                        organizationId: member.organizationId,
-                                        memberIdOrEmail: member.id,
-                                });
-
-                                await decrementOrganizationMemberCount({
+                                await removeOrganizationMemberByUserIdAndSlug({
                                         slug: params.slug,
+                                        userId: member.userId,
                                 });
 
                                 queryClient.invalidateQueries({
-                                        queryKey: ["orgs", member.organizationId]
+                                        queryKey: ["orgs", member.organizationId],
                                 });
                         },
                         {

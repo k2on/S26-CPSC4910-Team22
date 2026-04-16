@@ -1591,6 +1591,225 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
         Name
       >;
     };
+    functions: {
+      organizationMembers: {
+        addOrganizationMember: FunctionReference<
+          "mutation",
+          "internal",
+          { organizationId: string; role?: string; userId: string },
+          null,
+          Name
+        >;
+        addOrganizationMemberByEmailBySlug: FunctionReference<
+          "mutation",
+          "internal",
+          { email: string; slug: string },
+          {
+            organizationName: string;
+            status: "added" | "already_exists" | "user_not_found";
+          },
+          Name
+        >;
+        getOrganizationMembersByOrganizationId: FunctionReference<
+          "query",
+          "internal",
+          { organizationId: string },
+          Array<{
+            _creationTime: number;
+            _id: string;
+            createdAt: number;
+            organizationId: string;
+            role: string;
+            userId: string;
+          }>,
+          Name
+        >;
+        getOrganizationMembersBySlug: FunctionReference<
+          "query",
+          "internal",
+          { slug: string },
+          Array<{
+            _creationTime: number;
+            _id: string;
+            createdAt: number;
+            organizationId: string;
+            role: string;
+            userId: string;
+          }>,
+          Name
+        >;
+        removeOrganizationMemberByUserIdAndSlug: FunctionReference<
+          "mutation",
+          "internal",
+          { slug: string; userId: string },
+          null,
+          Name
+        >;
+      };
+      organizations: {
+        getAllOrganizations: FunctionReference<
+          "query",
+          "internal",
+          {},
+          Array<{
+            _creationTime: number;
+            _id: string;
+            createdAt: number;
+            logo?: string | null;
+            metadata?: string | null;
+            name: string;
+            pointValue: number;
+            slug: string;
+            totalMembers?: number;
+          }>,
+          Name
+        >;
+        getOrganizationByName: FunctionReference<
+          "query",
+          "internal",
+          { name: string },
+          null | {
+            _creationTime: number;
+            _id: string;
+            createdAt: number;
+            logo?: string | null;
+            metadata?: string | null;
+            name: string;
+            pointValue: number;
+            slug: string;
+            totalMembers?: number;
+          },
+          Name
+        >;
+        getOrganizationBySlug: FunctionReference<
+          "query",
+          "internal",
+          { slug: string },
+          null | {
+            _creationTime: number;
+            _id: string;
+            createdAt: number;
+            logo?: string | null;
+            metadata?: string | null;
+            name: string;
+            pointValue: number;
+            slug: string;
+            totalMembers?: number;
+          },
+          Name
+        >;
+        getOrganizationIdBySlug: FunctionReference<
+          "query",
+          "internal",
+          { slug: string },
+          null | string,
+          Name
+        >;
+        getOrganizationNameBySlug: FunctionReference<
+          "query",
+          "internal",
+          { slug: string },
+          null | string,
+          Name
+        >;
+        isUserInOrganization: FunctionReference<
+          "query",
+          "internal",
+          { organizationId: string; userId: string },
+          boolean,
+          Name
+        >;
+        updateOrganization: FunctionReference<
+          "mutation",
+          "internal",
+          {
+            slug: string;
+            updates: {
+              createdAt?: number;
+              logo?: string | null;
+              metadata?: string | null;
+              name?: string;
+              pointValue?: number;
+              slug?: string;
+              totalMembers?: number;
+            };
+          },
+          null,
+          Name
+        >;
+      };
+      user: {
+        getOrganizationDriversBySlug: FunctionReference<
+          "query",
+          "internal",
+          { slug: string },
+          Array<{
+            _creationTime: number;
+            _id: string;
+            address?: string | null;
+            banExpires?: number | null;
+            banReason?: string | null;
+            banned?: boolean | null;
+            createdAt: number;
+            email: string;
+            emailVerified: boolean;
+            image?: string | null;
+            imageBorderColor?: string | null;
+            name: string;
+            role?: string | null;
+            updatedAt: number;
+            userId?: string | null;
+          }>,
+          Name
+        >;
+        getUserByEmail: FunctionReference<
+          "query",
+          "internal",
+          { email: string },
+          null | {
+            _creationTime: number;
+            _id: string;
+            address?: string | null;
+            banExpires?: number | null;
+            banReason?: string | null;
+            banned?: boolean | null;
+            createdAt: number;
+            email: string;
+            emailVerified: boolean;
+            image?: string | null;
+            imageBorderColor?: string | null;
+            name: string;
+            role?: string | null;
+            updatedAt: number;
+            userId?: string | null;
+          },
+          Name
+        >;
+        getUsersByIds: FunctionReference<
+          "query",
+          "internal",
+          { userIds: Array<string> },
+          Array<{
+            _creationTime: number;
+            _id: string;
+            address?: string | null;
+            banExpires?: number | null;
+            banReason?: string | null;
+            banned?: boolean | null;
+            createdAt: number;
+            email: string;
+            emailVerified: boolean;
+            image?: string | null;
+            imageBorderColor?: string | null;
+            name: string;
+            role?: string | null;
+            updatedAt: number;
+            userId?: string | null;
+          }>,
+          Name
+        >;
+      };
+    };
     organizations: {
       addMemberByEmail: FunctionReference<
         "mutation",
@@ -1612,6 +1831,13 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
         "internal",
         { canAccessAll: boolean; currentUserId: string; slug: string },
         null,
+        Name
+      >;
+      getOrganizationById: FunctionReference<
+        "query",
+        "internal",
+        { id: string },
+        any,
         Name
       >;
       getOrganizationByName: FunctionReference<
@@ -1741,6 +1967,23 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
             name: string;
           };
           userId: string;
+        }>,
+        Name
+      >;
+      listVisibleOrganizations: FunctionReference<
+        "query",
+        "internal",
+        { canAccessAll: boolean; currentUserId: string },
+        Array<{
+          _creationTime: number;
+          _id: string;
+          createdAt: number;
+          logo?: null | string;
+          metadata?: null | string;
+          name: string;
+          pointValue: number;
+          slug: string;
+          totalMembers?: number;
         }>,
         Name
       >;
