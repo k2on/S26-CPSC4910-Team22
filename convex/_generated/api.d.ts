@@ -8,6 +8,9 @@
  * @module
  */
 
+import type * as admin_bulk_import from "../admin/bulk/import.js";
+import type * as admin_bulk_parse from "../admin/bulk/parse.js";
+import type * as admin_bulk_types from "../admin/bulk/types.js";
 import type * as admin_user from "../admin/user.js";
 import type * as cart from "../cart.js";
 import type * as driver_application from "../driver/application.js";
@@ -22,6 +25,9 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  "admin/bulk/import": typeof admin_bulk_import;
+  "admin/bulk/parse": typeof admin_bulk_parse;
+  "admin/bulk/types": typeof admin_bulk_types;
   "admin/user": typeof admin_user;
   cart: typeof cart;
   "driver/application": typeof driver_application;
@@ -1575,6 +1581,47 @@ export declare const components: {
           onUpdateHandle?: string;
         },
         any
+      >;
+    };
+    bulk: {
+      processBulk: FunctionReference<
+        "mutation",
+        "internal",
+        {
+          parsed: {
+            drivers: Array<{
+              email: string;
+              firstName: string;
+              lastName: string;
+              line: number;
+              orgName: string;
+              points?: number;
+              reason?: string;
+              type: "D" | "S";
+            }>;
+            errors: Array<{ line: number; message: string; raw: string }>;
+            organizations: Array<{ line: number; name: string }>;
+            sponsors: Array<{
+              email: string;
+              firstName: string;
+              lastName: string;
+              line: number;
+              orgName: string;
+              points?: number;
+              reason?: string;
+              type: "D" | "S";
+            }>;
+          };
+        },
+        {
+          errors: Array<{ line: number; message: string }>;
+          pointsForIds: Array<{
+            orgId: string;
+            points?: number;
+            reason?: string;
+            userId: string;
+          }>;
+        }
       >;
     };
     organizations: {

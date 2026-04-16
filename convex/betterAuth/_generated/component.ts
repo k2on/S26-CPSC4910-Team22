@@ -1549,6 +1549,48 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
         Name
       >;
     };
+    bulk: {
+      processBulk: FunctionReference<
+        "mutation",
+        "internal",
+        {
+          parsed: {
+            drivers: Array<{
+              email: string;
+              firstName: string;
+              lastName: string;
+              line: number;
+              orgName: string;
+              points?: number;
+              reason?: string;
+              type: "D" | "S";
+            }>;
+            errors: Array<{ line: number; message: string; raw: string }>;
+            organizations: Array<{ line: number; name: string }>;
+            sponsors: Array<{
+              email: string;
+              firstName: string;
+              lastName: string;
+              line: number;
+              orgName: string;
+              points?: number;
+              reason?: string;
+              type: "D" | "S";
+            }>;
+          };
+        },
+        {
+          errors: Array<{ line: number; message: string }>;
+          pointsForIds: Array<{
+            orgId: string;
+            points?: number;
+            reason?: string;
+            userId: string;
+          }>;
+        },
+        Name
+      >;
+    };
     organizations: {
       addMemberByEmail: FunctionReference<
         "mutation",
