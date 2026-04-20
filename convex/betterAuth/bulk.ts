@@ -3,6 +3,7 @@ import {
   DriverIdsAndPoints,
   IDriverIdsAndPoints,
   ParseResult } from "../admin/bulk/types";
+import { v } from "convex/values";
 
 
 export const processBulk = mutation({
@@ -84,6 +85,63 @@ export const processBulk = mutation({
       });
       response.pointsForIds.push({
         orgId: org._id,
+        userId: userId,
+        points: driver.points,
+        reason: driver.reason,
+      })
+    }
+
+    return response;
+  }
+});
+
+
+export const processBulkSponsor = mutation({
+  args: {
+    parsed: ParseResult,
+    orgId: v.string(),
+  },
+  returns: DriverIdsAndPoints,
+  handler: async (ctx, args) => {
+    const response: IDriverIdsAndPoints = {
+      pointsForIds: [],
+      errors: [],
+    };
+
+    for (const sponsor of args.parsed.sponsors) {
+      const userId = await ctx.db.insert("user", {
+        name: `${sponsor.firstName} ${sponsor.lastName}`,
+        email: sponsor.email,
+        emailVerified: false,
+        createdAt: new Date().getTime(),
+        updatedAt: new Date().getTime(),
+        role: "sponsor",
+      });
+      await ctx.db.insert("member", {
+        organizationId: args.orgId,
+        userId,
+        createdAt: new Date().getTime(),
+        role: "admin",
+      });
+    }
+
+    for (const driver of args.parsed.drivers) {
+      const userId = await ctx.db.insert("user", {
+        name: `${driver.firstName} ${driver.lastName}`,
+        email: driver.email,
+        emailVerified: false,
+        createdAt: new Date().getTime(),
+        updatedAt: new Date().getTime(),
+        role: "driver",
+      });
+      await ctx.db.insert("member", {
+        organizationId: args.orgId,
+        userId,
+        createdAt: new Date().getTime(),
+        role: "member",
+      });
+      response.pointsForIds.push({
+        orgId: args.orgId,
         userId: userId,
         points: driver.points,
         reason: driver.reason,

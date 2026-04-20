@@ -15,6 +15,7 @@ import {
         DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { BulkUserUploadModalSponsor } from "@/components/admin/users/BulkUserUploadModalSponsor";
 
 export function OrganizationMembers({ slug }: { slug: string }) {
         const organizationName = useQuery(api.appFunctions.getOrganizationNameBySlug, { slug });
@@ -66,48 +67,49 @@ export function OrganizationMembers({ slug }: { slug: string }) {
         }
 
         return (
-            <div className="flex flex-col gap-4">
-                    <div className="flex justify-end">
-                            <Dialog
-                                open={open}
-                                onOpenChange={(nextOpen) => {
-                                        setOpen(nextOpen);
-                                        if (!nextOpen) {
-                                                setEmail("");
-                                                setMessage("");
-                                        }
-                                }}
-                            >
-                                    <DialogTrigger asChild>
-                                            <Button>Add Member</Button>
-                                    </DialogTrigger>
-                                    <DialogContent>
-                                            <DialogHeader>
-                                                    <DialogTitle>Add Member</DialogTitle>
-                                                    <DialogDescription>
-                                                            Enter the email of the user you want to add to{" "}
-                                                            {organizationName ?? "this organization"}.
-                                                    </DialogDescription>
-                                            </DialogHeader>
+                <div className="flex flex-col gap-4">
+                        <div className="flex justify-end gap-2">
+                                <BulkUserUploadModalSponsor />
+                                <Dialog
+                                        open={open}
+                                        onOpenChange={(nextOpen) => {
+                                                setOpen(nextOpen);
+                                                if (!nextOpen) {
+                                                        setEmail("");
+                                                        setMessage("");
+                                                }
+                                        }}
+                                >
+                                        <DialogTrigger asChild>
+                                                <Button>Add Member</Button>
+                                        </DialogTrigger>
+                                        <DialogContent>
+                                                <DialogHeader>
+                                                        <DialogTitle>Add Member</DialogTitle>
+                                                        <DialogDescription>
+                                                                Enter the email of the user you want to add to{" "}
+                                                                {organizationName ?? "this organization"}.
+                                                        </DialogDescription>
+                                                </DialogHeader>
 
-                                            <form className="flex flex-col gap-4" onSubmit={onSubmit}>
-                                                    <Input
-                                                        value={email}
-                                                        onChange={(e) => setEmail(e.target.value)}
-                                                        placeholder="Email"
-                                                        disabled={isSubmitting}
-                                                    />
-                                                    <Button type="submit" disabled={isSubmitting || !email.trim()}>
-                                                            Submit
-                                                    </Button>
-                                            </form>
+                                                <form className="flex flex-col gap-4" onSubmit={onSubmit}>
+                                                        <Input
+                                                                value={email}
+                                                                onChange={(e) => setEmail(e.target.value)}
+                                                                placeholder="Email"
+                                                                disabled={isSubmitting}
+                                                        />
+                                                        <Button type="submit" disabled={isSubmitting || !email.trim()}>
+                                                                Submit
+                                                        </Button>
+                                                </form>
 
-                                            {message ? <p className="text-sm">{message}</p> : null}
-                                    </DialogContent>
-                            </Dialog>
-                    </div>
+                                                {message ? <p className="text-sm">{message}</p> : null}
+                                        </DialogContent>
+                                </Dialog>
+                        </div>
 
-                    <DataTable columns={columns} data={tableData} />
-            </div>
+                        <DataTable columns={columns} data={tableData} />
+                </div>
         );
-}
+} 

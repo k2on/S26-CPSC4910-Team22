@@ -25,6 +25,27 @@ export const processFile = action({
   },
 });
 
+export const processFileSponsor = action({
+  args: {
+    storageId: v.id("_storage"),
+    orgId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    // 1. Verify the caller is an admin
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Not authenticated");
+
+    const blob = await ctx.storage.get(args.storageId);
+    if (!blob) throw new Error("File not found in storage");
+    const text = await blob.text();
+    const parsed = parseBulkFile(text);
+
+    const response = await ctx.runMutation(components.betterAuth.bulk.processBulkSponsor, { parsed, orgId: args.orgId });
+    await ctx.runMutation(internal.admin.bulk.import.uploadPointsForUsers, response);
+    return response;
+  },
+});
+
 export const uploadPointsForUsers = internalMutation({
   args: DriverIdsAndPoints,
   handler: async (ctx, args) => {
